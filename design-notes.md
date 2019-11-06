@@ -73,9 +73,12 @@ wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.
 # XXX: following commands untested
 
 qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
-qemu-system-x86_64 -m 4G -smp 2 -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
+qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
 qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
+sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2"
 
+
+# XXX: ARM not working, may need to specify machine type and more hardware elements
 qemu-img create -f qcow2 ubuntu-19.10-arm64.qcow2 20G
 qemu-system-aarch64 -m 4G -smp 2 -cdrom ubuntu-19.10-server-arm64.iso -drive "file=ubuntu-19.10-arm64.qcow2,format=qcow2"
 qemu-img create -f qcow2 -b ubuntu-19.10-arm64.qcow2 ubuntu-19.10-arm64-snapshot.qcow2 
