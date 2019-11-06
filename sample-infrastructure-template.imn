@@ -144,11 +144,11 @@ node n9 {
 	!
     }
     canvas c1
-    iconcoords {485.0 169.0}
-    labelcoords {485.0 201.0}
+    iconcoords {483.0 169.0}
+    labelcoords {483.0 201.0}
     interface-peer {eth0 n1}
     interface-peer {eth1 n2}
-    services {zebra OSPFv2 vtysh IPForward}
+    services {IPForward}
 }
 
 link l1 {
@@ -197,7 +197,7 @@ annotation a1 {
     label {}
     labelcolor black
     fontfamily {Arial}
-    fontsize 12
+    fontsize {12}
     color #ff8c00
     width 0
     border black
@@ -211,7 +211,7 @@ annotation a2 {
     label {}
     labelcolor black
     fontfamily {Arial}
-    fontsize 12
+    fontsize {12}
     color #c300ff
     width 0
     border black
