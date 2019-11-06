@@ -40,6 +40,7 @@ sudo apt install bash bridge-utils ebtables iproute libev-dev python tcl8.5 tk8.
 sudo apt install ethtool
 sudo apt install qemu
 sudo apt install quagga
+sudo apt install socat
 wget https://github.com/coreemu/core/releases/download/release-5.5.2/requirements.txt
 sudo python3 -m pip install --upgrade
 sudo -H pip3 install -r requirements.txt 
