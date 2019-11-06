@@ -8,7 +8,7 @@ In the following description, "TA1" denotes various kinds of cross-domain guard 
 
 ## Bump-In-The-Wire Model
 
-*Diagram Here*
+![Emulator Architecture for BITW-style Cross-Domain Devices](emulator-bitw-arch.png)
 
 1. If x86, QEMU and bridges can be dropped optionally; cross-domain application program, gpsd, and TA1 char dev will run directly on CORE node
 2. Guard functions can be implemented using iptables initially that port forwards from 10.0.1.2:8080 to 10.1.1.2:8080; later, it could be implemented as a process that reads 10.0.1.2:8080 and 10.1.1.2:8080 and applies guard functions before transmitting. If vendor support is available, QEMU emulations of the device can be considered as well. Our architecture supports all these possibilities.
@@ -19,7 +19,7 @@ In the following description, "TA1" denotes various kinds of cross-domain guard 
 
 ## Bookend Model
 
-*Diagram Here*
+![Emulator Architecture for Bookend-style Cross-Domain Devices](emulator-bookend.png)
 
 In bookends model, socat sends virtual device to a local address/port; TA1 guard functions reads that port and write to eth0 (and vice versa). Only the QEMU isnide the CORE node is shown, but the rest of the scenario is the same as in the BITW case, except the cross-domain CORE router is a simple pass through in the Bookends case.
 
