@@ -70,9 +70,16 @@ wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-amd64.
 wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.iso
 
 # Create COW virtual disks and qemu images for both arch from ISO
-# https://linux-tips.com/t/booting-from-an-iso-image-using-qemu/136
-# https://www.unixmen.com/qemu-kvm-using-copy-write-mode/
-# XXX: To be expanded
+# XXX: following commands untested
+
+qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
+qemu-system-x86_64 -m 4G -smp 2 -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
+qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
+
+qemu-img create -f qcow2 ubuntu-19.10-arm64.qcow2 20G
+qemu-img create -f qcow2 ubuntu-19.10-arm64.qcow2 20G
+qemu-system-x86_64 -m 4G -smp 2 -cdrom ubuntu-19.10-server-arm64.iso -drive "file=ubuntu-19.10-arm64.qcow2,format=qcow2"
+qemu-img create -f qcow2 -b ubuntu-19.10-arm64.qcow2 ubuntu-19.10-arm64-snapshot.qcow2 
 
 ```
 
