@@ -29,14 +29,17 @@ In bookends model, socat sends virtual device to a local address/port; TA1 guard
 The process is manual now, but we may wrap this in a convenient install-all script in the future.
 
 ```
-# Assumes Ubuntu Linux (preferably 19.10) with python3 and PIP 
+# Assumes Ubuntu Linux (preferably 19.10)
 # Install CORE emulator, QEMU, and other prerequsitie Ubuntu packages
-
+sudo apt update
+sudo apt -y upgrade
+sudo apt install python3 python3-pip
+sudo apt install build-essential libssl-dev libffi-dev python3-dev
+sudo apt install python3-venv
+sudo apt install bash bridge-utils ebtables iproute libev-dev python tcl8.5 tk8.5 libtk-img xterm mgen traceroute
 sudo apt install ethtool
 sudo apt install qemu
-sudo apt-get install bash bridge-utils ebtables iproute libev-dev python tcl8.5 tk8.5 libtk-img xterm mgen traceroute
 sudo apt install quagga
-
 wget https://github.com/coreemu/core/releases/download/release-5.5.2/requirements.txt
 sudo python3 -m pip install --upgrade
 sudo -H pip3 install -r requirements.txt 
@@ -44,9 +47,9 @@ wget https://github.com/coreemu/core/releases/download/release-5.5.2/core_python
 dpkg -i core_python3_5.5.2_amd64.deb 
 
 # Download ISO live-server images for Ubuntu 19.10 for both amd64 and arm64
-# XXX: would be good to have wget for this
-# https://ubuntu.com/download/server
-# https://ubuntu.com/download/server/arm
+# from https://ubuntu.com/download/server and https://ubuntu.com/download/server/arm
+wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-amd64.iso
+wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.iso
 
 # Create COW virtual disks and qemu images for both arch from ISO
 # https://linux-tips.com/t/booting-from-an-iso-image-using-qemu/136
