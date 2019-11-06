@@ -17,6 +17,23 @@ In the following description, "TA1" denotes various kinds of cross-domain guard 
 5. Note the use of L2 bridges, we envision that only the QEMU side has an IP address
 6. Although one cross-domain connection is shown, the architecture will support cross-domain devices/connections to multiple peer enclaves
 
+The recipe for creating a virtual serial device using `socat` is as follows:
+```
+# On terminal 1  (notionally TA1 hardware side):
+$ nc -4 -k -t -l localhost 12345
+
+# On terminal 2 (notionally host side):
+$ sudo bash
+$ socat pty,link=/dev/virtualcom0,raw tcp:localhost:12345 & 
+$ yes 'Hello, World!' > /dev/virtualcom0
+
+# You should now see on terminal 1:
+Hello, World!
+Hello, World!
+...
+
+```
+
 ## Bookend Model
 
 ![Emulator Architecture for Bookend-style Cross-Domain Devices](emulator-bookend.png)
