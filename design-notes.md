@@ -56,6 +56,7 @@ sudo apt install python3-venv
 sudo apt install bash bridge-utils ebtables iproute libev-dev python tcl8.5 tk8.5 libtk-img xterm mgen traceroute
 sudo apt install ethtool
 sudo apt install qemu
+sudo apt install qemu-efi
 sudo apt install quagga
 sudo apt install socat
 wget https://github.com/coreemu/core/releases/download/release-5.5.2/requirements.txt
@@ -70,18 +71,27 @@ wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-amd64.
 wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.iso
 
 # Create COW virtual disks and qemu images for both arch from ISO
-# XXX: following commands untested
 
 qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
 qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -boot d -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
 qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2"
 
-
-# XXX: ARM not working, may need to specify machine type and more hardware elements
 qemu-img create -f qcow2 ubuntu-19.10-arm64.qcow2 20G
-qemu-system-aarch64 -m 4G -smp 2 -cdrom ubuntu-19.10-server-arm64.iso -drive "file=ubuntu-19.10-arm64.qcow2,format=qcow2"
-qemu-img create -f qcow2 -b ubuntu-19.10-arm64.qcow2 ubuntu-19.10-arm64-snapshot.qcow2 
+wget http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.img.gz
+gunzip QEMU_EFI.img.gz
+qemu-img create -f qcow2 varstore.img 64M
+qemu-system-aarch64 \
+    -cpu cortex-a53 -M virt -m 4G -nographic -smp 2 \
+    -drive if=pflash,format=raw,file=QEMU_EFI.img \
+    -drive if=pflash,file=varstore.img \
+    -drive "file=ubuntu-19.10-arm64.qcow2,format=qcow2" \
+    -drive "if=virtio,format=raw,file=ubuntu-19.10-server-arm64.iso"
+
+# qemu-img create -f qcow2 -b ubuntu-19.10-arm64.qcow2 ubuntu-19.10-arm64-snapshot.qcow2 
+# qemu-system-aarch64 \
+#    -cpu cortex-a53 -M virt -m 4G -nographic -smp 2 \
+#    -drive "if=virtio,format=raw,file=ubuntu-19.10-server-arm64.iso"
 
 ```
 
