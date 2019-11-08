@@ -70,13 +70,22 @@ dpkg -i core_python3_5.5.2_amd64.deb
 wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-amd64.iso
 wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.iso
 
-# Create COW virtual disks and qemu images for both arch from ISO
-
+# Create virtual disks and install Linux for AMD64
 qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
 qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -boot d -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
 qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
-sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2"
+chmod ugo-w ubuntu-19.10-amd64.qcow2
+sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" 
 
+# Boot system  up system with two NICs 
+# sudo tunctl -t qemutap0
+# sudo tunctl -t qemutap1
+# sudo ifconfig qemutap0 up
+# sudo ifconfig qemutap1 up
+# XXX: need to connect the taps to reasonable places
+# sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" -net nic -net tap,ifname=qemutap0,script=no,downscript=no -net nic -net tap,ifname=qemutap1,script=no,downscript=no
+
+# Create virtual disks and install Linux for ARM64
 qemu-img create -f qcow2 ubuntu-19.10-arm64.qcow2 20G
 wget http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.img.gz
 gunzip QEMU_EFI.img.gz
