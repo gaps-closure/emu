@@ -34,6 +34,12 @@ Hello, World!
 
 ```
 
+A passthrough BITW can be created as follows:
+```
+mkfifo fifo
+nc -4 -k -t -l 10.0.1.2 12345 <fifo | nc -4 -k -t -l 10.1.1.2 12345 >fifo
+```
+
 ## Bookend Model
 
 ![Emulator Architecture for Bookend-style Cross-Domain Devices](emulator-bookend.png)
