@@ -40,6 +40,21 @@ mkfifo fifo
 nc -4 -k -t -l 10.0.1.2 12345 <fifo | nc -4 -k -t -l 10.1.1.2 12345 >fifo
 ```
 
+An inline filter for BITW can be created as follows:
+```
+mkfifo fifo-nc1-filter
+mkfifo fifo-filter-nc1
+mkfifo fifo-nc2-filter
+mkfifo fifo-filter-nc2
+
+# filterproc takes a spec, reads from stdin, filters according to spec, and writes to stdout
+nc -4 -k -t -l 10.0.1.2 12345 < fifo-filter-nc1 > fifo-nc1-filter
+nc -4 -k -t -l 10.1.1.2 12345 < fifo-filter-nc2 > fifo-nc2-filter
+filterproc leftbkend-egress-spec  < fifo-nc1-filter | filterproc rightbkend-ingress-spec > fifo-filter-nc2
+filterproc rightbkend-egress-spec < fifo-nc2-filter | filterproc leftbkend-ingress-spec  > fifo-filter-nc1
+
+```
+
 ## Bookend Model
 
 ![Emulator Architecture for Bookend-style Cross-Domain Devices](emulator-bookend.png)
