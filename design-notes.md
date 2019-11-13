@@ -109,12 +109,23 @@ dpkg -i core_python3_5.5.2_amd64.deb
 wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-amd64.iso
 wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.iso
 
-# Create virtual disks and install Linux for AMD64
+# Create virtual disks and install Linux for AMD64, with user closure
 qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
 qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -boot d -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
 qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
 chmod ugo-w ubuntu-19.10-amd64.qcow2
+
+# Boot the snapshot and configure it for use in the emulator
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" 
+# Login to the VM and add a serial console
+sudo bash
+vi /etc/default/grub
+# Change GRUB_CMDLINE_LINUX="" to GRUB_CMDLINE_LINUX="console=ttyS0" in /etc/default/grub
+update-grub
+halt
+
+# Now boot without graphics (works inside CORE node also)
+sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" -nographic
 
 # Boot system  up system with two NICs 
 # sudo tunctl -t qemutap0
