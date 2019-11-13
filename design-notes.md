@@ -40,7 +40,7 @@ mkfifo fifo
 nc -4 -k -t -l 10.0.1.2 12345 <fifo | nc -4 -k -t -l 10.1.1.2 12345 >fifo
 ```
 
-An example of using this in CORE is shown below:
+An example of using this in CORE, with 'socat' links, is shown below:
 
 ![Pass-through BITW-style Cross-Domain link](socat_bidirectional_link.png)
 
