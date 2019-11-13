@@ -40,6 +40,8 @@ mkfifo fifo
 nc -4 -k -t -l 10.0.1.2 12345 <fifo | nc -4 -k -t -l 10.1.1.2 12345 >fifo
 ```
 
+![Pass-through BITW-style Cross-Domain link](Bidirectional-socat_link.png)
+
 An inline filter for BITW can be created as follows:
 ```
 mkfifo fifo-nc1-filter
