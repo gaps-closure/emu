@@ -40,7 +40,7 @@ mkfifo fifo
 nc -4 -k -t -l 10.0.1.2 12345 <fifo | nc -4 -k -t -l 10.1.1.2 12345 >fifo
 ```
 
-![Pass-through BITW-style Cross-Domain link](Bidirectional-socat_link.png)
+![Pass-through BITW-style Cross-Domain link](socat_bidirectional_link.png)
 
 ```
 #gw
