@@ -42,6 +42,20 @@ nc -4 -k -t -l 10.0.1.2 12345 <fifo | nc -4 -k -t -l 10.1.1.2 12345 >fifo
 
 ![Pass-through BITW-style Cross-Domain link](Bidirectional-socat_link.png)
 
+```
+#gw
+mkfifo fifo
+nc -4 -k -l 10.0.2.1 12345 < fifo | nc -4 -k -l  10.0.3.1 12345 > fifo
+#orange
+socat pty,link=/dev/vcom0,raw tcp:10.0.2.1:12345 &
+cat /dev/vcom0 (or cat < /dev/vcom0 )
+echo ”Hi grape. It is me orange" > /dev/vcom1
+#purple
+socat pty,link=/dev/vcom1,raw tcp:10.0.3.1:12345 &
+echo ”Hi orange. It is me grape" > /dev/vcom1
+cat /dev/vcom1 (or cat < /dev/vcom1 )
+```
+
 An inline filter for BITW can be created as follows:
 ```
 mkfifo fifo-nc1-filter
