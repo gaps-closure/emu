@@ -154,16 +154,63 @@ qemu-system-aarch64 \
 
 ```
 
+Plumbing the QEMU node to the CORE node is done as follows (needs to be scripted):
+```
+# Inside the CORE node:
+ip addr del 10.0.2.10/32 dev eth1
+tunctl -t qemutap0
+brctl addbr br0
+brctl addif br0 qemutap0
+brctl addif br0 eth1
+ifconfig qemutap0 up
+ifconfig br0 up
+
+tunctl -t qemutap1
+brctl addbr br1
+brctl addif br1 qemutap1
+# Additional configuration as with br0 to be done here ...
+
+# additional software such as socat ifconfig would be good to have
+
+sudo qemu-system-x86_64 -enable-kvm -m 1G -smp 1 -drive file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2 -net nic -net tap,ifname=qemutap0,script=no,downscript=no -net nic -net tap,ifname=qemutap1,script=no,downscript=no -nographic
+
+# Inside the qemu (login as user closure:
+sudo bash
+ip addr flush ens3
+ip addr add 10.0.2.10 dev ens3
+ip route add 10.0.2.0/24 dev ens3
+ping 10.0.2.10  # self
+ping 10.0.2.1   # cross-domain-gw
+
+```
+
 ## GAPS Emulator installation
 To be added.
 
 # Todo
-1. Prepare a sample partitioned program: 
+1. Prepare QEMU image for x86 with Ubuntu 19.10
+    * DONE, but will be nice to have a scripted process
+2. Prepare QEMU image for ARM with Ubuntu 19.10
+    * XXX: UNABLE to BOOT from ISO
+3. Create a sample IMN file using CORE GUI
+    * DONE, but will need to be refined, and eventually auto-generated
+4. Implement sample TA1 device emulators (pass,BITW,BKEND)
+    * Reuse BKEND impl. to create BITW
+    * Include stats and wire-shark support
+    * Design is done (see above), plumbing remains) -- also filterproc needs to be written
+5. Protoype the end-to-end QEMU build and sample scenario
+    * Plumbing the QEMU (see above)
+    * Automated scripting
+    * Fully scripted install and config over network
+    * Faster boot
+    * Back-channel management network to qemu for monitoring and software install
+    * Scripted network plumbing and cross-domain plumbing
+6. Prepare a sample partitioned program: 
     * Include install script (e.g., deb package)
     * Include systemd scripts that will start application on boot and respawn on failure
     * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
-2. Prepare QEMU images for x86 and ARM 
-3. Create a JSON configuration file containing:
+
+7. Create a JSON configuration file containing:
     * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
     * TA1 device capabilities and type, e.g.,
     * ID (pass-through)
@@ -171,18 +218,13 @@ To be added.
     * Bookends style
     * Specific guard functions supported on device
     * Software topology and mappings – names of executables and which node they will run on
-4. Basic GUI for the JSON config?
-    * Can we hack CORE-GUI and the IMN file to include this info? 
-5. Create a template IMN file using CORE GUI if needed
-    * Use special names to mark enclave nodes where GAPS will run and for any cross-domain routers, and whether BITW or nodes
-6. Implement sample TA1 device emulators (pass,BITW,BKEND)
-    * Reuse BKEND impl. to create BITW
-    * Include stats and wire-shark support
-7. Transform IMN template to GAPS scenario
+8. From the JSON generate IMN + scripting for GAPS scenario
     * Read in JSON file
     * Instantiate CORE nodes, do the necessary internal plumbing (for either BITW or Bookends style), and deploy application
     * Instantiate QEMU nodes and do needed plumbing
     * Manage GAPS components (application, gpsd, TA1 device emulation)
     * Configure TA1 device (control API)
     * Preferably, write the above functionality as a Python library (not a monolithic script)
+9. Basic GUI for the JSON config?
+    * Nice to have, maybe Phase 2
 
