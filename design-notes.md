@@ -40,8 +40,9 @@ Hello, World!
 
 ```
 
-##A passthrough BITW
-A BITW passthrough can be greated on the gateway by using two netcat commands to listen on the two ends of the gateway node.
+# Bidirectional Passthrough BITW
+
+A gateway can pass data between enclaves, which cannot directly route to each other, by using two netcat commands to listen on the two ends of the gateway node.
 ```
 mkfifo fifo
 nc -4 -k -t -l 10.0.1.2 12345 < fifo | nc -4 -k -t -l 10.1.1.2 12345 > fifo
@@ -65,7 +66,9 @@ echo ”Hi orange. It is me grape" > /dev/vcom1
 cat /dev/vcom1 (or cat < /dev/vcom1 )
 ```
 
-Adding an inline filter for BITW can be created as follows (with the ordange and purple nodes unchanged_ :
+# Bidirectional BITW filter
+
+The gateway Filter data between enclaves by adding a filter in the forward and reverse paths (with the ordange and purple nodes unchanged). The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout.
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BITW.png)
 
