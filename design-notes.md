@@ -139,7 +139,7 @@ wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.
 
 # Create virtual disks and install Linux for AMD64, with user closure
 qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
-qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -boot d -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
+sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -boot d -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
 qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
 chmod ugo-w ubuntu-19.10-amd64.qcow2
 
