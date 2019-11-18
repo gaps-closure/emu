@@ -17,6 +17,12 @@ In the following description, "TA1" denotes various kinds of cross-domain guard 
 5. Note the use of L2 bridges, we envision that only the QEMU side has an IP address
 6. Although one cross-domain connection is shown, the architecture will support cross-domain devices/connections to multiple peer enclaves
 
+## Bookend Model
+
+![Emulator Architecture for Bookend-style Cross-Domain Devices](emulator-bookend.png)
+
+In bookends model, socat sends virtual device to a local address/port; TA1 guard functions reads that port and write to eth0 (and vice versa). Only the QEMU isnide the CORE node is shown, but the rest of the scenario is the same as in the BITW case, except the cross-domain CORE router is a simple pass through in the Bookends case.
+
 The recipe for creating a virtual serial device using `socat` is as follows:
 ```
 # On terminal 1  (notionally TA1 hardware side):
@@ -34,31 +40,41 @@ Hello, World!
 
 ```
 
-A passthrough BITW can be created as follows:
+##A passthrough BITW
+A BITW passthrough can be greated on the gateway by using two netcat commands to listen on the two ends of the gateway node.
 ```
 mkfifo fifo
-nc -4 -k -t -l 10.0.1.2 12345 <fifo | nc -4 -k -t -l 10.1.1.2 12345 >fifo
+nc -4 -k -t -l 10.0.1.2 12345 < fifo | nc -4 -k -t -l 10.1.1.2 12345 > fifo
 ```
 
 An example of using this in CORE, with 'socat' links, is shown below:
 
-![Pass-through BITW-style Cross-Domain link](socat_bidirectional_link.png)
+![Pass-through BITW-style Cross-Domain link](socat-bidirectional-pass.png)
 
 ```
 #gw
 mkfifo fifo
 nc -4 -k -l 10.0.2.1 12345 < fifo | nc -4 -k -l  10.0.3.1 12345 > fifo
 #orange
-socat pty,link=/dev/vcom0,raw tcp:10.0.2.1:12345 &
+socat pty,link=/dev/vcom0,raw,ignoreeof tcp:10.0.2.1:12345,ignoreeof &
 cat /dev/vcom0 (or cat < /dev/vcom0 )
 echo ”Hi grape. It is me orange" > /dev/vcom1
 #purple
-socat pty,link=/dev/vcom1,raw tcp:10.0.3.1:12345 &
+socat pty,link=/dev/vcom1,raw,ignoreeof tcp:10.0.3.1:12345,ignoreeof &
 echo ”Hi orange. It is me grape" > /dev/vcom1
 cat /dev/vcom1 (or cat < /dev/vcom1 )
 ```
 
-An inline filter for BITW can be created as follows:
+Adding an inline filter for BITW can be created as follows (with the ordange and purple nodes unchanged_ :
+
+![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BITW.png)
+
+#gw
+mkfifo fifo
+nc -4 -k -l 10.0.2.1 12345 < fifo | ./filterproc.py forward-spec | nc -4 -k -l  10.0.3.1 12345 | ./filterproc.py reverse-spec > fifo &
+```
+
+Alternative  inline filter for BITW 
 ```
 mkfifo fifo-nc1-filter
 mkfifo fifo-filter-nc1
@@ -73,11 +89,6 @@ filterproc rightbkend-egress-spec < fifo-nc2-filter | filterproc leftbkend-ingre
 
 ```
 
-## Bookend Model
-
-![Emulator Architecture for Bookend-style Cross-Domain Devices](emulator-bookend.png)
-
-In bookends model, socat sends virtual device to a local address/port; TA1 guard functions reads that port and write to eth0 (and vice versa). Only the QEMU isnide the CORE node is shown, but the rest of the scenario is the same as in the BITW case, except the cross-domain CORE router is a simple pass through in the Bookends case.
 
 # Installation Notes
 ## Install Prerequisites
