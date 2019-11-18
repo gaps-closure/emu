@@ -68,7 +68,7 @@ cat /dev/vcom1 (or cat < /dev/vcom1 )
 
 ## Bidirectional BITW filter
 
-The gateway can control data passing between enclaves by adding a filter in the forward and reverse paths. The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout. The orange and purple nodes are unchanged from the pass-through case.
+The gateway can control data passing between enclaves by adding a filter in the forward and reverse paths. The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout.
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BITW.png)
 
@@ -77,6 +77,9 @@ The gateway can control data passing between enclaves by adding a filter in the 
 mkfifo fifo
 nc -4 -k -l 10.0.2.1 12345 < fifo | ./filterproc.py forward-spec | nc -4 -k -l  10.0.3.1 12345 | ./filterproc.py reverse-spec > fifo &
 ```
+
+Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged).
+
 
 Alternative inline filter for BITW 
 
@@ -100,6 +103,9 @@ The filter function can be moved into the end nodes. For example, the figure bel
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BOOKEND.png)
 
+```
+Not yet tested
+```
 
 # Installation Notes
 ## Install Prerequisites
