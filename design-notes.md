@@ -40,7 +40,7 @@ Hello, World!
 
 ```
 
-# Bidirectional Passthrough BITW
+# Bidirectional BITW Pass-through
 
 A gateway can pass data between enclaves, which cannot directly route to each other, by using two netcat commands to listen on the two ends of the gateway node.
 ```
@@ -68,16 +68,18 @@ cat /dev/vcom1 (or cat < /dev/vcom1 )
 
 # Bidirectional BITW filter
 
-The gateway Filter data between enclaves by adding a filter in the forward and reverse paths (with the ordange and purple nodes unchanged). The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout.
+The gateway can control data passing between enclaves by adding a filter in the forward and reverse paths. The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout. The orange and purple nodes are unchanged from the pass-through case.
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BITW.png)
 
+```
 #gw
 mkfifo fifo
 nc -4 -k -l 10.0.2.1 12345 < fifo | ./filterproc.py forward-spec | nc -4 -k -l  10.0.3.1 12345 | ./filterproc.py reverse-spec > fifo &
 ```
 
-Alternative  inline filter for BITW 
+Alternative inline filter for BITW 
+
 ```
 mkfifo fifo-nc1-filter
 mkfifo fifo-filter-nc1
@@ -91,6 +93,12 @@ filterproc leftbkend-egress-spec  < fifo-nc1-filter | filterproc rightbkend-ingr
 filterproc rightbkend-egress-spec < fifo-nc2-filter | filterproc leftbkend-ingress-spec  > fifo-filter-nc1
 
 ```
+
+# Bidirectional BOOKEND filter
+
+The filter function can be moved into the end nodes. For example, the figure below shows one possible implementation on the orange node.
+
+![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BOOKEND.png)
 
 
 # Installation Notes
