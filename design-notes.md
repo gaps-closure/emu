@@ -40,7 +40,7 @@ Hello, World!
 
 ```
 
-# Bidirectional BITW Pass-through
+## Bidirectional BITW Pass-through
 
 A gateway can pass data between enclaves, which cannot directly route to each other, by using two netcat commands to listen on the two ends of the gateway node.
 ```
@@ -66,7 +66,7 @@ echo ”Hi orange. It is me grape" > /dev/vcom1
 cat /dev/vcom1 (or cat < /dev/vcom1 )
 ```
 
-# Bidirectional BITW filter
+## Bidirectional BITW filter
 
 The gateway can control data passing between enclaves by adding a filter in the forward and reverse paths. The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout. The orange and purple nodes are unchanged from the pass-through case.
 
@@ -94,7 +94,7 @@ filterproc rightbkend-egress-spec < fifo-nc2-filter | filterproc leftbkend-ingre
 
 ```
 
-# Bidirectional BOOKEND filter
+## Bidirectional BOOKEND filter
 
 The filter function can be moved into the end nodes. For example, the figure below shows one possible implementation on the orange node.
 
