@@ -53,21 +53,31 @@ An example of using this in CORE, with 'socat' links, is shown below:
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-pass.png)
 
 ```
+DEV_ORANGE="/dev/vcom_am_or"
+GW_ORANGE_IP="10.0.2.1"
+GW_ORANGE_PORT="12345"
+
+DEV_PURPLE="/dev/vcom_am_pu"
+GW_PURPLE_IP="10.0.3.1"
+GW_PURPLE_PORT="12346"
+
 #gw
         mkfifo fifo
         nc -4 -k -l ${GW_ORANGE_IP} ${GW_ORANGE_PORT} \
           < fifo \
           | nc -4 -k -l ${GW_PURPLE_IP} ${GW_PURPLE_PORT} \
           > fifo &
+          
 #orange 
    terminal-1:
         socat -d -d -lf /tmp/mylogs-o.log \
           pty,link=${DEV_ORANGE},raw,ignoreeof,unlink-close=0,echo=0 \
-          tcp:10.0.2.1:12345 &
+          tcp:${GW_ORANGE_IP}:${GW_ORANGE_PORT} &
         sleep 1
         cat ${DEV_ORANGE}
    terminal-2:
         echo "Orange sends a message" > ${DEV_ORANGE}
+        
 #purple 
    terminal-1:
         socat -d -d -lf /tmp/mylogs-p.log \
