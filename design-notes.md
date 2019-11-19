@@ -79,7 +79,7 @@ filterproc rightbkend-egress-spec < fifo-nc2-filter | filterproc leftbkend-ingre
 
 In bookends model, socat sends virtual device to a local address/port; TA1 guard functions reads that port and write to eth0 (and vice versa). Only the QEMU isnide the CORE node is shown, but the rest of the scenario is the same as in the BITW case, except the cross-domain CORE router is a simple pass through in the Bookends case.
 
-# Installation Notes
+# QEMU VM Disk Creation and OS Installation Notes
 ## Install Prerequisites
 
 The process is manual now, but we may wrap this in a convenient install-all script in the future.
@@ -127,24 +127,73 @@ halt
 # Now boot without graphics (works inside CORE node also)
 # Note a NAT-ted ehternet is creted automagically -- so for example, you can loacl pacakges from Internet
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" -nographic
-
+```
+```
 # Create virtual disks and install Linux for ARM64
 # XXX: steps below are not working ywt, ARM is TBD
-qemu-img create -f qcow2 ubuntu-19.10-arm64.qcow2 20G
-wget http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.img.gz
-gunzip QEMU_EFI.img.gz
-qemu-img create -f qcow2 varstore.img 64M
-qemu-system-aarch64 \
-    -cpu cortex-a53 -M virt -m 4G -nographic -smp 2 \
-    -drive if=pflash,format=raw,file=QEMU_EFI.img \
-    -drive if=pflash,file=varstore.img \
-    -drive "file=ubuntu-19.10-arm64.qcow2,format=qcow2" \
-    -drive "if=virtio,format=raw,file=ubuntu-19.10-server-arm64.iso"
-
-# qemu-img create -f qcow2 -b ubuntu-19.10-arm64.qcow2 ubuntu-19.10-arm64-snapshot.qcow2 
+# qemu-img create -f qcow2 ubuntu-19.10-arm64.qcow2 20G
+# wget http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.img.gz
+# gunzip QEMU_EFI.img.gz
+# qemu-img create -f qcow2 varstore.img 64M
 # qemu-system-aarch64 \
 #    -cpu cortex-a53 -M virt -m 4G -nographic -smp 2 \
+#    -drive if=pflash,format=raw,file=QEMU_EFI.img \
+#    -drive if=pflash,file=varstore.img \
+#    -drive "file=ubuntu-19.10-arm64.qcow2,format=qcow2" \
 #    -drive "if=virtio,format=raw,file=ubuntu-19.10-server-arm64.iso"
+```
+
+Approach for ARM did not work as expected, and also above approach is not very scriptable, so exploring a different approach below.
+
+```
+sudo apt update
+sudo apt upgrade # XXX: not on workhorse!
+
+sudo apt install ubuntu-dev-tools
+mk-sbuild --arch arm64 eoan
+sudo debootstrap \
+        --arch=arm64 \
+        --keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg \
+        --verbose \
+        --foreign \
+        eoan \
+        rootfs
+
+dd if=/dev/zero of=rootfs.img bs=1 count=0 seek=20G
+mkfs.ext4 -b 4096 -F rootfs.img
+mkdir mnt
+sudo mount -o loop rootfs.img mnt
+sudo cp -a rootfs/. mnt
+sudo umount mnt
+
+# 19.04 experiencing kernel panic
+# wget http://ports.ubuntu.com/ubuntu-ports/dists/eoan/main/installer-arm64/current/images/netboot/ubuntu-installer/arm64/linux
+wget http://ports.ubuntu.com/ubuntu-ports/dists/xenial/main/installer-arm64/current/images/netboot/ubuntu-installer/arm64/linux
+
+qemu-system-aarch64 \
+  -nographic -M virt -cpu cortex-a53 -m 1024 \
+  -hda rootfs.img \
+  -kernel linux \
+  -append 'earlycon root=/dev/vda init=/bin/sh rw'
+
+# Inside QEMU VM, do
+/debootstrap/debootstrap --second-stage
+
+vim.tiny /etc/fstab
+# Add following entry
+# /dev/sda / ext4 relatime,errors=remount-ro 0 1
+
+passwd # set passwd for root root!
+adduser closure
+addgroup closure sudo
+
+vim.tiny /etc/apt/sources.list
+# Add following entry if not already there
+# deb http://ports.ubuntu.com/ubuntu-ports/ eoan main                          
+
+# XXX: need to bring kernel
+# XXX: need to setup network
+# XXX: need to sertup serial console
 
 ```
 
