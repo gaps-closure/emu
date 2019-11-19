@@ -54,16 +54,29 @@ An example of using this in CORE, with 'socat' links, is shown below:
 
 ```
 #gw
-mkfifo fifo
-nc -4 -k -l 10.0.2.1 12345 < fifo | nc -4 -k -l  10.0.3.1 12345 > fifo
-#orange
-socat pty,link=/dev/vcom0,raw,ignoreeof tcp:10.0.2.1:12345,ignoreeof &
-cat /dev/vcom0 (or cat < /dev/vcom0 )
-echo ”Hi grape. It is me orange" > /dev/vcom1
-#purple
-socat pty,link=/dev/vcom1,raw,ignoreeof tcp:10.0.3.1:12345,ignoreeof &
-echo ”Hi orange. It is me grape" > /dev/vcom1
-cat /dev/vcom1 (or cat < /dev/vcom1 )
+        mkfifo fifo
+        nc -4 -k -l ${GW_ORANGE_IP} ${GW_ORANGE_PORT} \
+          < fifo \
+          | nc -4 -k -l ${GW_PURPLE_IP} ${GW_PURPLE_PORT} \
+          > fifo &
+#orange 
+   terminal-1:
+        socat -d -d -lf /tmp/mylogs-o.log \
+          pty,link=${DEV_ORANGE},raw,ignoreeof,unlink-close=0,echo=0 \
+          tcp:10.0.2.1:12345 &
+        sleep 1
+        cat ${DEV_ORANGE}
+   terminal-2:
+        echo "Orange sends a message" > ${DEV_ORANGE}
+#purple 
+   terminal-1:
+        socat -d -d -lf /tmp/mylogs-p.log \
+          pty,link=${DEV_PURPLE},raw,ignoreeof,unlink-close=0,echo=0 \
+          tcp:${GW_PURPLE_IP}:${GW_PURPLE_PORT} &
+        sleep 1
+        cat ${DEV_PURPLE}
+   terminal-2:
+        echo "Purple sends a message" > ${DEV_PURPLE}
 ```
 
 ## Bidirectional BITW filter
@@ -88,18 +101,6 @@ The gateway can control data passing between enclaves by adding a filter in the 
 
 Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged).
 
-
-Alternative inline filter for BITW 
-
-```
-mkfifo fifo-into-nc1
-mkfifo fifo-into-nc2
-
-# filterproc takes a spec, reads from stdin, filters according to spec, and writes to stdout
-nc -4 -k -t -l 10.0.2.1 12345 < fifo-into-nc1 | filterproc leftbkend-ingress-spec  | filterproc rightbkend-egress-spec > fifo-into-nc2
-nc -4 -k -t -l 10.0.3.1 12346 < fifo-into-nc2 | filterproc rightbkend-ingress-spec  | filterproc leftbkend-egress-spec > fifo-into-nc1
-
-```
 
 ## Bidirectional BOOKEND filter
 
