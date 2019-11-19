@@ -53,11 +53,11 @@ An example of using this in CORE, with 'socat' links, is shown below:
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-pass.png)
 
 ```
-DEV_ORANGE="/dev/vcom_am_or"
+DEV_ORANGE="/dev/vcom_am_orange"
 GW_ORANGE_IP="10.0.2.1"
 GW_ORANGE_PORT="12345"
 
-DEV_PURPLE="/dev/vcom_am_pu"
+DEV_PURPLE="/dev/vcom_am_purple"
 GW_PURPLE_IP="10.0.3.1"
 GW_PURPLE_PORT="12346"
 
@@ -109,7 +109,7 @@ The gateway can control data passing between enclaves by adding a filter in the 
           > fifo-left &
 ```
 
-Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged).
+Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged). The addition of the second fifo (fifo-right) enables splitting the script into two separate (more symmetrical and easy to comprehend) commands; but this could also have been written with one fifo as with the pass-through example above.
 
 
 ## Bidirectional BOOKEND filter
