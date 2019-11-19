@@ -84,16 +84,12 @@ Only the gateway node processing pipeline is enhanced from the pass-through case
 Alternative inline filter for BITW 
 
 ```
-mkfifo fifo-nc1-filter
-mkfifo fifo-filter-nc1
-mkfifo fifo-nc2-filter
-mkfifo fifo-filter-nc2
+mkfifo fifo-into-nc1
+mkfifo fifo-into-nc2
 
 # filterproc takes a spec, reads from stdin, filters according to spec, and writes to stdout
-nc -4 -k -t -l 10.0.1.2 12345 < fifo-filter-nc1 > fifo-nc1-filter
-nc -4 -k -t -l 10.1.1.2 12345 < fifo-filter-nc2 > fifo-nc2-filter
-filterproc leftbkend-egress-spec  < fifo-nc1-filter | filterproc rightbkend-ingress-spec > fifo-filter-nc2
-filterproc rightbkend-egress-spec < fifo-nc2-filter | filterproc leftbkend-ingress-spec  > fifo-filter-nc1
+nc -4 -k -t -l 10.0.2.1 12345 < fifo-into-nc1 | filterproc leftbkend-ingress-spec  | filterproc rightbkend-egress-spec > fifo-into-nc2
+nc -4 -k -t -l 10.0.3.1 12346 < fifo-into-nc2 | filterproc rightbkend-ingress-spec  | filterproc leftbkend-egress-spec > fifo-into-nc1
 
 ```
 
