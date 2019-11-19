@@ -42,7 +42,7 @@ Hello, World!
 
 ## Bidirectional BITW Pass-through
 
-A gateway can pass data between enclaves, which cannot directly route to each other, by using two netcat commands to listen on the two ends of the gateway node.
+A gateway can pass data between enclaves, which cannot directly route to each other, by using netcat commands to listen to each enclave.
 ```
 mkfifo fifo
 nc -4 -k -t -l 10.0.1.2 12345 < fifo | nc -4 -k -t -l 10.1.1.2 12345 > fifo
@@ -74,8 +74,16 @@ The gateway can control data passing between enclaves by adding a filter in the 
 
 ```
 #gw
-mkfifo fifo
-nc -4 -k -l 10.0.2.1 12345 < fifo | ./filterproc.py forward-spec | nc -4 -k -l  10.0.3.1 12345 | ./filterproc.py reverse-spec > fifo &
+        nc -4 -k -l ${GW_ORANGE_IP} ${GW_ORANGE_PORT} \
+          < fifo-left \
+          | python3 filterproc.py left-ingress-spec   \
+          | python3 filterproc.py right-egress-spec   \
+          > fifo-right &
+        nc -4 -k -l ${GW_PURPLE_IP} ${GW_PURPLE_PORT} \
+          < fifo-right \
+          | python3 filterproc.py right-ingress-spec  \
+          | python3 filterproc.py left-egress-spec    \
+          > fifo-left &
 ```
 
 Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged).
