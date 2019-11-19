@@ -195,6 +195,11 @@ vim.tiny /etc/apt/sources.list
 # XXX: need to setup network
 # XXX: need to sertup serial console
 
+# XXX: debootstrap used raw disk, convert to qcow2
+# mXXX: make golden image read only
+# XXX: take a snapshot and boot from that
+
+# Script all the steps above using expect and sed
 ```
 
 Plumbing the QEMU node to the CORE node is done as follows (needs to be scripted):
