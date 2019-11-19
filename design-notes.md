@@ -97,6 +97,8 @@ The gateway can control data passing between enclaves by adding a filter in the 
 
 ```
 #gw
+        mkfifo fifo-left
+        mkfifo fifo-left
         nc -4 -k -l ${GW_ORANGE_IP} ${GW_ORANGE_PORT} \
           < fifo-left \
           | python3 filterproc.py left-ingress-spec   \
@@ -109,12 +111,12 @@ The gateway can control data passing between enclaves by adding a filter in the 
           > fifo-left &
 ```
 
-Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged). The addition of the second fifo (fifo-right) enables splitting the script into two separate (more symmetrical and easy to comprehend) commands; but this could also have been written with one fifo as with the pass-through example above.
+Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged). The addition of the second fifo (fifo-right) enables splitting the script into two separate (more symmetrical and easy to comprehend) commands; but this could also have been written with one fifo (and one line), as with the pass-through example above.
 
 
 ## Bidirectional BOOKEND filter
 
-The filter function can be moved into the end nodes. For example, the figure below shows one possible implementation on the orange node.
+The filter function can be split and moved into the end nodes. For example, the figure below shows one possible implementation on the orange node.
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BOOKEND.png)
 
