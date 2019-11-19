@@ -157,21 +157,24 @@ wget http://cdimage.ubuntu.com/releases/19.10/release/ubuntu-19.10-server-arm64.
 # Create virtual disks and install Linux for AMD64, with user closure
 qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -boot d -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
-qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
 chmod ugo-w ubuntu-19.10-amd64.qcow2
-cp ubuntu-19.10-amd64.qcow2 /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2  # Save for use in experiments
 
-# Boot the snapshot and configure it for use in the emulator
-sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" 
-# Login to the VM and add a serial console
+# Save the VM for future use after adding serial console support
+cp ubuntu-19.10-amd64.qcow2 /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2
+sudo chmod ugo+w /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2
+sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=/IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2,format=qcow2"
+# login to the VM as closure and update grub
 sudo bash
 vi /etc/default/grub
 # Change GRUB_CMDLINE_LINUX="" to GRUB_CMDLINE_LINUX="console=ttyS0" in /etc/default/grub
 update-grub
 halt
+sudo chmod ugo-w /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2
 
-# Now boot without graphics (works inside CORE node also)
-# Note a NAT-ted ehternet is creted automagically -- so for example, you can loacl pacakges from Internet
+qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
+
+# Test booting snapshot without graphics
+# Note a NAT-ted ehternet is creted automagically and you can access the Internet via the host
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" -nographic
 
 # Create virtual disks and install Linux for ARM64
