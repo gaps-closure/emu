@@ -159,6 +159,7 @@ qemu-img create -f qcow2 ubuntu-19.10-amd64.qcow2 20G
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -boot d -cdrom ubuntu-19.10-server-amd64.iso -drive "file=ubuntu-19.10-amd64.qcow2,format=qcow2"
 qemu-img create -f qcow2 -b ubuntu-19.10-amd64.qcow2 ubuntu-19.10-amd64-snapshot.qcow2 
 chmod ugo-w ubuntu-19.10-amd64.qcow2
+cp ubuntu-19.10-amd64.qcow2 /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2  # Save for use in experiments
 
 # Boot the snapshot and configure it for use in the emulator
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" 
@@ -194,7 +195,12 @@ qemu-system-aarch64 \
 ```
 
 Plumbing the QEMU node to the CORE node is done as follows (needs to be scripted):
+
 ```
+# First make one or more snapshots of the golden image of the QEMU virtual disk with barebones ubuntu install
+qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2 ubuntu-19.10-amd64-snapshot1.qcow2 
+qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2 ubuntu-19.10-amd64-snapshot2.qcow2 
+
 # Inside the CORE node:
 ip addr del 10.0.2.10/32 dev eth1
 tunctl -t qemutap0
@@ -211,9 +217,9 @@ brctl addif br1 qemutap1
 
 # additional software such as socat ifconfig would be good to have
 
-sudo qemu-system-x86_64 -enable-kvm -m 1G -smp 1 -drive file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2 -net nic -net tap,ifname=qemutap0,script=no,downscript=no -net nic -net tap,ifname=qemutap1,script=no,downscript=no -nographic
+sudo qemu-system-x86_64 -enable-kvm -m 1G -smp 1 -drive file=ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2 -net nic -net tap,ifname=qemutap0,script=no,downscript=no -net nic -net tap,ifname=qemutap1,script=no,downscript=no -nographic
 
-# Inside the qemu (login as user closure:
+# Inside the qemu (login as user closure):
 sudo bash
 ip addr flush ens3
 ip addr add 10.0.2.10 dev ens3
