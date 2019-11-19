@@ -181,7 +181,7 @@ qemu-system-aarch64 \
 
 vim.tiny /etc/fstab
 # Add following entry
-# /dev/sda / ext4 relatime,errors=remount-ro 0 1
+# /dev/vda / ext4 relatime,errors=remount-ro 0 1
 
 passwd # set passwd for root root!
 adduser closure
