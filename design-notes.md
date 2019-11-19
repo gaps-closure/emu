@@ -196,7 +196,7 @@ sudo qemu-system-x86_64 -enable-kvm -m 1G -smp 1 -drive file=ubuntu-19.10-amd64-
 sudo bash
 ip addr flush ens3
 ip addr add 10.0.2.10 dev ens3
-ip route add 10.0.2.0/24 dev ens3 via 10.0.3.1
+ip route add 10.0.2.0/24 dev ens3
 ping 10.0.2.10  # self
 ping 10.0.2.1   # cross-domain-gw
 
