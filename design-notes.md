@@ -54,11 +54,13 @@ An example of using this in CORE, with 'socat' links, is shown below:
 
 ```
 DEV_ORANGE="/dev/vcom_am_orange"
-GW_ORANGE_IP="10.0.2.1"
+SOCAT_ORANGE_LOGS="/tmp/socat_am_orange.log"
+GW_ORANGE_IP="10.0.1.1"
 GW_ORANGE_PORT="12345"
 
 DEV_PURPLE="/dev/vcom_am_purple"
-GW_PURPLE_IP="10.0.3.1"
+SOCAT_PURPLE_LOGS="/tmp/socat_am_purple.log"
+GW_PURPLE_IP="10.0.2.1"
 GW_PURPLE_PORT="12346"
 
 #gw
@@ -70,9 +72,9 @@ GW_PURPLE_PORT="12346"
           
 #orange 
    terminal-1:
-        socat -d -d -lf /tmp/mylogs-o.log \
+        socat -d -d -lf ${SOCAT_ORANGE_LOGS} \
           pty,link=${DEV_ORANGE},raw,ignoreeof,unlink-close=0,echo=0 \
-          tcp:${GW_ORANGE_IP}:${GW_ORANGE_PORT} &
+          tcp:${GW_ORANGE_IP}:${GW_ORANGE_PORT},ignoreeof &
         sleep 1
         cat ${DEV_ORANGE}
    terminal-2:
@@ -80,9 +82,9 @@ GW_PURPLE_PORT="12346"
         
 #purple 
    terminal-1:
-        socat -d -d -lf /tmp/mylogs-p.log \
+        socat -d -d -lf ${SOCAT_PURPLE_LOGS} \
           pty,link=${DEV_PURPLE},raw,ignoreeof,unlink-close=0,echo=0 \
-          tcp:${GW_PURPLE_IP}:${GW_PURPLE_PORT} &
+          tcp:${GW_PURPLE_IP}:${GW_PURPLE_PORT},ignoreeof &
         sleep 1
         cat ${DEV_PURPLE}
    terminal-2:
