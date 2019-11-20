@@ -305,23 +305,24 @@ To be added.
 4. Create a sample IMN file using CORE GUI
     * DONE, for 2 enclave scenario, but will be refined as needed
 5. Implement sample TA1 device emulators (pass,BITW,BKEND)
-    * PARTIAL, passthrough and BITW done
-    * develop and test for BKEND
+    * PARTIAL, passthrough and BITW plumbing implemented and tested
+    * BKEND fully worked out, not tested
     * add scripting to scenario
     * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
     * must include stats and wire-shark support
 6. Protoype the end-to-end QEMU build and sample scenario
     * PARTIAL
-    * Plumbing the QEMU developed/tested, but needs to be added to scenario script
-    * command scripting interface (redir ssh port, use vmcd and ssh) to be developed/tested
+    * Done developing/testing plumbing of QEMU with CORE, needs to be added to scenario script
+    * Done adding command scripting interface (redir ssh port, use vmcd and ssh), to be integrated
+    * Decided there will be no back-channel for direct software install over internet, must be provisioned or
+      added using local management interface
     * Automated scripting of BKEND vs. BITW remains
-    * Faster boot of QEMU would be nice
-    * Optional back-channel management network to qemu for monitoring and software install over internet
+    * QEMU does not hang on netowrk config, but faster boot (e.g., fewer services) of QEMU would be nice
 7. Prepare a sample partitioned program 
     * Include install script (e.g., deb package)
     * Include systemd scripts that will start application on boot and respawn on failure
     * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
-8. Create a JSON configuration file containing:
+8. Create a hihg level configuration file containing:
     * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
     * TA1 device capabilities and type, e.g.,
     * ID (pass-through)
@@ -329,8 +330,8 @@ To be added.
     * Bookends style
     * Specific guard functions supported on device
     * Software topology and mappings – names of executables and which node they will run on
-9. From the JSON generate IMN + scripting for GAPS scenario
-    * Read in JSON file
+9. From the configuration generate IMN + scripting for GAPS scenario
+    * Read in configuration file
     * Instantiate CORE nodes, do the necessary internal plumbing (for either BITW or Bookends style), and deploy application
     * Instantiate QEMU nodes and do needed plumbing
     * Manage GAPS components (application, gpsd, TA1 device emulation)
