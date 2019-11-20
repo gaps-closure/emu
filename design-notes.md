@@ -292,6 +292,10 @@ ping 10.0.2.1   # cross-domain-gw
 To be added.
 
 # Todo
+0. Documentation
+    * PARTIAL, this document
+    * Figures needs to be updated, addresses should match sample scenario 
+    * As scripts are developed, move code segments into actual scripts and only discuss functionality and usage
 1. Prepare QEMU image for x86 with Ubuntu 19.10
     * DONE, image saved under workhorse:/IMAGES, may be refined as needed (e.g., more software)
 2. Prepare QEMU image for ARM with Ubuntu 19.10
