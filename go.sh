@@ -1,17 +1,26 @@
 #!/bin/bash
 
-echo "Creating bidirectional pipe between enclaves on: $HOSTNAME"
+# Create a serial link between enclaves for CLOSURE project
+#
+# Link starts and ends on serial devices created by 'socat' on the
+# ORANGE and PURPLE enclaves, with the option of filters on the:
+#    a) Gateway (GW) between the end nodes (BITW model)
+#    b) Two end nodes (BOOKEND model)
 
-DEV_ORANGE="/dev/vcom_am_orange"
-SOCAT_ORANGE_LOGS="/tmp/socat_am_orange.log"
+#USER_INITIALS=${USER:0:2}   # Unique id (hopefully avoiding 'birthday paradox')
+USER_INITIALS=$(echo $SESSION_FILENAME | awk -F/ '{print $3}' | cut -c1-2 )
+
+DEV_ORANGE="/dev/vcom_${USER_INITIALS}_orange"
+SOCAT_ORANGE_LOGS="/tmp/socat_${USER_INITIALS}_orange.log"
 GW_ORANGE_IP="10.0.1.1"
-GW_ORANGE_PORT="12345"
+GW_ORANGE_PORT="12345"             
 
-DEV_PURPLE="/dev/vcom_am_purple"
-SOCAT_PURPLE_LOGS="/tmp/socat_am_purple.log"
+DEV_PURPLE="/dev/vcom_${USER_INITIALS}_purple"
+SOCAT_PURPLE_LOGS="/tmp/socat_${USER_INITIALS}_purple.log"
 GW_PURPLE_IP="10.0.2.1"
 GW_PURPLE_PORT="12346"
 
+echo "Creating bidirectional pipe on $HOSTNAME (between $DEV_ORANGE & $DEV_PURPLE)"
 
 function run {
   case $1 in
@@ -49,6 +58,7 @@ function run {
           < fifo \
           | nc -4 -k -l ${GW_PURPLE_IP} ${GW_PURPLE_PORT} \
           > fifo &
+          
         ls -l fifo*
         ps ax
         tcpdump -nli any ip
@@ -58,6 +68,7 @@ function run {
         socat -d -d -lf ${SOCAT_ORANGE_LOGS} \
           pty,link=${DEV_ORANGE},raw,ignoreeof,unlink-close=0,echo=0 \
           tcp:${GW_ORANGE_IP}:${GW_ORANGE_PORT},ignoreeof &
+          
         sleep 1
         cat ${DEV_ORANGE}
         ;;
@@ -66,11 +77,12 @@ function run {
         socat -d -d -lf ${SOCAT_PURPLE_LOGS} \
           pty,link=${DEV_PURPLE},raw,ignoreeof,unlink-close=0,echo=0 \
           tcp:${GW_PURPLE_IP}:${GW_PURPLE_PORT},ignoreeof &
+          
         sleep 1
         cat ${DEV_PURPLE}
         ;;
     *)
-        echo "Invalid option: $0 $1"
+        echo "Invalid option: $1"
         echo "usage:"
         echo "   $0 f  Add bidirectional link with filter on GW"
         echo "   $0 g  Add bidirectional link pass-through on GW"
