@@ -197,6 +197,7 @@ sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64
 Approach for ARM did not work as expected, and also above approach is not very scriptable, so exploring a different approach below.
 
 ```
+# XXX:  These should be scripted using bash, sed, and expect -- manual for now
 sudo apt update
 sudo apt upgrade # XXX: not on workhorse!
 
@@ -271,12 +272,14 @@ netplan apply
 qemu-img convert -f raw -O qcow2 rootfs.img rootfs.qcow2
 
 # Run with QCOW2
-qemu-system-aarch64   -nographic -M virt -cpu cortex-a53 -m 1024   -drive file=rootfs.qcow2,format=qcow2   -kernel linux-xenial   -append 'earlycon root=/dev/vda rw' -netdev user,id=unet -device virtio-net-device,netdev=unet
+qemu-system-aarch64   -nographic -M virt -cpu cortex-a53 -m 1024   -drive file=rootfs.qcow2,format=qcow2   -kernel linux   -append 'earlycon root=/dev/vda rw' -netdev user,id=unet -device virtio-net-device,netdev=unet
 
-# XXX: make golden image read only
-# XXX: take a snapshot and boot from that
-
-# Script all the steps above using expect and sed
+sudo cp linux-xenial /IMAGES/linux-kernel-arm64-xenial
+sudo cp rootfs.qcow2 /IMAGES/ubuntu
+sudo chmod ugo-wx /IMAGES/*
+sudo chown root.root /IMAGES/*
+#
+# You should be able take a snapshot and boot from that, and also invoke within CORE scenario
 ```
 
 Plumbing the QEMU node to the CORE node is done as follows (needs to be scripted):
