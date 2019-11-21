@@ -331,6 +331,30 @@ ping 10.0.2.1   # cross-domain-gw
 
 ```
 
+Finally, in preparation for the cross-domain API, we install some additional packages inside the QEMU VM
+
+```
+# XXX: Ubuntu repo may differ for ARM and x86, check
+date -s "<CORRECT_DATE_TIME_STRING>"
+echo "deb http://ports.ubuntu.com/ubuntu-ports eoan universe" >> /etc/apt/sources.list
+
+apt update
+apt upgrade
+apt install build-essential
+apt install libzmq3-dev
+apt install socat
+apt install zip unzip
+
+cd /tmp
+wget https://github.com/hdhaussy/zc/archive/master.zip
+unzip master.zip
+cd zc-master
+make
+cp zc /usr/local/bin/
+rm -rf zc-master master.zip
+
+```
+
 ## GAPS Emulator installation
 To be added.
 
