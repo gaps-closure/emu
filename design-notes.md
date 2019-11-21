@@ -355,6 +355,15 @@ rm -rf zc-master master.zip
 
 ```
 
+## Realistic Guard Emulation
+
+The initial emulator will use a simple line-oriented grep/sed style filter to do a proof-of-concept guard.  Looking ahead, we anticipate:
+    * Being able to integrate TA1 hardware in the loop into our emulation
+    * Being able to include a Linux device driver that emulates the TA1 devices more faithfully
+    * A more full-featured emulation of a guard using Linux kernel networking capabilities, for example, [using tc and eBPF] (https://archive.fosdem.org/2016/schedule/event/ebpf/attachments/slides/1159/export/events/attachments/ebpf/slides/1159/ebpf.pdf)
+    
+However, if a full hardware testbed is available to us, the need for full-featured emulation of guard functionality is diminished.
+    
 ## GAPS Emulator installation
 To be added.
 
