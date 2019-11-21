@@ -179,6 +179,8 @@ qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2 ubuntu-1
 # Note a NAT-ted ehternet is creted automagically and you can access the Internet via the host
 sudo qemu-system-x86_64 -enable-kvm -m 4G -smp 2 -drive "file=ubuntu-19.10-amd64-snapshot.qcow2,format=qcow2" -nographic
 ```
+
+Installing from ISO for ARM64 (steps below) ran into several challenges, need for EFI, newer kernels crashing on server (workhorse, which is xenial-based), but documenting for possible latent value. 
 ```
 # Create virtual disks and install Linux for ARM64
 # XXX: steps below are not working ywt, ARM is TBD
@@ -275,7 +277,7 @@ qemu-img convert -f raw -O qcow2 rootfs.img rootfs.qcow2
 qemu-system-aarch64   -nographic -M virt -cpu cortex-a53 -m 1024   -drive file=rootfs.qcow2,format=qcow2   -kernel linux   -append 'earlycon root=/dev/vda rw' -netdev user,id=unet -device virtio-net-device,netdev=unet
 
 sudo cp linux-xenial /IMAGES/linux-kernel-arm64-xenial
-sudo cp rootfs.qcow2 /IMAGES/ubuntu
+sudo cp rootfs.qcow2 /IMAGES/ubuntu-19.10-arm64-goldencopy.qcow2
 sudo chmod ugo-wx /IMAGES/*
 sudo chown root.root /IMAGES/*
 #
@@ -288,6 +290,10 @@ Plumbing the QEMU node to the CORE node is done as follows (needs to be scripted
 # First make one or more snapshots of the golden image of the QEMU virtual disk with barebones ubuntu install
 qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2 ubuntu-19.10-amd64-snapshot1.qcow2 
 qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-amd64-goldencopy.qcow2 ubuntu-19.10-amd64-snapshot2.qcow2 
+
+# Instead, for ARM64 you can use
+qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-arm64-goldencopy.qcow2 ubuntu-19.10-arm64-snapshot1.qcow2 
+qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-arm64-goldencopy.qcow2 ubuntu-19.10-arm64-snapshot2.qcow2 
 
 # Inside the CORE node:
 ip addr del 10.0.2.10/32 dev eth1
@@ -305,7 +311,15 @@ brctl addif br1 qemutap1
 
 # additional software such as socat ifconfig would be good to have
 
-sudo qemu-system-x86_64 -enable-kvm -m 1G -smp 1 -drive file=ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2 -net nic -net tap,ifname=qemutap0,script=no,downscript=no -net nic -net tap,ifname=qemutap1,script=no,downscript=no -nographic
+sudo qemu-system-x86_64 -nographic -enable-kvm -m 1G -smp 1 -drive file=ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2 -net nic -net tap,ifname=qemutap0,script=no,downscript=no -net nic -net tap,ifname=qemutap1,script=no,downscript=no -net nic -net user
+
+# Instead, for ARM64, you casn use
+sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
+  -drive file=ubuntu-19.10-arm64-snapshot1.qcow2,format=qcow2 \
+  -kernel linux-kernel-arm64-xenial -append 'earlycon root=/dev/vda rw' \
+  -netdev tap,id=unet0,ifname=qemutap0,script=no,downscript=no -device virtio-net-device,netdev=unet0 \
+  -netdev tap,id=unet1,ifname=qemutap1,script=no,downscript=no -device virtio-net-device,netdev=unet1 \
+  -netdev user,id=unet2 -device virtio-net-device,netdev=unet2
 
 # Inside the qemu (login as user closure):
 sudo bash
