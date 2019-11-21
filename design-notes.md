@@ -242,9 +242,27 @@ vim.tiny /etc/apt/sources.list
 # Add following entry if not already there
 # deb http://ports.ubuntu.com/ubuntu-ports/ eoan main                          
 
-# XXX: need to bring kernel
-# XXX: need to setup network
-# XXX: need to sertup serial console
+sudo shutdown -h 0
+
+# Boot with net work device added
+qemu-system-aarch64   -nographic -M virt -cpu cortex-a53 -m 1024   -hda rootfs.img   -kernel linux   -append 'earlycon root=/dev/vda rw' -netdev user,id=unet -device virtio-net-device,netdev=unet
+# Login as use closure
+sudo bash
+
+vi /etc/network/config.yaml
+
+# Add following to config.yaml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: true
+
+netplan apply
+
+# should be able to bring in kernel and other packages
+apt install linux-image-generic
 
 # XXX: debootstrap used raw disk, convert to qcow2
 # mXXX: make golden image read only
