@@ -224,13 +224,12 @@ canvas c1 {
 }
 
 hook 3:instantiation_hook.sh {
-    DIR_EM=$(echo $SESSION_FILENAME | sed 's:gaps-emulator/.*$:gaps-emulator:')
+    DIR_EM=$(echo $SESSION_FILENAME | sed 's:emulator/.*$:emulator:')
     echo "emdir=$DIR_EM"
     cp $DIR_EM/go.sh $SESSION_DIR/cross-domain-gw.conf/  
     cp $DIR_EM/go.sh $SESSION_DIR/orange-enclave-gw.conf/  
     cp $DIR_EM/go.sh $SESSION_DIR/purple-enclave-gw.conf/  
     cp $DIR_EM/filterproc.py $SESSION_DIR/cross-domain-gw.conf/  
-
 }
 
 option global {
