@@ -262,10 +262,18 @@ network:
 netplan apply
 
 # should be able to bring in kernel and other packages
-apt install linux-image-generic
+# XXX: unfortunately no kernel after xenial is working with qemu on workhorse for ARM64
+# apt install linux-image-generic
+# apt install grub2-common
+# update-grub
 
-# XXX: debootstrap used raw disk, convert to qcow2
-# mXXX: make golden image read only
+# Convert to QCOW2 format
+qemu-img convert -f raw -O qcow2 rootfs.img rootfs.qcow2
+
+# Run with QCOW2
+qemu-system-aarch64   -nographic -M virt -cpu cortex-a53 -m 1024   -drive file=rootfs.qcow2,format=qcow2   -kernel linux-xenial   -append 'earlycon root=/dev/vda rw' -netdev user,id=unet -device virtio-net-device,netdev=unet
+
+# XXX: make golden image read only
 # XXX: take a snapshot and boot from that
 
 # Script all the steps above using expect and sed
