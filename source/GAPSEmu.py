@@ -1,3 +1,7 @@
+import os
+import subprocess
+import time
+
 from FixedData import ICoords as IC
 from FixedData import LCoords as LC
 from FixedData import POSTAMBLE
@@ -6,10 +10,15 @@ from FixedData import POSTAMBLE
 BITW = 0
 BKND = 1
 
+#Supported Architctures
+X86_64 = 0
+ARM64  = 1
+
 #Globals
 nid = 0
 eid = 0
 linkId = 0
+USER = os.environ["USER"]
 
 def new_nid():
     global nid
@@ -27,9 +36,10 @@ def new_linkId():
     return linkId
 
 class Enclave:
-    def __init__(self, color, lan_size):
+    def __init__(self, color, arch, lan_size):
         self.eid = new_eid()
         self.color = color
+        self.arch = arch
         self.hub = Hub(color)
         self.lan_nodes = self.make_lan_nodes(lan_size)
         self.enclave_gateway = EnclaveGateway(color, self.eid, self.hub)
@@ -88,6 +98,7 @@ class EnclaveGateway:
         self.color = color
         self.hub = hub
         self.ifAddresses = {}
+        self.hostname = self.color + "-enclave-gw"
         self.ifPeers = {}
         self.links = []
         self.xd_gateway = None
@@ -98,7 +109,6 @@ class EnclaveGateway:
         self.links += [Link(self.nid, self.xd_gateway.nid)]
         
     def render_imn(self):
-        hostname = self.color + "-enclave-gw"
         ret = """
 node n%d {
     type router
@@ -115,7 +125,7 @@ node n%d {
     }
     canvas c1
     iconcoords {%s}
-    labelcoords {%s}\n""" % (self.nid, hostname, self.eid, self.eid, self.eid, IC[hostname], LC[hostname])
+    labelcoords {%s}\n""" % (self.nid, self.hostname, self.eid, self.eid, self.eid, IC[self.hostname], LC[self.hostname])
         ret += "    interface-peer {eth0 n%d}\n" % (self.hub.nid)
         ret += "    interface-peer {eth1 n%d}\n" % (self.xd_gateway.nid)
         ret += "}\n"
@@ -193,11 +203,12 @@ class Scenario:
         self.enclaves = {}
         self.xd_gateways = {}
         self.node_count = 0
+        self.core_session_id = None
 
-    def add_enclave(self, color, lan_size):
+    def add_enclave(self, color, arch, lan_size):
         if color in self.enclaves:
             raise Exception
-        enclave = Enclave(color, lan_size)
+        enclave = Enclave(color, arch, lan_size)
         self.enclaves[color] = enclave
 
     def add_xdGateway(self, color1, color2, mode):
@@ -215,4 +226,33 @@ class Scenario:
         for xdg in self.xd_gateways:
             ret += self.xd_gateways[xdg].render_imn()
         ret += POSTAMBLE
-        return ret
+        f = open(self.imn_file, "w")
+        f.write(ret)
+        f.close()
+
+    def start_core(self):
+        subprocess.Popen(["core-gui", "-s", self.imn_file])
+        time.sleep(2)
+        p = subprocess.run(['./get_core_session.sh'], stdout=subprocess.PIPE)
+        self.core_session_id = int(p.stdout)
+        time.sleep(5)
+
+
+    def start_enclaves(self):
+        pycore_path='/tmp/pycore.%d' % (self.core_session_id)
+        for e in self.enclaves:
+            egw_hostname = self.enclaves[e].enclave_gateway.hostname
+            egw_path = pycore_path + '/' + egw_hostname
+            egw_conf = egw_path + '.conf'
+            subprocess.run(['cp', './enclave_gateway_setup.sh', egw_conf])
+            subprocess.run(['vcmd', '-c', egw_path, '--', './enclave_gateway_setup.sh'])
+#                            if self.enclaves[e].arch == X86_64:
+ #               subprocess.Popen(['vcmd', '-c', path, '--', 'qemu-system-x86_64', '-nographic', '-enable-kvm', '-m', '1G', '-smp', '1', '-drive', 'file=/IMAGES/ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2', '-net', 'nic', '-net', 'tap,ifname=qemutap0,script=no,downscript=no', '-net', 'nic', '-net', 'tap,ifname=qemutap1,script=no,downscript=no', '-net', 'nic', '-net', 'user'])
+            
+
+    def start(self):
+        self.render_imn()
+        self.start_core()
+        self.start_enclaves()
+        
+        
