@@ -1,5 +1,6 @@
-from Coordinates import ICoords as IC
-from Coordinates import LCoords as LC
+from FixedData import ICoords as IC
+from FixedData import LCoords as LC
+from FixedData import POSTAMBLE
 
 #Model Types
 BITW = 0
@@ -8,6 +9,7 @@ BKND = 1
 #Globals
 nid = 0
 eid = 0
+linkId = 0
 
 def new_nid():
     global nid
@@ -18,6 +20,11 @@ def new_eid():
     global eid
     eid = eid + 1
     return eid
+
+def new_linkId():
+    global linkId
+    linkId = linkId + 1
+    return linkId
 
 class Enclave:
     def __init__(self, color, lan_size):
@@ -30,16 +37,21 @@ class Enclave:
     def make_lan_nodes(self, lan_size):
         ret = {}
         for lid in range(0, lan_size):
-            l = LanNode(self.color, self.eid, lid+1, "n%s" % (self.hub.nid))
+            l = LanNode(self.color, self.eid, lid+1, self.hub)
             ret[lid] = l
         return ret
 
     def render_imn(self):
         ret = ""
         ret += self.enclave_gateway.render_imn()
+        links = []
         for l in self.lan_nodes:
             ret += self.lan_nodes[l].render_imn()
+            links += self.lan_nodes[l].links
         ret += self.hub.render_imn()
+        links += self.enclave_gateway.links
+        for link in links:
+            ret += link.render_imn()
         return ret
 
 class Hub:
@@ -77,10 +89,13 @@ class EnclaveGateway:
         self.hub = hub
         self.ifAddresses = {}
         self.ifPeers = {}
+        self.links = []
         self.xd_gateway = None
+        self.links += [Link(self.nid, self.hub.nid)]
 
     def set_xd_gateway(self, xd_gateway):
         self.xd_gateway = xd_gateway
+        self.links += [Link(self.nid, self.xd_gateway.nid)]
         
     def render_imn(self):
         hostname = self.color + "-enclave-gw"
@@ -107,12 +122,15 @@ node n%d {
         return ret
         
 class LanNode:
-    def __init__(self, color, eid, lid, peer):
+    def __init__(self, color, eid, lid, hub):
         self.nid = new_nid()
         self.color = color
         self.eid = eid
         self.lid = lid
-        self.peer = peer
+        self.hub = hub
+        self.links = []
+        self.links += [Link(self.nid, self.hub.nid)]
+        
     def render_imn(self):
         hostname = "%s-%d" % (self.color, self.lid)
         return """
@@ -129,8 +147,8 @@ node n%d {
     canvas c1
     iconcoords {%s}
     labelcoords {%s}
-    interface-peer {eth0 %s}
-}\n""" % (self.nid, hostname, self.eid, self.eid, 100+self.lid, IC[hostname], LC[hostname], self.peer)
+    interface-peer {eth0 n%d}
+}\n""" % (self.nid, hostname, self.eid, self.eid, 100+self.lid, IC[hostname], LC[hostname], self.hub.nid)
 
 class XDomainGateway:
     def __init__(self, enclaves):
@@ -153,10 +171,19 @@ node n%d {
     iconcoords {%s}
     labelcoords {%s}\n""" % (IC[hostname], LC[hostname])
         for e in self.enclaves:
-            ret += "    interface-peer {eth%d n%d}\n" % (e.eid-1, e.eid)
+            ret += "    interface-peer {eth%d n%d}\n" % (e.eid-1, e.enclave_gateway.nid)
         ret += "    services {IPForward}\n}\n"
         return ret
 
+class Link:
+    def __init__(self, n1,n2):
+        self.linkId = new_linkId()
+        self.n1 = n1
+        self.n2 = n2
+        self.bandwidth = 0
+    def render_imn(self):
+        return "\nlink l%d {\n    nodes {n%d n%d}\n    bandwidth %d\n}\n" % (self.linkId, self.n1, self.n2, self.bandwidth)
+    
 class Scenario:
     def __init__(self, name, mode):
         self.name = name
@@ -187,4 +214,5 @@ class Scenario:
             ret += self.enclaves[color].render_imn()
         for xdg in self.xd_gateways:
             ret += self.xd_gateways[xdg].render_imn()
+        ret += POSTAMBLE
         return ret
