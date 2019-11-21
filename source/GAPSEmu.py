@@ -151,9 +151,11 @@ node n%d {
 }\n""" % (self.nid, hostname, self.eid, self.eid, 100+self.lid, IC[hostname], LC[hostname], self.hub.nid)
 
 class XDomainGateway:
-    def __init__(self, enclaves):
+    def __init__(self, enclave1, enclave2, mode):
         self.nid = new_nid()
-        self.enclaves = enclaves
+        self.enclave1 = enclave1
+        self.enclave2 = enclave2
+        self.mode = mode
 
     def render_imn(self):
         hostname = "cross-domain-gw-%d" % (self.nid)
@@ -164,13 +166,13 @@ node n%d {
     network-config {
 \thostname %s
 \t!\n""" % (self.nid, hostname)
-        for e in self.enclaves:
+        for e in (self.enclave1, self.enclave2):
             ret += "\tinterface eth%d\n\t ip address 10.0.%d.1/24\n\t!\n" % (e.eid-1, e.eid)
         ret += """    }
     canvas c1
     iconcoords {%s}
     labelcoords {%s}\n""" % (IC[hostname], LC[hostname])
-        for e in self.enclaves:
+        for e in (self.enclave1, self.enclave2):
             ret += "    interface-peer {eth%d n%d}\n" % (e.eid-1, e.enclave_gateway.nid)
         ret += "    services {IPForward}\n}\n"
         return ret
@@ -185,10 +187,9 @@ class Link:
         return "\nlink l%d {\n    nodes {n%d n%d}\n    bandwidth %d\n}\n" % (self.linkId, self.n1, self.n2, self.bandwidth)
     
 class Scenario:
-    def __init__(self, name, mode):
+    def __init__(self, name):
         self.name = name
         self.imn_file = "%s.imn" % (self.name)
-        self.mode = mode
         self.enclaves = {}
         self.xd_gateways = {}
         self.node_count = 0
@@ -199,13 +200,12 @@ class Scenario:
         enclave = Enclave(color, lan_size)
         self.enclaves[color] = enclave
 
-    def add_xdGateway(self, colors):
-        enclaves = []
-        for c in colors:
-            enclaves += [self.enclaves[c]]
-        xdg = XDomainGateway(enclaves)
-        for c in colors:
-            self.enclaves[c].enclave_gateway.set_xd_gateway(xdg)
+    def add_xdGateway(self, color1, color2, mode):
+        enclave1 = self.enclaves[color1]
+        enclave2 = self.enclaves[color2]
+        xdg = XDomainGateway(enclave1, enclave2, mode)
+        for e in (enclave1, enclave2):
+            e.enclave_gateway.set_xd_gateway(xdg)
         self.xd_gateways[xdg.nid] = xdg
 
     def render_imn(self):
