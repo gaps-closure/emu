@@ -342,9 +342,13 @@ To be added.
 1. Prepare QEMU image for x86 with Ubuntu 19.10
     * DONE, image saved under workhorse:/IMAGES, may be refined as needed (e.g., more software)
 2. Prepare QEMU image for ARM with Ubuntu 19.10
-    * PARTIAL, using debootstrap, able to build VM image and boot, however network driver missing
-3. Fully automated script for building VM images for specific arch and distro
-    * PARTIAL, worked out most details for ARM/eoan, need to complete, then add expect scripting  
+    * DONE, using debootstrap and external xenial kernel
+    * Need to check on newer host OS if we can use newer kernels, and if we can put it within rootfs of the VM
+    * One other issue is it does not set date correctly
+3. Fully automated (non-interactive) script for building VM images for specific arch and distro
+    * PARTIAL, documented details for ARM64/eoan build using debootstrap, need to script using bash,python-expect,sed
+    * Need to bring in additional packages needed for scenario, configure hsotname, static IP etc.
+    * Remove unnecessary pacakges and services to speed up booting
 4. Create a sample IMN file using CORE GUI
     * DONE, for 2 enclave scenario, but will be refined as needed
 5. Implement sample TA1 device emulators (pass,BITW,BKEND)
@@ -365,7 +369,7 @@ To be added.
     * Include install script (e.g., deb package)
     * Include systemd scripts that will start application on boot and respawn on failure
     * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
-8. Create a hihg level configuration file containing:
+8. Create a high level configuration file containing:
     * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
     * TA1 device capabilities and type, e.g.,
     * ID (pass-through)
