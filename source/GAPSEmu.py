@@ -227,7 +227,7 @@ class Scenario:
     def start_core(self):
         subprocess.Popen(["core-gui", "-s", self.imn_file])
         time.sleep(2)
-        p = subprocess.run(['./get_core_session.sh'], stdout=subprocess.PIPE)
+        p = subprocess.run(['./scripts/get_core_session.sh'], stdout=subprocess.PIPE)
         self.core_session_id = int(p.stdout)
         time.sleep(5)
 
@@ -237,7 +237,7 @@ class Scenario:
         for e in self.enclaves:
             hostname = self.enclaves[e].enclave_gateway.hostname
             path = pycore_path + '/' + hostname
-            subprocess.run(['cp', './enclave_gateway_setup.sh', path+'.conf'])
+            subprocess.run(['cp', './scripts/enclave_gateway_setup.sh', path+'.conf'])
             subprocess.run(['vcmd', '-c', path, '--', './enclave_gateway_setup.sh'])
  #           if self.enclaves[e].arch == X86_64:
  #               subprocess.Popen(['vcmd', '-c', path, '--', 'qemu-system-x86_64', '-nographic', '-enable-kvm', '-m', '2G', '-smp', '2', '-drive', 'file=%s,format=qcow2'% (X86_64_IMG), '-net', 'nic', '-net', 'tap,ifname=qemutap0,script=no,downscript=no', '-net', 'nic', '-net', 'tap,ifname=qemutap1,script=no,downscript=no', '-net', 'nic', '-net', 'user'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
