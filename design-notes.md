@@ -446,7 +446,7 @@ sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
   -netdev tap,id=unet2,ifname=qemutap2,script=no,downscript=no -device virtio-net-device,netdev=unet2
 
 # From CORE node, you can ssh into QEMU VM using:
-ssh closure@127.0.0.1 -p 10022
+ssh closure@10.200.0.1
 
 # From the host, you can invokve a vcmd into the CORE node, and then ssh/scp into QEMU node to run a command / add a file
 # WE can install the application .deb package for the scenario this way using dpkg -i (via ssh and vcmd) 
