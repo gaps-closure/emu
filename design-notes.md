@@ -135,6 +135,7 @@ sudo python3 -m pip install --upgrade
 sudo -H pip3 install -r requirements.txt 
 wget https://github.com/coreemu/core/releases/download/release-5.5.2/core_python3_5.5.2_amd64.deb
 dpkg -i core_python3_5.5.2_amd64.deb 
+sudo -H pip3 install pexpect
 ```
 
 ## VM Building Approach #1: Building images from ISO
@@ -269,6 +270,15 @@ sudo chown root.root /IMAGES/*
 # User network allows bringing software from net
 qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-arm64-goldencopy.qcow2 ubuntu-19.10-arm64-snapshot1.qcow2 
 qemu-system-aarch64  -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=ubuntu-19.10-arm64-snapshot1.qcow2,format=qcow2   -kernel linux   -append 'earlycon root=/dev/vda rw' -netdev user,id=unet -device virtio-net-device,netdev=unet
+```
+
+In the foregoing, there are several interactive steps. One example is when we boot into qemu and wait for the shell prompt before running debootstrap second stage. Such cases can be scripted using pexpect as in the example below. See [pexpect docs](https://pexpect.readthedocs.io/en/stable/overview.html) for additional examples.
+```
+#!/usr/bin/python3
+import pexpect
+child = pexpect.spawn('scp foo user@example.com:.')
+child.expect('Password:')
+child.sendline(mypassword)
 ```
 
 # Plumbing QEMU node inside CORE node for emulator 
