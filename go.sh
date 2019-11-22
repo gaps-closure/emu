@@ -51,14 +51,21 @@ function create_socat_pty {
 function enclave_config {
     ENCLAVE_NAME="$1"
     SUBNET_IP_GW="$2"
-    QEMU="$3"
-    
+    QEMU_IMG="$3"
+    QEMU_ARCH="$4"
+ 
     EN_GW_IP="10.0.${SUBNET_IP_GW}.2"
     DEV_GW_TAP=qemutap0
     DEV_GW_BR=br0
     DEV_GW_IF=eth1
     DEV_IN_TAP=qemutap1
-#    echo "$ENCLAVE_NAME $SUBNET_IP_GW QEMU=$QEMU IP=$EN_GW_IP tap=$DEV_GW_TAP BR=$DEV_GW_BR IF=$DEV_GW_IF (tap=$DEV_IN_TAP)"
+    DEV_MG_TAP=qemutap2
+#    echo "$ENCLAVE_NAME $SUBNET_IP_GW QEMU=$QEMU_IMG IP=$EN_GW_IP tap=$DEV_GW_TAP BR=$DEV_GW_BR IF=$DEV_GW_IF (tap=$DEV_IN_TAP)"
+
+    tunctl -t ${DEV_MG_TAP}
+    ip link set ${DEV_MG_TAP} up
+    ip addr add 10.200.0.2 dev ${DEV_MG_TAP}
+    ip route add 10.200.0.0/24 dev ${DEV_MG_TAP}
 
     ip addr del "${EN_GW_IP}/24" dev ${DEV_GW_IF}
     tunctl -t ${DEV_GW_TAP}
@@ -72,14 +79,34 @@ function enclave_config {
     ip link | grep -e ${DEV_GW_TAP} -e ${DEV_GW_IF} -e ${DEV_GW_BR}
     brctl show
 
-echo "sudo qemu-system-x86_64 -enable-kvm -m 1G -smp 1 -drive file=${QEMU},format=qcow2 -net nic -net tap,ifname=${DEV_GW_TAP},script=no,downscript=no -net nic -net tap,ifname=${DEV_IN_TAP},script=no,downscript=no -net nic -net user,hostfwd=tcp::10022-:22 -nographic"
-  
-    sudo qemu-system-x86_64 -enable-kvm -m 1G -smp 1 \
-      -drive file=${QEMU},format=qcow2 \
-      -net nic -net tap,ifname=${DEV_GW_TAP},script=no,downscript=no \
-      -net nic -net tap,ifname=${DEV_IN_TAP},script=no,downscript=no \
-      -net nic -net user,hostfwd=tcp::10022-:22 \
-      -nographic
+    case $QEMU_ARCH in
+        x86_64)
+            sudo qemu-system-x86_64 -nographic -enable-kvm -m 1G -smp 1 \
+              -drive file=${QEMU_IMG},format=qcow2 \
+              -net nic -net tap,ifname=${DEV_GW_TAP},script=no,downscript=no \
+              -net nic -net tap,ifname=${DEV_IN_TAP},script=no,downscript=no \
+              -net nic -net tap,ifname=${DEV_MG_TAP},script=no,downscript=no 
+              # Had to comment user nic, strange behavior of TCP getting closed
+              # replace this with tap instead of user network to support mgmt interface
+              # was working in x86 only scenario yesterday with 2 enclaves
+              # configure inside qemu to also use static IP for this interface
+              #-net nic -net user,net=192.168.77.0/24,dhcpstart=192.168.77.9,hostfwd=tcp::10023-:22 
+            ;;
+        aarch64)
+            # XXX: Fix args correctly, needs to come from outside
+            QQ=$DIR_IMGS/ubuntu-19.10-arm64-snapshot2.qcow2
+            KK=$DIR_IMGS/linux-kernel-arm64-xenial 
+            sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
+              -drive file=$QQ,format=qcow2 \
+              -kernel $KK -append 'earlycon root=/dev/vda rw' \
+              -netdev tap,id=unet0,ifname=qemutap0,script=no,downscript=no -device virtio-net-device,netdev=unet0 \
+              -netdev tap,id=unet1,ifname=qemutap1,script=no,downscript=no -device virtio-net-device,netdev=unet1 \
+              -netdev tap,id=unet2,ifname=qemutap2,script=no,downscript=no -device virtio-net-device,netdev=unet2 
+
+              # -netdev user,id=unet2,net=192.168.78.0/24,dhcpstart=192.168.78.9,hostfwd=tcp::10022-:22 -device virtio-net-device,netdev=unet2
+            ;;
+    esac
+      
 }
 
 function create_gw_pass {
@@ -137,13 +164,13 @@ function run {
         create_socat_pty ${ORANGE_NAME} ${ORANGE_GW_IP} ${ORANGE_GW_PORT}
         ;;
     o2)
-        enclave_config ${ORANGE_NAME} ${ORANGE_SUBNET_IP} ${ORANGE_QEMU}
+        enclave_config ${ORANGE_NAME} ${ORANGE_SUBNET_IP} ${ORANGE_QEMU} "x86_64"
         ;;
     p)
         create_socat_pty ${PURPLE_NAME} ${PURPLE_GW_IP} ${PURPLE_GW_PORT}
         ;;
     p2)
-        enclave_config ${PURPLE_NAME} ${PURPLE_SUBNET_IP} ${PURPLE_QEMU}
+        enclave_config ${PURPLE_NAME} ${PURPLE_SUBNET_IP} ${PURPLE_QEMU} "aarch64"
         ;;
     *)
         echo "Invalid option: $1"
