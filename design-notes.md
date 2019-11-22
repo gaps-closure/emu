@@ -389,8 +389,9 @@ network:
 # So better make all provisioning before setting static IP
 netplan apply
 
-# XXX: Tony to check what may have been missed
-# Also there is room to remove needless packages services here
+# XXX: Check what may have been missed by running apt list --installed on the working snapshots
+# Most can be added to the debootstrap --include list
+# Also there is room to remove needless packages here using --exclude, be careful not to exclude essential packages
 ```
 
 ## Network plumbing on CORE node
