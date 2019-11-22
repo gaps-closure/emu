@@ -2,17 +2,11 @@ import os
 import subprocess
 import time
 
-from FixedData import ICoords as IC
-from FixedData import LCoords as LC
-from FixedData import POSTAMBLE
-
-#Model Types
-BITW = 0
-BKND = 1
-
-#Supported Architctures
-X86_64 = 0
-ARM64  = 1
+from Constants import ICoords as IC
+from Constants import LCoords as LC
+from Constants import POSTAMBLE
+from Constants import X86_64
+#from Constants import X86_64_IMG
 
 #Globals
 nid = 0
@@ -241,14 +235,12 @@ class Scenario:
     def start_enclaves(self):
         pycore_path='/tmp/pycore.%d' % (self.core_session_id)
         for e in self.enclaves:
-            egw_hostname = self.enclaves[e].enclave_gateway.hostname
-            egw_path = pycore_path + '/' + egw_hostname
-            egw_conf = egw_path + '.conf'
-            subprocess.run(['cp', './enclave_gateway_setup.sh', egw_conf])
-            subprocess.run(['vcmd', '-c', egw_path, '--', './enclave_gateway_setup.sh'])
-#                            if self.enclaves[e].arch == X86_64:
- #               subprocess.Popen(['vcmd', '-c', path, '--', 'qemu-system-x86_64', '-nographic', '-enable-kvm', '-m', '1G', '-smp', '1', '-drive', 'file=/IMAGES/ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2', '-net', 'nic', '-net', 'tap,ifname=qemutap0,script=no,downscript=no', '-net', 'nic', '-net', 'tap,ifname=qemutap1,script=no,downscript=no', '-net', 'nic', '-net', 'user'])
-            
+            hostname = self.enclaves[e].enclave_gateway.hostname
+            path = pycore_path + '/' + hostname
+            subprocess.run(['cp', './enclave_gateway_setup.sh', path+'.conf'])
+            subprocess.run(['vcmd', '-c', path, '--', './enclave_gateway_setup.sh'])
+ #           if self.enclaves[e].arch == X86_64:
+ #               subprocess.Popen(['vcmd', '-c', path, '--', 'qemu-system-x86_64', '-nographic', '-enable-kvm', '-m', '2G', '-smp', '2', '-drive', 'file=%s,format=qcow2'% (X86_64_IMG), '-net', 'nic', '-net', 'tap,ifname=qemutap0,script=no,downscript=no', '-net', 'nic', '-net', 'tap,ifname=qemutap1,script=no,downscript=no', '-net', 'nic', '-net', 'user'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def start(self):
         self.render_imn()

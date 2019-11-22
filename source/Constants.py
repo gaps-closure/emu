@@ -67,3 +67,12 @@ option global {
 option session {
 }
 '''
+
+#Model Types
+BITW = 0
+BKND = 1
+
+#Supported Architctures
+X86_64 = 0
+ARM64  = 1
+
