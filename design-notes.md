@@ -371,7 +371,8 @@ network:
       addresses:
         - 10.0.2.2/24
 
-# Then make plan persistent, note without DHCP, you will need to additional plumbing to connect to Internet
+# Then make plan persistent, note without QEMU user networking, you will need to additional plumbing to connect to Internet
+# Unfortunately user networking causes problems in the mixed architecture CORE scenario, so we use it only during building
 # So better make all provisioning before setting static IP
 netplan apply
 
@@ -489,6 +490,7 @@ However, if a full hardware testbed is available to us, the need for full-featur
     * Include systemd scripts that will start application on boot and respawn on failure
     * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
 8. Create a high level configuration file containing:
+    * PARTIAL, Mike is working on this
     * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
     * TA1 device capabilities and type, e.g.,
     * ID (pass-through)
@@ -497,11 +499,12 @@ However, if a full hardware testbed is available to us, the need for full-featur
     * Specific guard functions supported on device
     * Software topology and mappings – names of executables and which node they will run on
 9. From the configuration generate IMN + scripting for GAPS scenario
+    * PARTIAL, Mike is working on this
     * Read in configuration file
     * Instantiate CORE nodes, do the necessary internal plumbing (for either BITW or Bookends style), and deploy application
     * Instantiate QEMU nodes and do needed plumbing
     * Manage GAPS components (application, gpsd, TA1 device emulation)
     * Configure TA1 device (control API)
     * Preferably, write the above functionality as a Python library (not a monolithic script)
-10. Basic GUI for the JSON config?
+10. Basic GUI for the high-level config?
     * Nice to have, defer to Phase 2
