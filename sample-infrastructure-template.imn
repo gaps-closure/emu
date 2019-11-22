@@ -4,11 +4,11 @@ node n1 {
     network-config {
 	hostname orange-enclave-gw
 	!
-	interface eth1
-	 ip address 10.0.2.10/24
-	!
 	interface eth0
-	 ip address 10.0.0.12/24
+	 ip address 10.0.101.1/24
+	!
+	interface eth1
+	 ip address 10.0.1.2/24
 	!
     }
     canvas c1
@@ -25,10 +25,10 @@ node n2 {
 	hostname purple-enclave-gw
 	!
 	interface eth1
-	 ip address 10.0.3.10/24
+	 ip address 10.0.2.2/24
 	!
 	interface eth0
-	 ip address 10.0.1.12/24
+	 ip address 10.0.102.1/24
 	!
     }
     canvas c1
@@ -45,7 +45,7 @@ node n3 {
 	hostname orange-1
 	!
 	interface eth0
-	 ip address 10.0.0.10/24
+	 ip address 10.0.101.2/24
 	!
     }
     canvas c1
@@ -61,7 +61,7 @@ node n4 {
 	hostname orange-2
 	!
 	interface eth0
-	 ip address 10.0.0.11/24
+	 ip address 10.0.101.3/24
 	!
     }
     canvas c1
@@ -77,7 +77,7 @@ node n5 {
 	hostname purple-2
 	!
 	interface eth0
-	 ip address 10.0.1.11/24
+	 ip address 10.0.102.3/24
 	!
     }
     canvas c1
@@ -93,7 +93,7 @@ node n6 {
 	hostname purple-1
 	!
 	interface eth0
-	 ip address 10.0.1.10/24
+	 ip address 10.0.102.2/24
 	!
     }
     canvas c1
@@ -137,10 +137,10 @@ node n9 {
 	hostname cross-domain-gw
 	!
 	interface eth1
-	 ip address 10.0.3.1/24
+	 ip address 10.0.2.1/24
 	!
 	interface eth0
-	 ip address 10.0.2.1/24
+	 ip address 10.0.1.1/24
 	!
     }
     canvas c1
@@ -221,6 +221,15 @@ annotation a2 {
 
 canvas c1 {
     name {Canvas1}
+}
+
+hook 3:instantiation_hook.sh {
+    DIR_EM=$(echo $SESSION_FILENAME | sed 's:emulator/.*$:emulator:')
+    echo "emdir=$DIR_EM"
+    cp $DIR_EM/go.sh $SESSION_DIR/cross-domain-gw.conf/  
+    cp $DIR_EM/go.sh $SESSION_DIR/orange-enclave-gw.conf/  
+    cp $DIR_EM/go.sh $SESSION_DIR/purple-enclave-gw.conf/  
+    cp $DIR_EM/filterproc.py $SESSION_DIR/cross-domain-gw.conf/  
 }
 
 option global {
