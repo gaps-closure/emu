@@ -431,7 +431,7 @@ sudo qemu-system-x86_64 -nographic -enable-kvm -M virt -m 1G -smp 1 \
   -drive file=ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2 \
   -net nic -net tap,ifname=qemutap0,script=no,downscript=no \
   -net nic -net tap,ifname=qemutap1,script=no,downscript=no \
-  -net nic -net tap,ifname=qemutap1,script=no,downscript=no
+  -net nic -net tap,ifname=qemutap2,script=no,downscript=no
 
 # Symbolically link linux-kernel-arm64-xenial from /IMAGES to your working directory
 
