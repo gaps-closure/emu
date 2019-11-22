@@ -366,7 +366,7 @@ network:
       addresses:
         - 10.200.0.1/24
       
-# For AMD64, purple enclave, use following in netplan
+# For ARM64, purple enclave, use following in netplan
 # Note order and names of interfaces are different
 # Also IP addresses are different due to scenario locations
 vi /etc/netplan/config.yaml
