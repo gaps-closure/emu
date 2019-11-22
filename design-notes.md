@@ -192,6 +192,9 @@ For ARM64, we explored a more scriptable (using bash, sed, python-expect, etc,.)
 ```
 # assumes ubuntu-dev-tools
 mk-sbuild --arch arm64 eoan
+
+# Please see options for debootstrap
+# --include, --exclude, --components makes the process highly customizable
 sudo debootstrap \
         --arch=arm64 \
         --keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg \
