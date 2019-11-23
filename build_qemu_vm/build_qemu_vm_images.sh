@@ -23,12 +23,12 @@ usage_exit() {
 
 handle_opts() {
   local OPTIND
-  while getopts ":cpha:d:s:k:" options; do
+  while getopts "a:d:s:k:cph" options; do
     case "${options}" in
+      k) KDIST=${OPTARG} ;;
       a) QARCH=${OPTARG} ;;
       d) UDIST=${OPTARG} ;;
       s) SIZE=${OPTARG}  ;;
-      k) KDIST=${OPTARG} ;;
       p) PREPSRV="yes"   ;;
       c) NRLCORE="yes"   ;;
       h) usage_exit      ;;
@@ -121,9 +121,7 @@ debootstrap_second_stage() {
   QEMUCMD="echo"
   case $QARCH in
     amd64)
-      echo "Coming soon"
-      exit 1
-      QEMUCMD="qemu-system-x86_64 ..."
+      QEMUCMD="sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=rootfs.img,format=raw -net nic -net user -kernel linux-kernel-${QARCH}-${KDIST} -append \"earlycon console=ttyS0 root=/dev/sda init=/bin/sh rw\""
       ;;
     arm64)
       QEMUCMD="qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=rootfs.img,format=raw -netdev user,id=unet -device virtio-net-device,netdev=unet -kernel linux-kernel-${QARCH}-${KDIST} -append \"earlycon root=/dev/vda init=/bin/sh rw\""
@@ -175,7 +173,7 @@ build_vm_image() {
   debootstrap_first_stage
   debootstrap_second_stage
   make_golden_cow
-  #configure_system
+  configure_system
 }
 
 handle_opts "$@"
