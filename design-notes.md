@@ -112,7 +112,7 @@ Code to be specified.
 
 # Dependencies Installation and QEMU VM Disk Image Creation and OS Installation Notes
 
-We have developed a non-interactive script that automatically builds QEMU VM images, and installs Ubuntu, and configures it.The earlier process was manual, and is documented below as some of the information could be useful. The scripts are easier to use. We save the kernels and a golden copy of the QEMU VM images. We take snapshots of the images and customize them for use wihtin the emulator.  The script can optionally also install pre-requisites and NRL CORE on the build server.
+We have developed a non-interactive script that automatically builds QEMU VM images, and installs Ubuntu, and configures it. We save the kernels and a golden copy of the QEMU VM images. We take snapshots of the images and customize them for use wihtin the emulator.  The script can optionally also install pre-requisites and NRL CORE on the build server.
 
 ```
 ./build_qemu_vm_images.sh -h
@@ -132,6 +132,8 @@ We have developed a non-interactive script that automatically builds QEMU VM ima
 ./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial
 
 ```
+
+The scripted process above is much easier to use. Our initial process was manual, and details are documented below as some of the information could be useful.
 
 ## Install prerequisites on build and run machine
 
