@@ -155,10 +155,6 @@ print('\nCompleted, second stage')
 END
 }
 
-configure_system() {
-  echo ""
-}
-
 make_golden_cow() {
   QFILE="ubuntu-${QARCH}-${UDIST}-qemu.qcow2"
   qemu-img convert -f raw -O qcow2 rootfs.img rootfs.qcow2
@@ -167,19 +163,19 @@ make_golden_cow() {
   echo "Saved $QFILE"
 }
 
+configure_system() {
+  echo ""
+}
+
 build_vm_image() {
   echo "Building QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
   mkdir -p ./build
   cd ./build
   fetch_kernel
   debootstrap_first_stage
-  cp rootfs.img rootfs.img-first
-  #cp rootfs.img-first rootfs.img
   debootstrap_second_stage
-  cp rootfs.img rootfs.img-second
-  configure_system
-  cp rootfs.img rootfs.img-configured
   make_golden_cow
+  #configure_system
 }
 
 handle_opts "$@"
