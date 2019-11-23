@@ -105,7 +105,7 @@ debootstrap_first_stage() {
   sudo debootstrap \
     --verbose --foreign --arch=$QARCH \
     --keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg \
-    --include $INCLUDES \
+    --include="$INCLUDES" \
     $UDIST rootfs
   dd if=/dev/zero of=rootfs.img bs=1 count=0 seek=20G
   mkfs.ext4 -b 4096 -F rootfs.img
@@ -126,7 +126,7 @@ debootstrap_second_stage() {
       QEMUCMD="qemu-system-x86_64 ..."
       ;;
     arm64)
-      QEMUCMD="qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 -hda rootfs.img -kernel linux-kernel-${QARCH}-${KDIST} -append 'earlycon root=/dev/vda init=/bin/sh rw'"
+      QEMUCMD="qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=rootfs.img,format=raw -netdev user,id=unet -device virtio-net-device,netdev=unet -kernel linux-kernel-${QARCH}-${KDIST} -append \"earlycon root=/dev/vda init=/bin/sh rw\""
       ;;
     *)
       echo "No support for $QARCH"
@@ -135,12 +135,23 @@ debootstrap_second_stage() {
   esac
   python3 - <<END
 import os
+import sys
 import pexpect
-child = pexpect.spawn(os.environ['QEMUCMD'])
-child.expect('#\n')
+def spl_print(lines): 
+  l = lines.splitlines() 
+  for y in l[:-1]: 
+    if y!=b'': print(y.decode('utf-8'))
+  sys.stdout.write(l[-1].decode('utf-8'))
+child = pexpect.spawn('$QEMUCMD')
+child.expect('\n# ',timeout=1800)
+spl_print(child.before+child.after)
+print('\nBooted, invoking debootstrap')
 child.sendline('/debootstrap/debootstrap --second-stage')
-child.expect('#\n')
-child.sendline('shutdown now')
+i=1
+while i!=0:
+  i = child.expect(['\n# ','I: Unpacking ','I: Configuring'],timeout=1800)
+  spl_print(child.before+child.after)
+print('\nCompleted, second stage')
 END
 }
 
@@ -162,9 +173,13 @@ build_vm_image() {
   cd ./build
   fetch_kernel
   debootstrap_first_stage
+  cp rootfs.img rootfs.img-first
+  #cp rootfs.img-first rootfs.img
   debootstrap_second_stage
-  #configure_system
-  #make_golden_cow
+  cp rootfs.img rootfs.img-second
+  configure_system
+  cp rootfs.img rootfs.img-configured
+  make_golden_cow
 }
 
 handle_opts "$@"
