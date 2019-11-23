@@ -191,7 +191,8 @@ For ARM64, we explored a more scriptable (using bash, sed, python-expect, etc,.)
 
 ```
 # assumes ubuntu-dev-tools
-mk-sbuild --arch arm64 eoan
+# Not clear mk-sbuild is needed, we are directly scripting debootstrap
+# mk-sbuild --arch arm64 eoan
 
 # Please see options for debootstrap
 # --include, --exclude, --components makes the process highly customizable
