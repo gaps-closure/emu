@@ -112,7 +112,26 @@ Code to be specified.
 
 # Dependencies Installation and QEMU VM Disk Image Creation and OS Installation Notes
 
-The process is manual now, but we plan to wrap this in a convenient install-all script in the future. We will likely use the debootstrap approach, and script using bash, sed, and python-expect
+We have developed a non-interactive script that automatically builds QEMU VM images, and installs Ubuntu, and configures it.The earlier process was manual, and is documented below as some of the information could be useful. The scripts are easier to use. We save the kernels and a golden copy of the QEMU VM images. We take snapshots of the images and customize them for use wihtin the emulator.  The script can optionally also install pre-requisites and NRL CORE on the build server.
+
+```
+./build_qemu_vm_images.sh -h
+# Usage: ./build_qemu_vm_images.sh [ -h ] [ -p ] [ -c ] \
+#           [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ]
+# -h        Help
+# -p        Install pre-requisites on build server
+# -c        Intall NRL CORE on build server
+# -a QARCH  Architecture [arm64(default), amd64]
+# -d UDIST  Ubuntu distro [eoan(default)]
+# -s SIZE   Image size [20G(default),<any>]
+# -k KDIST  Ubuntu distro for kernel [xenial(default),<any>]
+
+# For making an AMD64 image
+./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan
+# ARM64 requires use of an older kernel
+./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial
+
+```
 
 ## Install prerequisites on build and run machine
 
