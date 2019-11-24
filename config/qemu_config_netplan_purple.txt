@@ -1,0 +1,15 @@
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens3:
+      addresses:
+        - 10.0.2.2/24
+    ens4:
+      addresses:
+        - 10.0.102.1/24
+    ens5:
+      addresses:
+        - 10.200.0.1/24
