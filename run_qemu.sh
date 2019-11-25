@@ -23,17 +23,17 @@ QEMU_ARCH_NAME_ARM="arm64"
 QEMU_BASE_NAME_ARM="linux-kernel-arm64-xenial"
 
 #####################################################################
-# B) QEMU RUN COMMANDS
+# B) QEMU RUN COMMANDS (using filename passed in as a parameter)
 #####################################################################
 function run_x86 {
     #-M virt
     sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 \
-      -drive file=${IMG_2_RUN},format=qcow2
+      -drive file=${1},format=qcow2
 }
 
 function run_arm {
     sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
-      -drive file=${IMG_2_RUN},format=qcow2 \
+      -drive file=${1},format=qcow2 \
       -kernel ${GOLDEN_IMG_DIR}/${QEMU_BASE_NAME_ARM} \
       -append 'earlycon root=/dev/vda rw' \
       -netdev user,id=unet \
@@ -85,10 +85,10 @@ function run_using_defined_images {
     echo
     case $QEMU_TYPE in
         arm)
-            run_arm
+            run_arm "$IMG_2_RUN"
             ;;
         *)
-            run_x86
+            run_x86 "$IMG_2_RUN"
             ;;
     esac
 }

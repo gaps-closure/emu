@@ -18,8 +18,13 @@ closure ALL=(ALL) NOPASSWD: ALL
 
 
 *********************************************************
-3) Set date (if on ARM) in VM
+3) Set date and name if on ARM in VM
 *********************************************************
+echo "ubuntu-arm" > hostname
+vi /etc/hosts
+#add line after localhost
+127.0.1.1	ubuntu-arm
+
 date --set "24 Nov 2019 11:13:00"
 
 *********************************************************
@@ -78,14 +83,14 @@ shutdown -h 0
 10) CREATE VM per CORE node (with right IP addresses)
 *********************************************************
 amcauley@workhorse:~/gaps/top-level/emulator$ ./run_qemu.sh x86 orange-enclave-gw
-  closure@ubuntu-x86:~$ cd netplan/
-  closure@ubuntu-x86:~/netplan$ sudo bash
-  root@ubuntu-x86:/home/closure/netplan# rm /etc/netplan/* 
-  root@ubuntu-x86:/home/closure/netplan# cp netplan/orange-netcfg.yaml /etc/netplan/
+  closure@ubuntu-x86:~$ cd
+  closure@ubuntu-x86:~$ sudo bash
+  root@ubuntu-x86:/home/closure# rm /etc/netplan/* 
+  root@ubuntu-x86:/home/closure# cp netplans/orange-netcfg.yaml /etc/netplan/
 
 amcauley@workhorse:~/gaps/top-level/emulator$ ./run_qemu.sh arm purple-enclave-gw
-  closure@workhorse:~$ sudo bash
-  root@ubuntu-x86:/home/closure/netplan# rm /etc/netplan/* 
-  root@ubuntu-x86:/home/closure/netplan# cp netplan/orange-netcfg.yaml /etc/netplan/
+  closure@ubuntu-arm:~$ sudo bash
+  root@ubuntu-arm:/home/closure# rm /etc/netplan/*
+  root@ubuntu-arm:/home/closure# cp netplans/purple-netcfg.yaml /etc/netplan/
 
 
