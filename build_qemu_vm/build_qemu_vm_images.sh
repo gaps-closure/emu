@@ -203,9 +203,10 @@ build_vm_image() {
     debootstrap_first_stage
     debootstrap_second_stage
     make_golden_cow
+  else
+    echo "Configuring QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
+    configure_golden_cow
   fi
-  echo "Configuring QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
-  configure_golden_cow
 }
 
 handle_opts "$@"
