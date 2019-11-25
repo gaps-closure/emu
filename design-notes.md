@@ -320,7 +320,7 @@ or
 amcauley@workhorse:~/gaps/top-level/emulator$ ./run_qemu.sh arm
 ```
 
-2) Become su in VM (without having to type password) 
+2) Make user 'closure' a su in VM (without having to type password)
 ```
 sudo bash
 visudo
