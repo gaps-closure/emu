@@ -36,7 +36,7 @@ ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 l
 ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
   sudo socat -d -d -lf ${LOG} \
   pty,link=${DEV_PTY},raw,ignoreeof,unlink-close=0,echo=0 \
-  tcp:${GW_IP}:${GW_PORT},ignoreeof
-  
+  tcp:${GW_IP}:${GW_PORT},ignoreeof &
+sleep 1
 ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
-  ps aux | grep ca
+  sudo chmod 666 ${DEV_PTY}
