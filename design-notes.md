@@ -502,9 +502,8 @@ However, if a full hardware testbed is available to us, the need for full-featur
     * Need to check on newer host OS if we can use newer kernels, and if we can put it within rootfs of the VM
     * One other issue is it does not set date correctly
 3. Fully automated (non-interactive) script for building VM images for specific arch and distro
-    * PARTIAL, documented details for ARM64/eoan build using debootstrap, need to script using bash,python-expect,sed
-    * Need to bring in additional packages needed for scenario, configure hsotname, static IP etc.
-    * Remove unnecessary packages and services to speed up booting
+    * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
+    * Need to do additional custom configuration: fstab, closure user, netplan, apt-repos, additional packages, ...
 4. Create a sample IMN file using CORE GUI
     * DONE, for 2 enclave scenario, but will be refined as needed
 5. Implement sample TA1 device emulators (pass,BITW,BKEND)
