@@ -1,7 +1,9 @@
 #!/bin/bash
 
+QEMUCMD="echo"
 PREPSRV="no"
 NRLCORE="no"
+UPDATEONLY="no"
 QARCH="arm64"
 UDIST="eoan"
 SIZE="20G"
@@ -9,11 +11,12 @@ KDIST="xenial" # ARM64 breaks on kernels after xenial on workhorse
 
 usage_exit() {
   [[ -n "$1" ]] && echo $1
-  echo "Usage: $0 [ -h ] [ -p ] [ -c ] \\"
+  echo "Usage: $0 [ -cpuh ] \\"
   echo "          [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ]" 
   echo "-h        Help"
   echo "-p        Install pre-requisites on build server"
   echo "-c        Intall NRL CORE on build server"
+  echo "-u        Only perform post-build configuration and updating"
   echo "-a QARCH  Architecture [arm64(default), amd64]"
   echo "-d UDIST  Ubuntu distro [eoan(default)]"
   echo "-s SIZE   Image size [20G(default),<any>]"
@@ -23,20 +26,21 @@ usage_exit() {
 
 handle_opts() {
   local OPTIND
-  while getopts "a:d:s:k:cph" options; do
+  while getopts "a:d:s:k:pcuh" options; do
     case "${options}" in
-      k) KDIST=${OPTARG} ;;
-      a) QARCH=${OPTARG} ;;
-      d) UDIST=${OPTARG} ;;
-      s) SIZE=${OPTARG}  ;;
-      p) PREPSRV="yes"   ;;
-      c) NRLCORE="yes"   ;;
-      h) usage_exit      ;;
+      k) KDIST=${OPTARG}  ;;
+      a) QARCH=${OPTARG}  ;;
+      d) UDIST=${OPTARG}  ;;
+      s) SIZE=${OPTARG}   ;;
+      p) PREPSRV="yes"    ;;
+      c) NRLCORE="yes"    ;;
+      u) UPDATEONLY="yes" ;;
+      h) usage_exit       ;;
       :) usage_exit "Error: -${OPTARG} requires an argument." ;;
-      *) usage_exit; exit 1 ;;
+      *) usage_exit       ;;
     esac
-    shift $((OPTIND-1))
   done
+  shift "$((OPTIND-1))"
   case $UDIST in
     eoan)   ;;
     *)      usage_exit "Unsupported Ubuntu distribution $UDIST" ;;
@@ -117,20 +121,24 @@ debootstrap_first_stage() {
   echo "First stage rootfs image built"
 }
 
-debootstrap_second_stage() {
-  QEMUCMD="echo"
+start_qemu_initshell() {
+  ROOTDRIVE="$1"
   case $QARCH in
     amd64)
-      QEMUCMD="sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=rootfs.img,format=raw -net nic -net user -kernel linux-kernel-${QARCH}-${KDIST} -append \"earlycon console=ttyS0 root=/dev/sda init=/bin/sh rw\""
+      QEMUCMD="sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive $ROOTDRIVE -net nic -net user -kernel linux-kernel-${QARCH}-${KDIST} -append \"earlycon console=ttyS0 root=/dev/sda init=/bin/sh rw\""
       ;;
     arm64)
-      QEMUCMD="qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=rootfs.img,format=raw -netdev user,id=unet -device virtio-net-device,netdev=unet -kernel linux-kernel-${QARCH}-${KDIST} -append \"earlycon root=/dev/vda init=/bin/sh rw\""
+      QEMUCMD="qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 -drive $ROOTDRIVE -netdev user,id=unet -device virtio-net-device,netdev=unet -kernel linux-kernel-${QARCH}-${KDIST} -append \"earlycon root=/dev/vda init=/bin/sh rw\""
       ;;
     *)
       echo "No support for $QARCH"
       exit 1
       ;;
   esac
+}
+
+debootstrap_second_stage() {
+  start_qemu_initshell "file=rootfs.img,format=raw"
   python3 - <<END
 import os
 import sys
@@ -161,21 +169,47 @@ make_golden_cow() {
   echo "Saved $QFILE"
 }
 
-configure_system() {
-  echo ""
+configure_golden_cow() {
+  QFILE="ubuntu-${QARCH}-${UDIST}-qemu.qcow2"
+  start_qemu_initshell "file=$QFILE,format=qcow2"
+  python3 - <<END
+import os
+import sys
+import pexpect
+def spl_print(lines): 
+  l = lines.splitlines() 
+  for y in l[:-1]: 
+    if y!=b'': print(y.decode('utf-8'))
+  sys.stdout.write(l[-1].decode('utf-8'))
+child = pexpect.spawn('$QEMUCMD')
+child.expect('\n# ',timeout=1800)
+spl_print(child.before+child.after)
+print('\nBooted, configuring system')
+
+
+child.sendline('# additional commands here')
+child.expect('\n# ',timeout=1800)
+spl_print(child.before+child.after)
+print('\nCompleted configuration')
+END
 }
 
 build_vm_image() {
-  echo "Building QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
   mkdir -p ./build
   cd ./build
-  fetch_kernel
-  debootstrap_first_stage
-  debootstrap_second_stage
-  make_golden_cow
-  configure_system
+  if [ $UPDATEONLY != "yes" ]; then
+    echo "Building QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
+    fetch_kernel
+    debootstrap_first_stage
+    debootstrap_second_stage
+    make_golden_cow
+  fi
+  echo "Configuring QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
+  configure_golden_cow
 }
 
 handle_opts "$@"
+echo "Options PREPSRV=$PREPSRV NRLCORE=$NRLCORE QARCH=$QARCH UDIST=$UDIST KDIST=$KDIST UPDATEONLY=$UPDATEONLY SIZE=$SIZE"
 prep_build_machine 
 build_vm_image 
+
