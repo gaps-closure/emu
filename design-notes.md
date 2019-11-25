@@ -339,11 +339,6 @@ date --set "24 Nov 2019 11:13:00"
 ```
 
 3) Load Packages into VM
-
-* Check what may have been missed by running apt list --installed on the working snapshots
-* Most can be added to the debootstrap --include list
-* Also there is room to remove needless packages here using --exclude, be careful not to exclude essential packages
-
 ```
 apt update
 apt upgrade
@@ -361,6 +356,9 @@ apt install -y ssh
 apt install -y net-tools
 apt install -y tshark
 ```
+* Check what may have been missed by running apt list --installed on the working snapshots
+* Most can be added to the debootstrap --include list
+* Also there is room to remove needless packages here using --exclude, be careful not to exclude essential packages
 
 4) Load Other Packages into VM
 ```
@@ -374,7 +372,7 @@ cd /tmp
 rm -rf zc-master master.zip
 ```
 
-5) Copy IP addressing Plans (but not yet configure) into the VM. The coniguration plans are in the emulator conifg directory. Note the order and names of interfaces are different for different architecture (e.g., x86 'config/qemu_config_netplan_core_x86.txt' vs ARM 'qemu_config_netplan_core_arm.txt'). All IP addresses assume the node is an orange envlave gateway. These will be customized when coniguring for specific CORE nodes - as described in the next (Create Node Snapshots) section.
+5) Copy IP addressing Plans (but not yet configure) into the VM. The plans are in the emulator/conifg directory. Note the order and names of interfaces are different for different architecture (e.g., x86 'config/qemu_config_netplan_core_x86.txt' vs ARM 'qemu_config_netplan_core_arm.txt'). All IP addresses assume the node is an orange envlave gateway. These will be customized when coniguring for specific CORE nodes - as described in the next (Create Node Snapshots) section.
 
 ```
 cd /home/closure
@@ -399,7 +397,7 @@ echo "PASTE" >> .ssh/authorized_keys
 
 7) Close VM
 ```
-shutdown -h 0
+sudo shutdown -h 0
 ```
 
 ## B) Create Node Snapshots Needed for Scenario 
