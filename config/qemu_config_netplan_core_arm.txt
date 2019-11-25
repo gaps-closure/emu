@@ -6,10 +6,10 @@ network:
   ethernets:
     eth0:
       addresses:
-        - 10.0.2.2/24
+        - 10.200.0.1/24
     eth1:
       addresses:
         - 10.0.102.1/24
     eth2:
       addresses:
-        - 10.200.0.1/24
+        - 10.0.2.2/24

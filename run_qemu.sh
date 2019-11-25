@@ -3,9 +3,9 @@
 # Start closure QEMU VM (and create if file does not exist)
 
 # Example Usage:
-#   Old image:                ./run_qemu old
-#   Closure x86 image:        ./run_qemu x86
-#   Closure ARM image:        ./run_qemu arm
+#   Old image:                ./run_qemu.sh old
+#   Closure x86 image:        ./run_qemu.sh x86
+#   Closure ARM image:        ./run_qemu.sh arm
 #   Closure x86 orange node:  ./run_qemu.sh x86 orange-enclave-gw
 #   Closure ARM purple node:  ./run_qemu.sh arm purple-enclave-gw
 

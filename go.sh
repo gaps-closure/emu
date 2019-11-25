@@ -17,16 +17,19 @@ DIR_IMGS=$(echo $SESSION_FILENAME | sed 's:emulator.*$:emulator/imgs:')
 
 DEV_PTY_PREFIX="/dev/vcom"
 LOG_FILE_PREFIX="/tmp/socat"
+ARM_LINUX="$DIR_IMGS/linux-kernel-arm64-xenial"
 
 ORANGE_NAME="orange"
 ORANGE_SUBNET_IP=1
-ORANGE_QEMU="$DIR_IMGS/ubuntu-19.10-amd64-snapshot1.qcow2"
+#ORANGE_QEMU="$DIR_IMGS/ubuntu-19.10-amd64-snapshot1.qcow2"
+ORANGE_QEMU="$DIR_IMGS/ubuntu-19.10-amd64-closure-orange-enclave-gw.qcow2"
 ORANGE_GW_IP="10.0.${ORANGE_SUBNET_IP}.1"
 ORANGE_GW_PORT="12345"
 
 PURPLE_NAME="purple"
 PURPLE_SUBNET_IP=2
-PURPLE_QEMU="$DIR_IMGS/ubuntu-19.10-amd64-snapshot2.qcow2"
+#PURPLE_QEMU="$DIR_IMGS/ubuntu-19.10-amd64-snapshot2.qcow2"
+PURPLE_QEMU="$DIR_IMGS/ubuntu-19.10-arm64-closure-purple-enclave-gw.qcow2"
 PURPLE_GW_IP="10.0.${PURPLE_SUBNET_IP}.1"
 PURPLE_GW_PORT="12346"
 
@@ -94,11 +97,9 @@ function enclave_config {
             ;;
         aarch64)
             # XXX: Fix args correctly, needs to come from outside
-            QQ=$DIR_IMGS/ubuntu-19.10-arm64-snapshot2.qcow2
-            KK=$DIR_IMGS/linux-kernel-arm64-xenial 
             sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
-              -drive file=$QQ,format=qcow2 \
-              -kernel $KK -append 'earlycon root=/dev/vda rw' \
+              -drive file=$PURPLE_QEMU,format=qcow2 \
+              -kernel $ARM_LINUX -append 'earlycon root=/dev/vda rw' \
               -netdev tap,id=unet0,ifname=qemutap0,script=no,downscript=no -device virtio-net-device,netdev=unet0 \
               -netdev tap,id=unet1,ifname=qemutap1,script=no,downscript=no -device virtio-net-device,netdev=unet1 \
               -netdev tap,id=unet2,ifname=qemutap2,script=no,downscript=no -device virtio-net-device,netdev=unet2 

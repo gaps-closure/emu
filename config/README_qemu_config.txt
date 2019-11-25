@@ -64,7 +64,7 @@ cd /home/closure
 mkdir -p netplans
 cp /etc/netplan/* netplans/
 echo "PASTE" > orange-netcfg.yaml
-cat orange-netcfg.yaml | sed 's:1\.:2\.:' > tt
+cat orange-netcfg.yaml | sed 's:1\.:2\.:' | sed 's:ens3:eth0:' | sed 's:ens4:eth1:' | sed 's:ens5:eth2:' > purple-netcfg.yaml
 
 # ssh public key
 amcauley@workhorse:~/gaps/top-level/emulator/conifg$ ssh-keygen -f id_rsa -C ""
