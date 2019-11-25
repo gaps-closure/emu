@@ -339,9 +339,10 @@ date --set "24 Nov 2019 11:13:00"
 ```
 
 3) Load Packages into VM
-XXX: Check what may have been missed by running apt list --installed on the working snapshots
-XXX: Most can be added to the debootstrap --include list
-XXX; Also there is room to remove needless packages here using --exclude, be careful not to exclude essential packages
+
+* Check what may have been missed by running apt list --installed on the working snapshots
+* Most can be added to the debootstrap --include list
+* Also there is room to remove needless packages here using --exclude, be careful not to exclude essential packages
 
 ```
 apt update
