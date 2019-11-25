@@ -386,13 +386,14 @@ amcauley@workhorse:~/gaps/top-level/emulator$ cat config/qemu_config_netplan_cor
 echo "PASTE" > core_arm_netcfg.yaml
 ```
 
-6) Put the closure user public key into VM (and create the private-public key pair if not already in the emulator config directory)
+6) Put the closure user public key into VM (and create the private-public key pair if not already in the emulator config directory). Remove known hosts file (was only present on AMD VM).
 ```
 amcauley@workhorse:~/gaps/top-level/emulator/conifg$ ssh-keygen -f id_rsa -C ""
 amcauley@workhorse:~/gaps/top-level/emulator/conifg$ cat id_rsa.pub 
 cd /home/closure
 mkdir -p .ssh
 echo "PASTE" >> .ssh/authorized_keys
+rm .ssh/known_hosts
 ```
 
 7) Close VM
