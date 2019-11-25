@@ -338,7 +338,7 @@ vi /etc/hosts
 date --set "24 Nov 2019 11:13:00"
 ```
 
-3) Load Packages into VM
+4) Load Packages into VM
 ```
 apt update
 apt upgrade
@@ -360,7 +360,7 @@ apt install -y tshark
 * Most can be added to the debootstrap --include list
 * Also there is room to remove needless packages here using --exclude, be careful not to exclude essential packages
 
-4) Load Other Packages into VM
+5) Load Other Packages into VM
 ```
 cd /tmp
 wget https://github.com/hdhaussy/zc/archive/master.zip
@@ -372,7 +372,17 @@ cd /tmp
 rm -rf zc-master master.zip
 ```
 
-5) Copy IP addressing Plans (but not yet configure) into the VM. The plans are in the emulator/conifg directory. Note the order and names of interfaces are different for different architecture (e.g., x86 'config/qemu_config_netplan_core_x86.txt' vs ARM 'qemu_config_netplan_core_arm.txt'). All IP addresses assume the node is an orange envlave gateway. These will be customized when coniguring for specific CORE nodes - as described in the next (Create Node Snapshots) section.
+6) Put the closure user public key into VM (and create the private-public key pair if not already in the emulator config directory). Remove known hosts file (was only present on AMD VM).
+```
+amcauley@workhorse:~/gaps/top-level/emulator/conifg$ ssh-keygen -f id_rsa -C ""
+amcauley@workhorse:~/gaps/top-level/emulator/conifg$ cat id_rsa.pub 
+cd /home/closure
+mkdir -p .ssh
+echo "PASTE" >> .ssh/authorized_keys
+rm .ssh/known_hosts
+```
+
+7) Copy IP addressing Plans (but not yet configure) into the VM. The plans are in the emulator/conifg directory. Note the order and names of interfaces are different for different architecture (e.g., x86 'config/qemu_config_netplan_core_x86.txt' vs ARM 'qemu_config_netplan_core_arm.txt'). All IP addresses assume the node is an orange envlave gateway. These will be customized when coniguring for specific CORE nodes - as described in the next (Create Node Snapshots) section.
 
 ```
 cd /home/closure
@@ -386,17 +396,7 @@ amcauley@workhorse:~/gaps/top-level/emulator$ cat config/qemu_config_netplan_cor
 echo "PASTE" > core_arm_netcfg.yaml
 ```
 
-6) Put the closure user public key into VM (and create the private-public key pair if not already in the emulator config directory). Remove known hosts file (was only present on AMD VM).
-```
-amcauley@workhorse:~/gaps/top-level/emulator/conifg$ ssh-keygen -f id_rsa -C ""
-amcauley@workhorse:~/gaps/top-level/emulator/conifg$ cat id_rsa.pub 
-cd /home/closure
-mkdir -p .ssh
-echo "PASTE" >> .ssh/authorized_keys
-rm .ssh/known_hosts
-```
-
-7) Close VM
+8) Close VM
 ```
 sudo shutdown -h 0
 ```
@@ -469,9 +469,18 @@ sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
   -netdev tap,id=unet0,ifname=qemutap0,script=no,downscript=no -device virtio-net-device,netdev=unet0 \
   -netdev tap,id=unet1,ifname=qemutap1,script=no,downscript=no -device virtio-net-device,netdev=unet1 \
   -netdev tap,id=unet2,ifname=qemutap2,script=no,downscript=no -device virtio-net-device,netdev=unet2
+```
 
-# From CORE node, you can ssh into QEMU VM using:
-ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1
+From CORE node, you can ssh into QEMU VM using:
+```
+ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
+  sudo socat -d -d -lf ${LOG} \
+  pty,link=${DEV_PTY},raw,ignoreeof,unlink-close=0,echo=0 \
+  tcp:${GW_IP}:${GW_PORT},ignoreeof &
+sleep 1
+ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
+  sudo chmod 666 ${DEV_PTY}
+```
 
 # From the host, you can invokve a vcmd into the CORE node, and then ssh/scp into QEMU node to run a command / add a file
 # WE can install the application .deb package for the scenario this way using dpkg -i (via ssh and vcmd) 
