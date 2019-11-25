@@ -112,7 +112,7 @@ Code to be specified.
 
 # Dependencies Installation and QEMU VM Disk Image Creation and OS Installation Notes
 
-We have developed a non-interactive script that automatically builds QEMU VM images, and installs Ubuntu, and configures it.The earlier process was manual, and is documented below as some of the information could be useful. The scripts are easier to use. We save the kernels and a golden copy of the QEMU VM images. We take snapshots of the images and customize them for use wihtin the emulator.  The script can optionally also install pre-requisites and NRL CORE on the build server.
+We have developed a non-interactive script that automatically builds QEMU VM images, and installs Ubuntu, and configures it. We save the kernels and a golden copy of the QEMU VM images. We take snapshots of the images and customize them for use wihtin the emulator.  The script can optionally also install pre-requisites and NRL CORE on the build server.
 
 ```
 ./build_qemu_vm_images.sh -h
@@ -132,6 +132,8 @@ We have developed a non-interactive script that automatically builds QEMU VM ima
 ./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial
 
 ```
+
+The scripted process above is much easier to use. Our initial process was manual, and details are documented below as some of the information could be useful.
 
 ## Install prerequisites on build and run machine
 
@@ -500,9 +502,8 @@ However, if a full hardware testbed is available to us, the need for full-featur
     * Need to check on newer host OS if we can use newer kernels, and if we can put it within rootfs of the VM
     * One other issue is it does not set date correctly
 3. Fully automated (non-interactive) script for building VM images for specific arch and distro
-    * PARTIAL, documented details for ARM64/eoan build using debootstrap, need to script using bash,python-expect,sed
-    * Need to bring in additional packages needed for scenario, configure hsotname, static IP etc.
-    * Remove unnecessary packages and services to speed up booting
+    * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
+    * Need to do additional custom configuration: fstab, closure user, netplan, apt-repos, additional packages, ...
 4. Create a sample IMN file using CORE GUI
     * DONE, for 2 enclave scenario, but will be refined as needed
 5. Implement sample TA1 device emulators (pass,BITW,BKEND)
