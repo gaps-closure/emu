@@ -92,22 +92,37 @@ prep_build_machine() {
 
 fetch_kernel() {
   KRNL="dists/${KDIST}/main/installer-${QARCH}/current/images/netboot/ubuntu-installer/${QARCH}/linux"
+  INRD="dists/${KDIST}/main/installer-${QARCH}/current/images/netboot/ubuntu-installer/${QARCH}/initrd.gz"
   case $QARCH in
     amd64) KURL="http://archive.ubuntu.com/ubuntu" ;;
     arm64) KURL="http://ports.ubuntu.com/ubuntu-ports" ;;
     *) usage_exit "No support for $QARCH" ;;
   esac
   echo "Fetching boot kernel"
-  rm -f linux
+  rm -f linux initrd.gz
   wget $KURL/$KRNL
+  wget $KURL/$INRD
   mv linux linux-kernel-$QARCH-$KDIST
+  mv initrd.gz linux-initrd-$QARCH-$KDIST.gz
 }
 
 debootstrap_first_stage() {
   echo "Commencing debootstrap first stage"
-  INCLUDES="socat zip unzip ssh"
+  case $QARCH in
+    amd64) 
+      INCLUDES="socat zip unzip ssh net-tools tshark libzmq3-dev build-essential linux-image-generic grub2-common grub-pc"
+      ;;
+    arm64)
+      INCLUDES="socat zip unzip ssh net-tools tshark libzmq3-dev build-essential"
+      ;;
+    *) 
+      usage_exit "No support for $QARCH" 
+      ;;
+  esac
+  echo "Fetching boot kernel"
   sudo debootstrap \
     --verbose --foreign --arch=$QARCH \
+    --components=main,universe \
     --keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg \
     --include="$INCLUDES" \
     $UDIST rootfs
@@ -148,21 +163,21 @@ def spl_print(lines):
   for y in l[:-1]: 
     if y!=b'': print(y.decode('utf-8'))
   sys.stdout.write(l[-1].decode('utf-8'))
-child = pexpect.spawn('$QEMUCMD')
-child.expect('\n# ',timeout=1800)
-spl_print(child.before+child.after)
+p = pexpect.spawn('$QEMUCMD')
+p.expect('\n# ',timeout=1800)
+spl_print(p.before+p.after)
 print('\nBooted, invoking debootstrap')
-child.sendline('/debootstrap/debootstrap --second-stage')
+p.sendline('/debootstrap/debootstrap --second-stage')
 i=1
 while i!=0:
-  i = child.expect(['\n# ','I: Unpacking ','I: Configuring'],timeout=1800)
-  spl_print(child.before+child.after)
+  i = p.expect(['\n# ','I: Unpacking ','I: Configuring'],timeout=1800)
+  spl_print(p.before+p.after)
 print('\nCompleted, second stage')
 END
 }
 
 make_golden_cow() {
-  QFILE="ubuntu-${QARCH}-${UDIST}-qemu.qcow2"
+  QFILE="ubuntu-${QARCH}-${UDIST}-qemu.qcow2.virgin"
   qemu-img convert -f raw -O qcow2 rootfs.img rootfs.qcow2
   rm -f rootfs.img
   mv rootfs.qcow2 $QFILE
@@ -171,25 +186,50 @@ make_golden_cow() {
 
 configure_golden_cow() {
   QFILE="ubuntu-${QARCH}-${UDIST}-qemu.qcow2"
+  HNAME="ubuntu-${QARCH}"
+  echo "Making copy $QFILE of virgin image for updating"
+  cp ${QFILE}.virgin ${QFILE} 
   start_qemu_initshell "file=$QFILE,format=qcow2"
   python3 - <<END
 import os
 import sys
 import pexpect
+
 def spl_print(lines): 
   l = lines.splitlines() 
   for y in l[:-1]: 
     if y!=b'': print(y.decode('utf-8'))
   sys.stdout.write(l[-1].decode('utf-8'))
-child = pexpect.spawn('$QEMUCMD')
-child.expect('\n# ',timeout=1800)
-spl_print(child.before+child.after)
+
+def do_cmd(p,cmd=None):
+  if cmd is not None: p.sendline(cmd)
+  p.expect('\n# ',timeout=1800)
+  spl_print(p.before+p.after)
+
+p = pexpect.spawn('$QEMUCMD')
+do_cmd(p)
 print('\nBooted, configuring system')
 
+if "$QARCH" == 'amd64':
+  do_cmd(p, 'echo "/dev/sda / ext4 relatime,errors=remount-ro 0 1" >> /etc/fstab')
+  do_cmd(p, 'cat > /etc/netplan/config.yaml <<YAMEND\nnetwork:\n  version: 2\n  renderer: networkd\n  ethernets:\n    ens3:\n      dhcp4: true\nYAMEND\n')
+  do_cmd(p, 'netplan generate')
+elif "$QARCH" == 'arm64':
+  do_cmd(p, 'echo "/dev/vda / ext4 relatime,errors=remount-ro 0 1" >> /etc/fstab')
+  do_cmd(p, 'cat > /etc/netplan/config.yaml <<YAMEND\nnetwork:\n  version: 2\n  renderer: networkd\n  ethernets:\n    eth0:\n      dhcp4: true\nYAMEND\n')
+  do_cmd(p, 'netplan generate')
+else:
+  raise Exception('Unsupported architecture')
 
-child.sendline('# additional commands here')
-child.expect('\n# ',timeout=1800)
-spl_print(child.before+child.after)
+do_cmd(p, 'echo $HNAME > /etc/hostname')
+do_cmd(p, 'echo "127.0.1.1 $HNAME" > /etc/hosts')
+do_cmd(p, 'adduser closure --gecos "" --disabled-password')
+do_cmd(p, 'echo "closure:closure" | chpasswd')
+do_cmd(p, 'addgroup closure sudo')
+do_cmd(p, 'echo "closure ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers')
+do_cmd(p, 'sync;sync')
+
+do_cmd(p, '# Additional commands here, maybe make image bootable?')
 print('\nCompleted configuration')
 END
 }
