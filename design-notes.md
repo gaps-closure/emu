@@ -127,9 +127,13 @@ We have developed a non-interactive script that automatically builds QEMU VM ima
 # -k KDIST  Ubuntu distro for kernel [xenial(default),<any>]
 
 # For making an AMD64 image
-./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan
+./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G
+# Perform post-install configuration
+./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G -u
+
 # ARM64 requires use of an older kernel
-./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial
+./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G
+./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G -u
 
 ```
 
