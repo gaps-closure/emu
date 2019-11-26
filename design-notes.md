@@ -139,7 +139,7 @@ We have developed a non-interactive script that automatically builds QEMU VM ima
 
 The scripted process above is much easier to use. Our initial process was manual, and details are documented below as some of the information could be useful.
 
-## Install prerequisites on build and run machine
+## Install prerequisites on build and run machine (DEPRECATED)
 
 ```
 # Assumes Ubuntu Linux (preferably 19.10)
@@ -163,7 +163,7 @@ dpkg -i core_python3_5.5.2_amd64.deb
 sudo -H pip3 install pexpect
 ```
 
-## VM Building Approach #1: Building images from ISO
+## VM Building Approach #1: Building images from ISO (DEPRECATED)
 ```
 # Download ISO live-server images for Ubuntu 19.10 for both amd64 and arm64
 # from https://ubuntu.com/download/server and https://ubuntu.com/download/server/arm
@@ -210,7 +210,7 @@ qemu-system-aarch64 \
 # XXX: Process never went beyond splash screen
 ```
 
-## VM Building Approach #2: Using debootstrap
+## VM Building Approach #2: Using debootstrap (DEPRECATED)
 
 For ARM64, we explored a more scriptable (using bash, sed, python-expect, etc,.) approach based on debootstrap. We expect the process can be replicated for x86, but untested.
 
@@ -313,7 +313,9 @@ child.sendline(mypassword)
 # Creation of QEMU Snapshots for each CORE node
 The creation of per-node snapshots for each architecture is done as a two stage process.  Note that the starting of the QEMU with the correct coniguration is done by the  'run_qemu.sh' script.
 
-## A) Enhance each architecture with additional software and configuration
+** Everything until Step 5 except date setting has been moved into the VM Builder to golden image. Perhaps Step 6 (instructions appear to be broken) can also be subsumed into the builder. Suggest moving steps 5,6,7 which are emulator-specific (even zc code may change) into Section B and do on the snapshot. Section B needs to be scripted. **
+
+## A) Enhance each architecture with additional software and configuration (DEPRECATED)
 
 For each architecture, perorm the following conigurations: 
 
