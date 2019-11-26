@@ -22,11 +22,21 @@ You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created.  T
 Optionally, take a test snapshot, boot into it, and login as closure user.
 
 ```
+cd ./build
 qemu-img create -f qcow2 -b ubuntu-amd64-eoan-qemu.qcow2 test-snapshot.qcow2
 sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=test-snapshot.qcow2,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append "earlycon console=ttyS0 root=/dev/sda rw"
 ```
 
-XXX: Move golden images to correct place and make read-only
+From the build Move golden images to correct place and make read-only
+```
+cd ./build
+sudo cp linux-kernel-amd64-eoan /IMAGES
+sudo cp linux-kernel-arm64-xenial /IMAGES
+sudo ubuntu-amd64-eoan-qemu.qcow2 /IMAGES
+sudo ubuntu-arm64-eoan-qemu.qcow2 /IMAGES
+sudo chmod ugo-wx /IMAGES/linux-kernel-*
+sudo chmod ugo-wx /IMAGES/ubuntu-*.qcow2
+```
 
 XXX: Create snapshots as needed for emulation
 
