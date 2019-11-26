@@ -268,7 +268,7 @@ qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024   -hda rootfs.img
 # Login as user closure
 sudo bash
 
-vi /etc/network/config.yaml
+vi /etc/netplan/config.yaml
 
 # Add following to config.yaml
 network:
