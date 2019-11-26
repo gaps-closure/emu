@@ -488,9 +488,8 @@ ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
   sudo chmod 666 ${DEV_PTY}
 ```
 
-# From the host, you can invokve a vcmd into the CORE node, and then ssh/scp into QEMU node to run a command / add a file
-# WE can install the application .deb package for the scenario this way using dpkg -i (via ssh and vcmd) 
-# vcmd syntax?
+From the host, you can invoke a vcmd into the CORE node, and then ssh/scp into QEMU node to run a command / add a file.
+We can install the application .deb package for the scenario this way using dpkg -i (via ssh and vcmd).
 
 ```
 
