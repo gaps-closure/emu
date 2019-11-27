@@ -226,16 +226,15 @@ However, if a full hardware testbed is available to us, the need for full-featur
 0. Documentation
     * PARTIAL, this document
     * Figures needs to be updated, addresses should match sample scenario 
-    * As scripts are developed, move code segments into actual scripts and only discuss functionality and usage
+    * Move code segments into actual scripts, reference, and discuss only functionality and usage
 1. Prepare QEMU image for x86 with Ubuntu 19.10
     * DONE, image saved under workhorse:/IMAGES, may be refined as needed (e.g., more software)
 2. Prepare QEMU image for ARM with Ubuntu 19.10
     * DONE, using debootstrap and external xenial kernel
     * Need to check on newer host OS if we can use newer kernels, and if we can put it within rootfs of the VM
-    * One other issue is it does not set date correctly
 3. Fully automated (non-interactive) script for building VM images for specific arch and distro
     * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
-    * PARTIAL, additional script to customize the snapshot for each node in the emulation scenario (need to add zmqcat, configure ssh key, configure netplan, additional CLOSURE software)
+    * PARTIAL, additional script to customize the snapshot for each node in the emulation scenario (*need to add zmqcat, configure ssh key, configure netplan, additional CLOSURE software*)
 4. Create a sample IMN file using CORE GUI
     * DONE, for 2 enclave scenario, but will be refined as needed
 5. Implement sample TA1 device emulators (pass,BITW,BKEND)
@@ -243,17 +242,17 @@ However, if a full hardware testbed is available to us, the need for full-featur
     * BKEND fully worked out, not tested
     * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
     * must include stats and wire-shark support
-6. Protoype the end-to-end QEMU build and sample scenario
+6. Protoype the end-to-end QEMU build and sample scenario manually
     * PARTIAL
+    * Done end-to-end comms over emulated BITW with some manual configruation steps
     * Done developing/testing plumbing of QEMU with CORE, needs to be added to scenario script
     * Done adding command scripting interface (redir ssh port, use vmcd and ssh), to be integrated
-    * Done end-to-end comms over emulated BITW with some manual configruation steps
 7. Prepare a sample partitioned program 
     * Include install script (e.g., deb package)
     * Include systemd scripts that will start application on boot and respawn on failure
     * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
 8. Create a high level configuration file containing:
-    * PARTIAL, Mike is working on this
+    * PARTIAL, Mike is working on this, currently program, JSON spec would be preferable as it can be spit out by CLOSURE tools
     * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
     * TA1 device capabilities and type, e.g.,
     * ID (pass-through)
@@ -455,12 +454,12 @@ Use the -rtc to set date on the VM, otherwise things like apt update may fail du
 sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=ubuntu-amd64-eoan-qemu.qcow2,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append "earlycon console=ttyS0 root=/dev/sda rw" -rtc base=`date --iso-8601=seconds | sed -e 's/ /T/'`
 ```
 
-# Creation of QEMU Snapshots for each CORE node
+## Creation of QEMU Snapshots for each CORE node
 The creation of per-node snapshots for each architecture is done as a two stage process.  Note that the starting of the QEMU with the correct coniguration is done by the  'run_qemu.sh' script.
 
 * Steps 1-4 except date setting (which is moved to invocation) has been moved into the VM Builder to golden image. Suggest moving steps 5,6,7 which are emulator-specific (even zc code may change) and run it on separate snapshot for each node. Separate Section B is not needed. All these will be done by `emulator_configure.sh` invoked by scenario generator. *
 
-## A) Enhance each architecture with additional software and configuration (DEPRECATED)
+### A) Enhance each architecture with additional software and configuration (DEPRECATED)
 
 For each architecture, perorm the following conigurations: 
 
@@ -553,7 +552,7 @@ echo "PASTE" > core_arm_netcfg.yaml
 sudo shutdown -h 0
 ```
 
-## B) Create Node Snapshots Needed for Scenario 
+### B) Create Node Snapshots Needed for Scenario 
 Having added all the packages and conigurations to the QEMU image, we are now ready to add the scenario specific static IP configuration.  Unfortunately user networking causes problems in the mixed architecture CORE scenario, so we use it only during building. Below shows coniguration of an x86 for the orange enclave gateway node and an ARM for the purple enclave gateway node. 
 
 ```
