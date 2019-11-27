@@ -81,7 +81,7 @@ prep_build_machine() {
       build-essential libssl-dev libffi-dev \
       python3 python3-pip python3-dev libev-dev python3-venv \
       tcl8.6 tk8.6 libtk-img quagga \
-      ubuntu-dev-tools qemu qemu-efi qemu-user-static
+      ubuntu-dev-tools qemu qemu-efi qemu-user-static qemu-system-arm
     sudo -H pip3 install --upgrade pip
     sudo -H pip3 install pexpect
     if [ $NRLCORE == "yes" ]; then
