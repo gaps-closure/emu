@@ -520,23 +520,19 @@ However, if a full hardware testbed is available to us, the need for full-featur
     * One other issue is it does not set date correctly
 3. Fully automated (non-interactive) script for building VM images for specific arch and distro
     * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
-    * Need to do additional custom configuration: fstab, closure user, netplan, apt-repos, additional packages, ...
+    * PARTIAL, additional script to customize the snapshot for each node in the emulation scenario (need to add zmqcat, configure ssh key, configure netplan, additional CLOSURE software)
 4. Create a sample IMN file using CORE GUI
     * DONE, for 2 enclave scenario, but will be refined as needed
 5. Implement sample TA1 device emulators (pass,BITW,BKEND)
     * PARTIAL, passthrough and BITW plumbing implemented and tested
     * BKEND fully worked out, not tested
-    * add scripting to scenario
     * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
     * must include stats and wire-shark support
 6. Protoype the end-to-end QEMU build and sample scenario
     * PARTIAL
     * Done developing/testing plumbing of QEMU with CORE, needs to be added to scenario script
     * Done adding command scripting interface (redir ssh port, use vmcd and ssh), to be integrated
-    * Decided there will be no back-channel for direct software install over internet, must be provisioned or
-      added using local management interface
-    * Automated scripting of BKEND vs. BITW remains
-    * QEMU does not hang on netowrk config, but faster boot (e.g., fewer services) of QEMU would be nice
+    * Done end-to-end comms over emulated BITW with some manual configruation steps
 7. Prepare a sample partitioned program 
     * Include install script (e.g., deb package)
     * Include systemd scripts that will start application on boot and respawn on failure
