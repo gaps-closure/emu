@@ -207,9 +207,9 @@ From the host, you can invoke a vcmd into the CORE node, and then ssh/scp into Q
 We can install the application .deb package for the scenario this way using dpkg -i (via ssh and vcmd).
 
 ```
-
 ## GAPS Emulator installation instructions
 To be added.
+```
 
 ## Future Work
 ### Realistic Guard Emulation 
@@ -272,11 +272,13 @@ However, if a full hardware testbed is available to us, the need for full-featur
 10. Basic GUI for the high-level config?
     * Nice to have, defer to Phase 2
 
+
 # APPENDIX 1: Manual Dependency Installation, QEMU VM image building, and configuration (DEPRECATED)
 
-*These steps have been scripted (or about to be scripted soon), please use the scripts.*
+These steps have been scripted (or about to be scripted soon), please use the scripts.
 
 ## Install prerequisites on build and run machine (DEPRECATED)
+
 
 ```
 # Assumes Ubuntu Linux (preferably 19.10)
