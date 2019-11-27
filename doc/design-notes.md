@@ -137,7 +137,144 @@ We have developed a non-interactive script that automatically builds QEMU VM ima
 
 ```
 
-The scripted process above is much easier to use. Our initial process was manual, and details are documented below as some of the information could be useful.
+The scripted process above is much easier to use and less error-prone. Our initial process was manual, and details are documented at the end as some of the information could be useful during development. Also see [Image Management Process](image-management-process.md) for more information.
+
+# Plumbing QEMU node inside CORE node for emulator 
+Plumbing the QEMU node to the CORE node is done as follows. This will need to be scripted as well.
+
+```
+# Inside the CORE node
+
+# Setup for cross-domain link
+ip addr flush dev eth1
+tunctl -t qemutap0
+brctl addbr br0
+brctl addif br0 qemutap0
+brctl addif br0 eth1
+ifconfig qemutap0 up
+ifconfig br0 up
+
+# Setup for intra-domain link
+ip addr flush dev eth0
+tunctl -t qemutap1
+brctl addbr br1
+brctl addif br1 qemutap1
+brctl addif br1 eth0
+ifconfig qemutap1 up
+ifconfig br1 up
+
+# Setup for management link, same on all nodes
+tunctl -t qemutap2
+tunctl -t qemutap2
+ip link set qemutap2 up
+ip addr add 10.200.0.2 dev qemutap2
+ip route add 10.200.0.0/24 dev qemutap2
+```
+
+```
+# Start QEMU node within CORE node for AMD64, orange
+sudo qemu-system-x86_64 -nographic -enable-kvm -M virt -m 1G -smp 1 \
+  -drive file=ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2 \
+  -net nic -net tap,ifname=qemutap0,script=no,downscript=no \
+  -net nic -net tap,ifname=qemutap1,script=no,downscript=no \
+  -net nic -net tap,ifname=qemutap2,script=no,downscript=no
+
+# Symbolically link linux-kernel-arm64-xenial from /IMAGES to your working directory
+
+# Start QEMU node within CORE node for ARM64, purple
+# Note need for external kernel and root device is /dev/vda
+# Serial console is ttyS0 in AMD64, but ttyAMA0 in ARM64
+sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
+  -drive file=ubuntu-19.10-arm64-snapshot1.qcow2,format=qcow2 \
+  -kernel /linux-kernel-arm64-xenial -append 'earlycon root=/dev/vda rw' \
+  -netdev tap,id=unet0,ifname=qemutap0,script=no,downscript=no -device virtio-net-device,netdev=unet0 \
+  -netdev tap,id=unet1,ifname=qemutap1,script=no,downscript=no -device virtio-net-device,netdev=unet1 \
+  -netdev tap,id=unet2,ifname=qemutap2,script=no,downscript=no -device virtio-net-device,netdev=unet2
+```
+
+From CORE node, you can ssh into QEMU VM using:
+```
+ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
+  sudo socat -d -d -lf ${LOG} \
+  pty,link=${DEV_PTY},raw,ignoreeof,unlink-close=0,echo=0 \
+  tcp:${GW_IP}:${GW_PORT},ignoreeof &
+sleep 1
+ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
+  sudo chmod 666 ${DEV_PTY}
+```
+
+From the host, you can invoke a vcmd into the CORE node, and then ssh/scp into QEMU node to run a command / add a file.
+We can install the application .deb package for the scenario this way using dpkg -i (via ssh and vcmd).
+
+```
+
+## GAPS Emulator installation instructions
+To be added.
+
+## Future Work
+### Realistic Guard Emulation 
+
+The initial emulator will use a simple line-oriented grep/sed style filter to do a proof-of-concept guard.  Looking ahead, we anticipate:
+    * Being able to integrate TA1 hardware in the loop into our emulation
+    * Being able to include a Linux device driver that emulates the TA1 devices more faithfully
+    * A more full-featured emulation of a guard using Linux kernel networking capabilities, for example, [using tc and eBPF] (https://archive.fosdem.org/2016/schedule/event/ebpf/attachments/slides/1159/export/events/attachments/ebpf/slides/1159/ebpf.pdf)
+    * A variant of the above approach is to target the eBPF or P4 solution to SmartNIC hardware
+    
+However, if a full hardware testbed is available to us, the need for full-featured emulation of guard functionality is diminished.
+
+# Todo
+0. Documentation
+    * PARTIAL, this document
+    * Figures needs to be updated, addresses should match sample scenario 
+    * As scripts are developed, move code segments into actual scripts and only discuss functionality and usage
+1. Prepare QEMU image for x86 with Ubuntu 19.10
+    * DONE, image saved under workhorse:/IMAGES, may be refined as needed (e.g., more software)
+2. Prepare QEMU image for ARM with Ubuntu 19.10
+    * DONE, using debootstrap and external xenial kernel
+    * Need to check on newer host OS if we can use newer kernels, and if we can put it within rootfs of the VM
+    * One other issue is it does not set date correctly
+3. Fully automated (non-interactive) script for building VM images for specific arch and distro
+    * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
+    * PARTIAL, additional script to customize the snapshot for each node in the emulation scenario (need to add zmqcat, configure ssh key, configure netplan, additional CLOSURE software)
+4. Create a sample IMN file using CORE GUI
+    * DONE, for 2 enclave scenario, but will be refined as needed
+5. Implement sample TA1 device emulators (pass,BITW,BKEND)
+    * PARTIAL, passthrough and BITW plumbing implemented and tested
+    * BKEND fully worked out, not tested
+    * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
+    * must include stats and wire-shark support
+6. Protoype the end-to-end QEMU build and sample scenario
+    * PARTIAL
+    * Done developing/testing plumbing of QEMU with CORE, needs to be added to scenario script
+    * Done adding command scripting interface (redir ssh port, use vmcd and ssh), to be integrated
+    * Done end-to-end comms over emulated BITW with some manual configruation steps
+7. Prepare a sample partitioned program 
+    * Include install script (e.g., deb package)
+    * Include systemd scripts that will start application on boot and respawn on failure
+    * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
+8. Create a high level configuration file containing:
+    * PARTIAL, Mike is working on this
+    * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
+    * TA1 device capabilities and type, e.g.,
+    * ID (pass-through)
+    * BITW style
+    * Bookends style
+    * Specific guard functions supported on device
+    * Software topology and mappings – names of executables and which node they will run on
+9. From the configuration generate IMN + scripting for GAPS scenario
+    * PARTIAL, Mike is working on this
+    * Read in configuration file
+    * Instantiate CORE nodes, do the necessary internal plumbing (for either BITW or Bookends style), and deploy application
+    * Instantiate QEMU nodes and do needed plumbing
+    * Manage GAPS components (application, gpsd, TA1 device emulation)
+    * Configure TA1 device (control API)
+    * Preferably, write the above functionality as a Python library (not a monolithic script)
+10. Basic GUI for the high-level config?
+    * Nice to have, defer to Phase 2
+
+# APPENDIX 1: Manual Dependency Installation, QEMU VM image building, and configuration (DEPRECATED)
+
+*These steps have been scripted (or about to be scripted soon), please use the scripts.*
 
 ## Install prerequisites on build and run machine (DEPRECATED)
 
@@ -319,7 +456,7 @@ sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=ubuntu-a
 # Creation of QEMU Snapshots for each CORE node
 The creation of per-node snapshots for each architecture is done as a two stage process.  Note that the starting of the QEMU with the correct coniguration is done by the  'run_qemu.sh' script.
 
-** Everything until Step 5 except date setting has been moved into the VM Builder to golden image. Perhaps Step 6 (instructions appear to be broken) can also be subsumed into the builder. Suggest moving steps 5,6,7 which are emulator-specific (even zc code may change) into Section B and do on the snapshot. Section B needs to be scripted. **
+* Steps 1-4 except date setting (which is moved to invocation) has been moved into the VM Builder to golden image. Suggest moving steps 5,6,7 which are emulator-specific (even zc code may change) and run it on separate snapshot for each node. Separate Section B is not needed. All these will be done by `emulator_configure.sh` invoked by scenario generator. *
 
 ## A) Enhance each architecture with additional software and configuration (DEPRECATED)
 
@@ -348,6 +485,7 @@ vi /etc/hosts
 127.0.1.1    ubuntu-arm
 
 date --set "24 Nov 2019 11:13:00"
+# XXX: No, use -rtc option during qemu invocation instead of above
 ```
 
 4) Load Packages into VM
@@ -428,137 +566,3 @@ amcauley@workhorse:~/gaps/top-level/emulator$ ./run_qemu.sh arm purple-enclave-g
   root@ubuntu-arm:/home/closure# rm /etc/netplan/*
   root@ubuntu-arm:/home/closure# cat netplans/core_arm_netcfg.yaml | sed 's:1\.:2\.:' > /etc/netplan/core_arm_netcfg.yaml
 ```
-
-
-# Plumbing QEMU node inside CORE node for emulator 
-Plumbing the QEMU node to the CORE node is done as follows. This will need to be scripted as well.
-
-```
-# Inside the CORE node
-
-# Setup for cross-domain link
-ip addr flush dev eth1
-tunctl -t qemutap0
-brctl addbr br0
-brctl addif br0 qemutap0
-brctl addif br0 eth1
-ifconfig qemutap0 up
-ifconfig br0 up
-
-# Setup for intra-domain link
-ip addr flush dev eth0
-tunctl -t qemutap1
-brctl addbr br1
-brctl addif br1 qemutap1
-brctl addif br1 eth0
-ifconfig qemutap1 up
-ifconfig br1 up
-
-# Setup for management link, same on all nodes
-tunctl -t qemutap2
-tunctl -t qemutap2
-ip link set qemutap2 up
-ip addr add 10.200.0.2 dev qemutap2
-ip route add 10.200.0.0/24 dev qemutap2
-```
-
-```
-# Start QEMU node within CORE node for AMD64, orange
-sudo qemu-system-x86_64 -nographic -enable-kvm -M virt -m 1G -smp 1 \
-  -drive file=ubuntu-19.10-amd64-snapshot1.qcow2,format=qcow2 \
-  -net nic -net tap,ifname=qemutap0,script=no,downscript=no \
-  -net nic -net tap,ifname=qemutap1,script=no,downscript=no \
-  -net nic -net tap,ifname=qemutap2,script=no,downscript=no
-
-# Symbolically link linux-kernel-arm64-xenial from /IMAGES to your working directory
-
-# Start QEMU node within CORE node for ARM64, purple
-# Note need for external kernel and root device is /dev/vda
-# Serial console is ttyS0 in AMD64, but ttyAMA0 in ARM64
-sudo qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
-  -drive file=ubuntu-19.10-arm64-snapshot1.qcow2,format=qcow2 \
-  -kernel /linux-kernel-arm64-xenial -append 'earlycon root=/dev/vda rw' \
-  -netdev tap,id=unet0,ifname=qemutap0,script=no,downscript=no -device virtio-net-device,netdev=unet0 \
-  -netdev tap,id=unet1,ifname=qemutap1,script=no,downscript=no -device virtio-net-device,netdev=unet1 \
-  -netdev tap,id=unet2,ifname=qemutap2,script=no,downscript=no -device virtio-net-device,netdev=unet2
-```
-
-From CORE node, you can ssh into QEMU VM using:
-```
-ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
-  sudo socat -d -d -lf ${LOG} \
-  pty,link=${DEV_PTY},raw,ignoreeof,unlink-close=0,echo=0 \
-  tcp:${GW_IP}:${GW_PORT},ignoreeof &
-sleep 1
-ssh -i /home/amcauley/gaps/top-level/emulator/config/id_rsa closure@10.200.0.1 \
-  sudo chmod 666 ${DEV_PTY}
-```
-
-From the host, you can invoke a vcmd into the CORE node, and then ssh/scp into QEMU node to run a command / add a file.
-We can install the application .deb package for the scenario this way using dpkg -i (via ssh and vcmd).
-
-```
-
-## GAPS Emulator installation instructions
-To be added.
-
-## Future Work
-### Realistic Guard Emulation 
-
-The initial emulator will use a simple line-oriented grep/sed style filter to do a proof-of-concept guard.  Looking ahead, we anticipate:
-    * Being able to integrate TA1 hardware in the loop into our emulation
-    * Being able to include a Linux device driver that emulates the TA1 devices more faithfully
-    * A more full-featured emulation of a guard using Linux kernel networking capabilities, for example, [using tc and eBPF] (https://archive.fosdem.org/2016/schedule/event/ebpf/attachments/slides/1159/export/events/attachments/ebpf/slides/1159/ebpf.pdf)
-    * A variant of the above approach is to target the eBPF or P4 solution to SmartNIC hardware
-    
-However, if a full hardware testbed is available to us, the need for full-featured emulation of guard functionality is diminished.
-
-# Todo
-0. Documentation
-    * PARTIAL, this document
-    * Figures needs to be updated, addresses should match sample scenario 
-    * As scripts are developed, move code segments into actual scripts and only discuss functionality and usage
-1. Prepare QEMU image for x86 with Ubuntu 19.10
-    * DONE, image saved under workhorse:/IMAGES, may be refined as needed (e.g., more software)
-2. Prepare QEMU image for ARM with Ubuntu 19.10
-    * DONE, using debootstrap and external xenial kernel
-    * Need to check on newer host OS if we can use newer kernels, and if we can put it within rootfs of the VM
-    * One other issue is it does not set date correctly
-3. Fully automated (non-interactive) script for building VM images for specific arch and distro
-    * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
-    * PARTIAL, additional script to customize the snapshot for each node in the emulation scenario (need to add zmqcat, configure ssh key, configure netplan, additional CLOSURE software)
-4. Create a sample IMN file using CORE GUI
-    * DONE, for 2 enclave scenario, but will be refined as needed
-5. Implement sample TA1 device emulators (pass,BITW,BKEND)
-    * PARTIAL, passthrough and BITW plumbing implemented and tested
-    * BKEND fully worked out, not tested
-    * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
-    * must include stats and wire-shark support
-6. Protoype the end-to-end QEMU build and sample scenario
-    * PARTIAL
-    * Done developing/testing plumbing of QEMU with CORE, needs to be added to scenario script
-    * Done adding command scripting interface (redir ssh port, use vmcd and ssh), to be integrated
-    * Done end-to-end comms over emulated BITW with some manual configruation steps
-7. Prepare a sample partitioned program 
-    * Include install script (e.g., deb package)
-    * Include systemd scripts that will start application on boot and respawn on failure
-    * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
-8. Create a high level configuration file containing:
-    * PARTIAL, Mike is working on this
-    * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
-    * TA1 device capabilities and type, e.g.,
-    * ID (pass-through)
-    * BITW style
-    * Bookends style
-    * Specific guard functions supported on device
-    * Software topology and mappings – names of executables and which node they will run on
-9. From the configuration generate IMN + scripting for GAPS scenario
-    * PARTIAL, Mike is working on this
-    * Read in configuration file
-    * Instantiate CORE nodes, do the necessary internal plumbing (for either BITW or Bookends style), and deploy application
-    * Instantiate QEMU nodes and do needed plumbing
-    * Manage GAPS components (application, gpsd, TA1 device emulation)
-    * Configure TA1 device (control API)
-    * Preferably, write the above functionality as a Python library (not a monolithic script)
-10. Basic GUI for the high-level config?
-    * Nice to have, defer to Phase 2
