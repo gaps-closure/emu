@@ -301,6 +301,7 @@ qemu-img create -f qcow2 -b /IMAGES/ubuntu-19.10-arm64-goldencopy.qcow2 ubuntu-1
 qemu-system-aarch64  -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=ubuntu-19.10-arm64-snapshot1.qcow2,format=qcow2   -kernel linux   -append 'earlycon root=/dev/vda rw' -netdev user,id=unet -device virtio-net-device,netdev=unet
 ```
 
+### Expect scripting
 In the foregoing, there are several interactive steps. One example is when we boot into qemu and wait for the shell prompt before running debootstrap second stage. Such cases can be scripted using pexpect as in the example below. See [pexpect docs](https://pexpect.readthedocs.io/en/stable/overview.html) for additional examples.
 ```
 #!/usr/bin/python3
@@ -308,6 +309,11 @@ import pexpect
 child = pexpect.spawn('scp foo user@example.com:.')
 child.expect('Password:')
 child.sendline(mypassword)
+```
+### Setting date on a QEMU VM
+Use the -rtc to set date on the VM, otherwise things like apt update may fail due to arbitrary old date.
+```
+sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=ubuntu-amd64-eoan-qemu.qcow2,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append "earlycon console=ttyS0 root=/dev/sda rw" -rtc base=`date --iso-8601=seconds | sed -e 's/ /T/'`
 ```
 
 # Creation of QEMU Snapshots for each CORE node
