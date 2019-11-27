@@ -96,11 +96,11 @@ spl_print(p.before+p.after)
 
 print('\nLogged in, configuring snapshot')
 
-# Fix date setting?
-# Add ssh key for remote access and configure .ssh directory perms
-# Install additional software including zmqcat
-# Apply scenario-node specific netplan to copy 
+# XXX: Add ssh key for remote access and configure .ssh directory perms
+# XXX: Apply scenario-node specific netplan to copy 
 # XXX: netplan for each node must come from scenario
+# XXX: Install additional software including zmqcat
+# XXX: Fix date setting?
 
 do_cmd(p, '# Additional commands here')
 print('\nCompleted configuration')
