@@ -223,6 +223,7 @@ elif "$QARCH" == 'arm64':
   do_cmd(p, 'echo "/dev/vda / ext4 relatime,errors=remount-ro 0 1" >> /etc/fstab')
   do_cmd(p, 'mkdir -p /etc/netplan')
   p.sendline('cat>/etc/netplan/config.yaml<<YAMEND\nnetwork:\n  version: 2\n  renderer: networkd\n  ethernets:\n    eth0:\n      dhcp4: true\nYAMEND\n')
+  p.expect('.+# ',timeout=1800)
   spl_print(p.before+p.after)
   do_cmd(p, 'ls -l /etc/netplan')
   do_cmd(p, 'netplan generate')
