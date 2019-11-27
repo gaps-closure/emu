@@ -36,8 +36,8 @@ From the build Move golden images to correct place and make read-only
 cd ./build
 sudo cp linux-kernel-amd64-eoan /IMAGES
 sudo cp linux-kernel-arm64-xenial /IMAGES
-sudo ubuntu-amd64-eoan-qemu.qcow2 /IMAGES
-sudo ubuntu-arm64-eoan-qemu.qcow2 /IMAGES
+sudo cp ubuntu-amd64-eoan-qemu.qcow2 /IMAGES
+sudo cp ubuntu-arm64-eoan-qemu.qcow2 /IMAGES
 sudo chmod ugo-wx /IMAGES/linux-kernel-*
 sudo chmod ugo-wx /IMAGES/ubuntu-*.qcow2
 ```

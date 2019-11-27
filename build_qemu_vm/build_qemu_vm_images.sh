@@ -99,9 +99,10 @@ fetch_kernel() {
     arm64) KURL="http://ports.ubuntu.com/ubuntu-ports" ;;
     *) usage_exit "No support for $QARCH" ;;
   esac
-  echo "Fetching boot kernel"
   rm -f linux initrd.gz
+  echo "Fetching boot kernel"
   wget $KURL/$KRNL
+  echo "Also fetching initrd (but not used)"
   wget $KURL/$INRD
   mv linux linux-kernel-$QARCH-$KDIST
   mv initrd.gz linux-initrd-$QARCH-$KDIST.gz
@@ -120,7 +121,6 @@ debootstrap_first_stage() {
       usage_exit "No support for $QARCH" 
       ;;
   esac
-  echo "Fetching boot kernel"
   sudo debootstrap \
     --verbose --foreign --arch=$QARCH \
     --components=main,universe \

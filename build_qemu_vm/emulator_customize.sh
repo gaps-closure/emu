@@ -97,12 +97,18 @@ spl_print(p.before+p.after)
 print('\nLogged in, configuring snapshot')
 
 # XXX: Add ssh key for remote access and configure .ssh directory perms
-# XXX: Apply scenario-node specific netplan to copy 
-# XXX: netplan for each node must come from scenario
+
+# XXX: Apply scenario-node specific netplan to copy to /etc/netplan
+# XXX: netplan for each node must come from scenario, needs argument
+# XXX: run 'netplan generate'
+
 # XXX: Install additional software including zmqcat
 # XXX: Fix date setting?
 
 do_cmd(p, '# Additional commands here')
+# XXX: Could send sudo shutdown now but need to expect for response 
+# XXX: sync should suffice
+do_cmd(p, 'sync;sync')
 print('\nCompleted configuration')
 END
 }
