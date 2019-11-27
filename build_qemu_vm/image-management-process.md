@@ -1,8 +1,12 @@
+
+Ensure sudo group is allowed to work without passwords, otherwise expect scripting will fail on sudo.
+
 First create a virgin image for each architecture for the supported distro (currently eoan):
 
 ```
-# AMD64
-./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G
+# AMD64, use -p option for first time to ensure prerequisites are installed
+# XXX: update iproute, tcl, and tk package names in script 
+./build_qemu_vm_images.sh -p -a amd64 -d eoan -k eoan -s 20G
 # ARM64
 ./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G
 ```
