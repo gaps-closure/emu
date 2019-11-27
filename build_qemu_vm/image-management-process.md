@@ -42,11 +42,20 @@ sudo chmod ugo-wx /IMAGES/linux-kernel-*
 sudo chmod ugo-wx /IMAGES/ubuntu-*.qcow2
 ```
 
-XXX: Create snapshots as needed for emulation
+Finally create a snapshot for each node in the scenario with corresponding architecture, netplan, and CLOSURE software.
 
-XXX: Do gaps emulator specific common configuration (e.g., software load/build for particular architecture)
+```
+./emulator_customize.sh -h
+# Usage: ./emulator_customize.sh [ -h ] \
+#           [ -g GIMG ] [ -k KRNL ] [-o OFIL ] [-a QARCH]
+# -h        Help
+# -g GIMG   Full path to golden image, required
+# -k KRNL   Full path to kernel, required
+# -o OFIL   Name of output snapshot, required
+# -a QARCH  Architecture [arm64(default), amd64]
 
-XXX: Make copies of snapshot for each node in emulation, and perform node-specific configuration on the copies
+# XXX: will take additional arguments for netplan file and software to be loaded
 
-XXX: Use the copies within emulation, throw away copies on exiting emulation
+```
 
+The `emulator_customize.sh` script is only partially done. It needs to be extended to add ssh-key, apply a netplan, and install zmqcat and other CLOSURE software as needed.
