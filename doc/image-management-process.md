@@ -60,9 +60,16 @@ Finally create a snapshot for each node in the scenario with corresponding archi
                         -a amd64 \
                         -o snap.qcow2 \
                         -n /home/rkrishnan/gaps/top-level/emulator/config/qemu_config_netplan_core_x86.txt 
+                        
+# To create an arm64 instance for use in CLOSURE scenario
+./emulator_customize.sh -g /IMAGES/ubuntu-arm64-eoan-qemu.qcow2 \
+                        -k /IMAGES/linux-kernel-arm64-eoan \
+                        -a arm64 \
+                        -o snap1.qcow2 \
+                        -n /home/rkrishnan/gaps/top-level/emulator/config/qemu_config_netplan_core_arm.txt 
 
 ```
 
-The `emulator_customize.sh` script `snap.cow2` in the `build` subdirectory. It uses public/private keypair `id_closure_rsa`/`id_closure_rsa.pub` from the `build` directory, and the keypair is newly created if missing. Please
-make sure all images for emulation scenario use same key. Software installation such as zmq-cat and other CLOSURE software has been deferred to the emulation scenario -- it can install software via ssh over the management interface included in the netplan.
+The `emulator_customize.sh` script creates `snap.cow2` and `snap1.cow` in the `build` subdirectory. The script uses keypair `id_closure_rsa`/`id_closure_rsa.pub` from the `build` directory, and newly creates them if they are missing. Make sure all images for emulation scenario use same key. 
 
+Software installation such as zmq-cat and other CLOSURE software has been deferred to the emulation scenario -- it can install software via ssh over the management interface included in the netplan.
