@@ -1,0 +1,62 @@
+{
+ "name": "two_enclave_1Q_demo",
+ "enclave": 
+  [
+   {
+    "name": "orange",
+    "xdhost":
+     [
+      {
+       "hwconf":{},
+       "swconf":{}
+      }
+     ],
+    "inthost":
+     [
+      {},
+      {}
+     ],
+    "link": 
+     [
+      {}
+     ],
+    "hub": 
+     [
+      {}
+     ]
+   },
+   {
+    "name": "purple",
+    "xdhost":
+     [
+      {
+       "hwconf": {},
+       "swconf": {}
+      }
+     ],
+    "inthost":
+     [
+      {},
+      {}
+     ],
+    "link": 
+     [
+      {}
+     ],
+    "hub": 
+     [
+      {}
+     ]
+   }
+  ],
+ "xdgateway":
+  [
+   {
+    "name": "orange_purple",
+    "type": "BITW",
+    "guardconf": 
+     {
+     }
+   }
+  ]
+}
