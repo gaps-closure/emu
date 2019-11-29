@@ -39,14 +39,14 @@ handle_opts() {
   esac
 }
 
-
 start_qemu_initshell() {
+  CURDT=`date -u --iso-8601=seconds | sed -e 's/ /T/'`
   case $QARCH in
     amd64)
-      QEMUCMD="sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=$OFIL,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append \"earlycon console=ttyS0 root=/dev/sda rw\""
+      QEMUCMD="sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=$OFIL,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append \"earlycon console=ttyS0 root=/dev/sda rw\" -rtc base=$CURDT"
       ;;
     arm64)
-      QEMUCMD="sudo qemu-system-aarch64  -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=$OFIL,format=qcow2 -kernel linux-kernel-arm64-xenial -append \"earlycon console=ttyAMA0 root=/dev/vda rw\" -netdev user,id=unet -device virtio-net-device,netdev=unet"
+      QEMUCMD="sudo qemu-system-aarch64  -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=$OFIL,format=qcow2 -kernel linux-kernel-arm64-xenial -append \"earlycon console=ttyAMA0 root=/dev/vda rw\" -netdev user,id=unet -device virtio-net-device,netdev=unet -rtc base=$CURDT"
       ;;
     *)
       echo "No support for $QARCH"
@@ -62,6 +62,10 @@ make_snapshot() {
 
 configure_snapshot() {
   start_qemu_initshell "file=$OFIL,format=qcow2"
+  if [ ! -f id_closure_rsa ]; then
+    ssh-keygen -t rsa -b 4096 -N "" -f id_closure_rsa 
+  fi
+  PUBKEY=`cat id_closure_rsa.pub`
   python3 - <<END
 import os
 import sys
@@ -95,8 +99,12 @@ p.expect(prompt)
 spl_print(p.before+p.after)
 
 print('\nLogged in, configuring snapshot')
+do_cmd(p, 'date')
 
-# XXX: Add ssh key for remote access and configure .ssh directory perms
+# Add ssh key for remote access and configure .ssh directory perms
+do_cmd(p, 'mkdir -p ~/.ssh && chmod 700 ~/.ssh')
+do_cmd(p, 'echo $PUBKEY >> ~/.ssh/authorized_keys')
+do_cmd(p, 'chmod 600 ~/.ssh/authorized_keys')
 
 # XXX: Apply scenario-node specific netplan to copy to /etc/netplan
 # XXX: netplan for each node must come from scenario, needs argument
