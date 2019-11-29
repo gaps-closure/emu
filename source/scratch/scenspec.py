@@ -3,15 +3,22 @@
 from   argparse import ArgumentParser
 from   inspect  import isclass
 import json
+import random
 
 # Base class of all scenario objects
 class base: 
   def __init__(self,**kwargs): 
     for k in kwargs: setattr(self,k,kwargs[k])
-  def render(self,depth): 
-    print(' ' * depth + self.__class__.__name__)
-  def field_render(depth,fldval,fldnam): 
-    print(' ' * depth + fldnam + ':', str(fldval))
+  def render(self,depth,style='basic'): 
+    if style is 'basic':
+      print(' ' * depth + self.__class__.__name__)
+    else:
+      raise Exception('Unsupported style: ' + style)
+  def field_render(depth,fldval,fldnam,style='basic'): 
+    if style is 'basic':
+      print(' ' * depth + fldnam + ':', str(fldval))
+    else:
+      raise Exception('Unsupported style: ' + style)
 
 # Parse arguments
 def get_args():
@@ -41,21 +48,56 @@ def compose(n,d):
     else:                    return v
   return globals()[n](**{k:subcomp(k,v) for k,v in d.items()})
 
-# Traverse scenario 
-def traverse(v,name,depth):
+# Generic traversal using depth-first search
+def traverse(v,name,depth,style):
   if valid_class_instance(v): 
-    v.render(depth)
+    v.render(depth,style=style)
     for i in fields(v): 
       x = getattr(v,i)
       if isinstance(x,list):
-        for j in x: traverse(j,i,depth+1)
+        for j in x: traverse(j,i,depth+1,style)
       else:
-        traverse(x,i,depth+1)
+        traverse(x,i,depth+1,style)
   else:
-    base.field_render(depth,v,name)
+    base.field_render(depth,v,name,style)
+
+def contents(n,v,depth):
+  res = ''
+  if not valid_class_instance(v): return ''
+
+  # XXX: handle these details later
+  if n in ['link','hwconf','swconf','guardconf','xdlink']: return ''
+
+  if n in ['enclave','xdgateway']: res += 'subgraph {\n'
+
+  res += 'graph ' if depth == 0 else 'node_' + ''.join(random.choice('0123456789') for i in range(4))
+  res += '[label=' + n 
+  for i in fields(v): 
+    x = getattr(v,i)
+    if not isinstance(x,list) and not valid_class_instance(x): 
+      res += ';' + i + '=' + str(x)
+  res += ']\n'
+  for i in fields(v): 
+    x = getattr(v,i)
+    if valid_class_instance(x): 
+      res += contents(i,x,depth+1)
+    elif isinstance(x,list):
+      for j in x: res += contents(i,j,depth+1)
+
+  if n in ['enclave','xdgateway']: res += '}\n'
+
+  return res
+
+def dot_render(v,depth):
+  if depth == 0:
+    n = v.__class__.__name__ 
+    print('graph ' + ' {\n' + contents(n,v,depth) + '}\n')
    
 # Scenario classes derived from base class
-class scenario(base):  pass
+class scenario(base):  
+  # Extend to handle dot, note dot_render does own traversal
+  def render(self,depth,style='basic'): 
+    return dot_render(self,0) if style is 'dot' else super().render(depth,style)
 class enclave(base):   pass
 class xdhost(base):    pass
 class inthost(base):   pass
@@ -65,6 +107,7 @@ class xdgateway(base): pass
 class hwconf(base):    pass
 class swconf(base):    pass
 class guardconf(base): pass
+class xdlink(base):    pass
 
 if __name__ == '__main__':
   args = get_args()
@@ -75,4 +118,5 @@ if __name__ == '__main__':
   # XXX: endow derived classes with custom rendering functions for IMN/DOT/...
   with open(args.file, 'r') as inf: d = json.load(inf)
   scen = compose('scenario',d)
-  traverse(scen,'scenario',0)
+  # traverse(scen,'scenario',0,'basic')
+  scen.render(0,'dot')
