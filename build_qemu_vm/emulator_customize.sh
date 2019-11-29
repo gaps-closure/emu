@@ -4,28 +4,31 @@ GIMG=""
 KRNL=""
 QARCH="arm64"
 OFIL="snap.qcow2"
+NPLAN=""
 
 # XXX: create argument to pass netplan
 usage_exit() {
   [[ -n "$1" ]] && echo $1
   echo "Usage: $0 [ -h ] \\"
-  echo "          [ -g GIMG ] [ -k KRNL ] [-o OFIL ] [-a QARCH]" 
+  echo "          [ -g GIMG ] [ -k KRNL ] [-o OFIL ] [-a QARCH] -n [NPLAN]" 
   echo "-h        Help"
   echo "-g GIMG   Full path to golden image, required"
   echo "-k KRNL   Full path to kernel, required"
   echo "-o OFIL   Name of output snapshot, required"
   echo "-a QARCH  Architecture [arm64(default), amd64]"
+  echo "-n NPLAN  Netplan file, required"
   exit 1
 }
 
 handle_opts() {
   local OPTIND
-  while getopts "a:g:k:o:h" options; do
+  while getopts "a:g:k:o:n:h" options; do
     case "${options}" in
       a) QARCH=${OPTARG}  ;;
-      g) GIMG=${OPTARG}  ;;
-      k) KRNL=${OPTARG}  ;;
-      o) OFIL=${OPTARG}  ;;
+      g) GIMG=${OPTARG}   ;;
+      k) KRNL=${OPTARG}   ;;
+      o) OFIL=${OPTARG}   ;;
+      n) NPLAN=${OPTARG}  ;;
       h) usage_exit       ;;
       :) usage_exit "Error: -${OPTARG} requires an argument." ;;
       *) usage_exit       ;;
@@ -103,19 +106,19 @@ do_cmd(p, 'date')
 
 # Add ssh key for remote access and configure .ssh directory perms
 do_cmd(p, 'mkdir -p ~/.ssh && chmod 700 ~/.ssh')
-do_cmd(p, 'echo $PUBKEY >> ~/.ssh/authorized_keys')
+do_cmd(p, 'echo "$PUBKEY" >> ~/.ssh/authorized_keys')
 do_cmd(p, 'chmod 600 ~/.ssh/authorized_keys')
 
-# XXX: Apply scenario-node specific netplan to copy to /etc/netplan
-# XXX: netplan for each node must come from scenario, needs argument
-# XXX: run 'netplan generate'
-
-# XXX: Install additional software including zmqcat
-# XXX: Fix date setting?
+# Apply scenario-node specific netplan to copy to /etc/netplan
+do_cmd(p, 'sudo mkdir -p /etc/netplan')
+do_cmd(p, 'sudo rm -f /etc/netplan/config.yaml')
+with open('$NPLAN', 'r') as nplnf:
+  for line in nplnf:
+   do_cmd(p, "echo '" + line.rstrip('\n') + "' | sudo tee -a /etc/netplan/config.yaml")
+do_cmd(p, 'cat /etc/netplan/config.yaml')
+do_cmd(p, 'sudo netplan generate')
 
 do_cmd(p, '# Additional commands here')
-# XXX: Could send sudo shutdown now but need to expect for response 
-# XXX: sync should suffice
 do_cmd(p, 'sync;sync')
 print('\nCompleted configuration')
 END
