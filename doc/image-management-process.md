@@ -54,8 +54,15 @@ Finally create a snapshot for each node in the scenario with corresponding archi
 # -o OFIL   Name of output snapshot, required
 # -a QARCH  Architecture [arm64(default), amd64]
 
-# XXX: will take additional arguments for netplan file and software to be loaded
+# To create an amd64 instance for use in CLOSURE emulation scenario
+./emulator_customize.sh -g /IMAGES/ubuntu-amd64-eoan-qemu.qcow2 \
+                        -k /IMAGES/linux-kernel-amd64-eoan \
+                        -a amd64 \
+                        -o snap.qcow2 \
+                        -n /home/rkrishnan/gaps/top-level/emulator/config/qemu_config_netplan_core_x86.txt 
 
 ```
 
-The `emulator_customize.sh` script is only partially done. It needs to be extended to add ssh-key, apply a netplan, and install zmqcat and other CLOSURE software as needed.
+The `emulator_customize.sh` script `snap.cow2` in the `build` subdirectory. It uses public/private keypair `id_closure_rsa`/`id_closure_rsa.pub` from the `build` directory, and the keypair is newly created if missing. Please
+make sure all images for emulation scenario use same key. Software installation such as zmq-cat and other CLOSURE software has been deferred to the emulation scenario -- it can install software via ssh over the management interface included in the netplan.
+
