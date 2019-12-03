@@ -43,7 +43,7 @@ handle_opts() {
 }
 
 start_qemu_initshell() {
-  CURDT=`date -u --iso-8601=seconds | sed -e 's/ /T/'`
+  CURDT=`date -u --iso-8601=seconds | sed -e 's/\+.*//'`
   case $QARCH in
     amd64)
       QEMUCMD="sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=$OFIL,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append \"earlycon console=ttyS0 root=/dev/sda rw\" -rtc base=$CURDT"
