@@ -1,0 +1,118 @@
+{
+  "qname": "two_enclave_1Q_demo",
+  "enclave": 
+  [
+    {
+      "qname": "orange",
+      "xdhost":
+      [
+	{
+          "hostname": "orange-enclave-gw",
+	  "hwconf":{"arch": "amd64"},
+	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan"}, 
+	  "nwconf":{"interface": 
+		    [{"ifname" :"eth0", "addr":"10.0.101.1/24"},
+ 		     {"ifname" :"eth1", "addr":"10.0.1.2/24"}] },
+	  "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"},
+	            {"ifname": "eth1", "peername": "orange-purple-xd-gateway"}]
+	}
+      ],
+      "inthost":
+      [
+	{
+	  "hostname": "orange-1",
+	  "nwconf":{"interface":
+		    [{"ifname": "eth0", "addr": "10.0.101.2/24"}] },
+          "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"}]
+	},
+	{
+	  "hostname": "orange-2",
+	  "nwconf":{"interface":
+		    [{"ifname": "eth0", "addr": "10.0.101.3/24"}] },
+	  "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"}]
+	}
+      ],
+      "link": 
+      [
+	{"f": "orange-hub", "t":"orange-1", "bandwidth": "unlimited", "delay": 0},
+        {"f": "orange-hub", "t":"orange-2", "bandwidth": "unlimited", "delay": 0},
+        {"f": "orange-hub", "t":"orange-enclave-gw", "bandwidth": "unlimited", "delay": 0} 
+      ],
+      "hub": 
+      [
+	{ "hostname": "orange-hub", 
+	  "ifpeer": [{"ifname": "e0", "peername": "orange-enclave-gw"},
+		     {"ifname": "e1", "peername": "orange-1"},
+		     {"ifname": "e2", "peername": "orange-2"}]
+	}
+      ]
+    },
+    {
+      "qname": "purple",
+      "xdhost":
+      [
+	{
+	  "hostname": "purple-enclave-gw",
+	  "hwconf":{"arch": "arm64"},
+	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "xenial"}, 
+	  "nwconf":{"interface": 
+		    [{"ifname" :"eth0", "addr":"10.0.102.1/24"},
+ 		     {"ifname" :"eth1", "addr":"10.0.2.2/24"}] },
+	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"},
+	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}]
+	}
+      ],
+      "inthost":
+      [
+	{
+	  "hostname": "purple-1",
+	  "nwconf":{"interface":
+		    [{"ifname": "eth0", "addr": "10.0.102.2/24"}] },
+	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}]
+	},
+	{
+	  "hostname": "purple-2",
+	  "nwconf":{"interface":
+		    [{"ifname": "eth0", "addr": "10.0.102.3/24"}] },
+	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}]
+	}
+      ],
+      "link": 
+      [
+	{"f": "purple-hub", "t":"purple-1", "bandwidth": "unlimited", "delay": 0}, 
+        {"f": "purple-hub", "t":"purple-2", "bandwidth": "unlimited", "delay": 0}, 
+        {"f": "purple-hub", "t":"purple-enclave-gw", "bandwidth": "unlimited", "delay": 0} 
+      ],
+      "hub": 
+      [
+	{ "hostname": "purple-hub", 
+	  "ifpeer": [{"ifname": "e0", "peername": "purple-enclave-gw"},
+		     {"ifname": "e1", "peername": "purple-1"},
+		     {"ifname": "e2", "peername": "purple-2"}]
+	}
+      ]
+    }
+  ],
+  "xdgateway":
+  [
+    {
+      "hostname": "orange-purple-xd-gw",
+      "nwconf":{"interface":
+		[{"ifname": "eth0", "addr": "10.0.1.1/24"},
+		 {"ifname": "eth1", "addr": "10.0.2.1/24"}] },
+      "ifpeer":[{"ifname": "eth0", "peername": "orange-enclave-gw"},
+		{"ifname": "eth1", "peername": "purple-enclave-gw"}]
+    }
+  ],
+  "xdlink": 
+  [
+    { "model":  "BITW", 
+      "left":   {"f": "orange-enclave-gw", "t":"orange-purple-xd-gw", 
+	         "egress":   {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}, 
+                 "ingress":  {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}}, 
+      "right":  {"f": "orange-purple-xd-gw", "t":"purple-enclave-gw",
+	         "egress":   {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}, 
+                 "ingress":   {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}}
+    }
+  ]
+}

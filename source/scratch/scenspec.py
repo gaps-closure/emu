@@ -9,12 +9,12 @@ import random
 class base: 
   def __init__(self,**kwargs): 
     for k in kwargs: setattr(self,k,kwargs[k])
-  def render(self,depth,style='basic'): 
+  def render(self,depth,style='basic',layout=None): 
     if style is 'basic':
       print(' ' * depth + self.__class__.__name__)
     else:
       raise Exception('Unsupported style: ' + style)
-  def field_render(depth,fldval,fldnam,style='basic'): 
+  def field_render(depth,fldval,fldnam,style='basic',layout=None): 
     if style is 'basic':
       print(' ' * depth + fldnam + ':', str(fldval))
     else:
@@ -23,7 +23,8 @@ class base:
 # Parse arguments
 def get_args():
   p = ArgumentParser(description='CLOSURE Scenario Configuration')
-  p.add_argument('-f', '--file', required=True, type=str, help='Input file')
+  p.add_argument('-f', '--file', required=True, type=str, help='Input config file')
+  p.add_argument('-l', '--layout', required=True, type=str, help='Input layout file')
   return p.parse_args()
 
 # Non-function, non-internal fields of scenario class instance
@@ -49,9 +50,9 @@ def compose(n,d):
   return globals()[n](**{k:subcomp(k,v) for k,v in d.items()})
 
 # Generic traversal using depth-first search
-def traverse(v,name,depth,style):
+def traverse(v,name,depth,style,layout=None):
   if valid_class_instance(v): 
-    v.render(depth,style=style)
+    v.render(depth,style=style,layout=layout)
     for i in fields(v): 
       x = getattr(v,i)
       if isinstance(x,list):
@@ -59,64 +60,84 @@ def traverse(v,name,depth,style):
       else:
         traverse(x,i,depth+1,style)
   else:
-    base.field_render(depth,v,name,style)
+    base.field_render(depth,v,name,style,layout=layout)
 
-def contents(n,v,depth):
-  res = ''
-  if not valid_class_instance(v): return ''
+class IDGen():
+  def __init__(self):
+    self.nid = 0
+    self.lid = 0
+    self.cid = 0
+    self.nm2id = {}
 
-  # XXX: handle these details later
-  if n in ['link','hwconf','swconf','guardconf','xdlink']: return ''
+  def get_id(nm,typ):
+    if nm not in nm2id: 
+      if typ in ['NODE', 'xdhost', 'inthost', 'hub', 'xdgateway']:
+        nm2id[nm] = 'n'+str(self.nid)]
+        self.nid += 1
+      elif typ in ['link', 'left', 'right']:
+        nm2id[nm] = 'l'+str(self.lid)]
+        self.lid += 1
+      elif typ in ['canvas']:
+        nm2id[nm] = 'c'+str(self.cid)]
+        self.cid += 1
+    return nm2id[nm]
 
-  if n in ['enclave','xdgateway']: res += 'subgraph {\n'
-
-  res += 'graph ' if depth == 0 else 'node_' + ''.join(random.choice('0123456789') for i in range(4))
-  res += '[label=' + n 
-  for i in fields(v): 
-    x = getattr(v,i)
-    if not isinstance(x,list) and not valid_class_instance(x): 
-      res += ';' + i + '=' + str(x)
-  res += ']\n'
-  for i in fields(v): 
-    x = getattr(v,i)
-    if valid_class_instance(x): 
-      res += contents(i,x,depth+1)
-    elif isinstance(x,list):
-      for j in x: res += contents(i,j,depth+1)
-
-  if n in ['enclave','xdgateway']: res += '}\n'
-
-  return res
-
-def dot_render(v,depth):
-  if depth == 0:
-    n = v.__class__.__name__ 
-    print('graph ' + ' {\n' + contents(n,v,depth) + '}\n')
-   
 # Scenario classes derived from base class
 class scenario(base):  
-  # Extend to handle dot, note dot_render does own traversal
-  def render(self,depth,style='basic'): 
-    return dot_render(self,0) if style is 'dot' else super().render(depth,style)
-class enclave(base):   pass
-class xdhost(base):    pass
-class inthost(base):   pass
-class link(base):      pass
-class hub(base):       pass
+  def render(self,depth,style='imn',layout=None): 
+    if style is 'imn':
+      # handle enclave[]
+      #for e in enclave:
+      #  for x in e.xdhost:
+      #      x.hwconf
+      # handle xdgateway[]
+      # handle xdlink[]
+      # handle additional stuff such as canvas, 
+      return "foostring"
+    else:
+      return super().render(depth,style)
+
+class enclave(base): pass
+class xdhost(base): pass
+class hwconf(base): pass
+class swconf(base): pass
+class nwconf(base): pass
+class interface(base): pass
+class ifpeer(base): pass
+class inthost(base): pass
+class link(base): pass
+class hub(base): pass
 class xdgateway(base): pass
-class hwconf(base):    pass
-class swconf(base):    pass
-class guardconf(base): pass
-class xdlink(base):    pass
+class xdlink(base): pass
+class left(base): pass
+class right(base): pass
+class egress(base): pass
+class ingress(base): pass
+
+# Layout classes also derived from base class
+class layout(base): 
+  def get_node_layout(nod):
+    x = [for n in self.nodelayout if n.hostname == nod]
+    return x[0] if len(x) == 1 else raise Exception ('Error getting layout for:' + nod)
+ 
+class canvas(base): pass
+class option(base): pass
+class optglobal(base): pass
+class session(base): pass
+class nodelayout(base): pass
+class iconcoords(base): pass
+class labelcoords(base): pass
+class annotation(base): pass
+class bbox(base): pass
 
 if __name__ == '__main__':
   args = get_args()
-  # XXX: JSON would come from CAPO tools
-  # XXX: JSON can be readily extended without modifying base class and compose 
-  # XXX: As JSON is extended, may add classes or modify per-class render 
-  # XXX: JSON could be optionally generated by driver.py for convenience
-  # XXX: endow derived classes with custom rendering functions for IMN/DOT/...
-  with open(args.file, 'r') as inf: d = json.load(inf)
-  scen = compose('scenario',d)
-  # traverse(scen,'scenario',0,'basic')
-  scen.render(0,'dot')
+  with open(args.file, 'r') as inf: conf = json.load(inf)
+  with open(args.layout, 'r') as inf: layo = json.load(inf)
+
+  scen = compose('scenario',conf)
+  locs = compose('layout',layo)
+
+  #traverse(scen,'scenario',0,'basic',locs)
+  #traverse(locs,'layout',0,'basic',locs)
+  #scen.render(0,'imn',locs)
