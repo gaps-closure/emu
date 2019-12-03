@@ -63,7 +63,7 @@ Finally create a snapshot for each node in the scenario with corresponding archi
                         
 # To create an arm64 instance for use in CLOSURE scenario
 ./emulator_customize.sh -g /IMAGES/ubuntu-arm64-eoan-qemu.qcow2 \
-                        -k /IMAGES/linux-kernel-arm64-eoan \
+                        -k /IMAGES/linux-kernel-arm64-xenial \
                         -a arm64 \
                         -o snap1.qcow2 \
                         -n /home/rkrishnan/gaps/top-level/emulator/config/qemu_config_netplan_core_arm.txt 
