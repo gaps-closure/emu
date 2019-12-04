@@ -104,6 +104,18 @@ spl_print(p.before+p.after)
 print('\nLogged in, configuring snapshot')
 do_cmd(p, 'date')
 
+print('\nDisabling auto apt checks and updates')
+do_cmd(p,'sudo systemctl disable --now apt-daily{,-upgrade}.{timer,service}')
+print('\nUpdating packages')
+do_cmd(p, 'sudo apt update')
+print('\nInstalling haveged for randomness')
+do_cmd(p, 'sudo apt install -y haveged')
+
+#print('\nUpgrading ssh')
+#do_cmd(p, 'sudo apt install ssh')
+#print('\nReconfiguring ssh')
+#do_cmd(p, 'sudo dpkg-reconfigure openssh-server')
+
 # Add ssh key for remote access and configure .ssh directory perms
 do_cmd(p, 'mkdir -p ~/.ssh && chmod 700 ~/.ssh')
 do_cmd(p, 'echo "$PUBKEY" >> ~/.ssh/authorized_keys')
