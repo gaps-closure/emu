@@ -101,8 +101,10 @@ class IDGen():
         self.cid += 1
     return self.nm2id[nm]
 
+# Extend base with a class member and class method for ID generation/mapping
 class basewid(base):  
-  _idgen = IDGen()  # class member, common for instances of this class and all subclasses
+  __idgen__ = IDGen()  
+  def get_id(nm,typ): return basewid.__idgen__.get_id(nm,typ)
 
 # Scenario classes 
 class scenario(basewid):  
@@ -126,7 +128,8 @@ class inthost(basewid):
 ## TODO
 class hub(basewid): 
   def render(self,depth,style='imn',layout=None): 
-    tstr = 'hub to be handled, use of get_id: ' + self.hostname + ' ' + basewid._idgen.get_id(self.hostname,'hub')
+    #tstr = 'hub to be handled, use of get_id: ' + self.hostname + ' ' + basewid.__idgen__.get_id(self.hostname,'hub')
+    tstr = 'hub to be handled, use of get_id: ' + self.hostname + ' ' + basewid.get_id(self.hostname,'hub')
     return tstr + '\n' if style is 'imn' else super().render(depth,style,layout)
 
 ## TODO
@@ -217,3 +220,4 @@ if __name__ == '__main__':
   ret = scen.render(0,'imn',locs)
   ret += locs.render(0,'imn',None)
   print(ret)
+  print(basewid.__idgen__.nm2id)
