@@ -17,6 +17,7 @@ Now configure the virgin image to make it usable generally with user networking 
 ```
 # AMD64
 ./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G -u
+# ARM64
 ./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G -u
 ```
 
