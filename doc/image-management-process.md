@@ -31,7 +31,7 @@ qemu-img create -f qcow2 -b ubuntu-amd64-eoan-qemu.qcow2 test-snapshot.qcow2
 sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=test-snapshot.qcow2,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append "earlycon console=ttyS0 root=/dev/sda rw"
 ```
 
-From the build Move golden images to correct place and make read-only
+From the build directory, move golden images to a common directory `/IMAGES` and make read-only.
 ```
 cd ./build
 sudo cp linux-kernel-amd64-eoan /IMAGES
