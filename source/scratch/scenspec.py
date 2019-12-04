@@ -11,12 +11,12 @@ class base:
     for k in kwargs: setattr(self,k,kwargs[k])
   def render(self,depth,style='basic',layout=None): 
     if style is 'basic':
-      print(' ' * depth + self.__class__.__name__)
+      return ' ' * depth + self.__class__.__name__ + '\n'
     else:
       raise Exception('Unsupported style: ' + style)
   def field_render(depth,fldval,fldnam,style='basic',layout=None): 
     if style is 'basic':
-      print(' ' * depth + fldnam + ':', str(fldval))
+      return ' ' * depth + fldnam + ':' + str(fldval) + '\n'
     else:
       raise Exception('Unsupported style: ' + style)
 
@@ -51,16 +51,18 @@ def compose(n,d):
 
 # Generic traversal using depth-first search
 def traverse(v,name,depth,style,layout=None):
+  ret = ""
   if valid_class_instance(v): 
-    v.render(depth,style=style,layout=layout)
+    ret += v.render(depth,style=style,layout=layout)
     for i in fields(v): 
       x = getattr(v,i)
       if isinstance(x,list):
-        for j in x: traverse(j,i,depth+1,style)
+        ret += "".join([traverse(j,i,depth+1,style,layout) for j in x])
       else:
-        traverse(x,i,depth+1,style)
+        ret += traverse(x,i,depth+1,style,layout)
   else:
-    base.field_render(depth,v,name,style,layout=layout)
+    ret += base.field_render(depth,v,name,style,layout=layout)
+  return ret
 
 class IDGen():
   def __init__(self):
@@ -72,13 +74,13 @@ class IDGen():
   def get_id(nm,typ):
     if nm not in nm2id: 
       if typ in ['NODE', 'xdhost', 'inthost', 'hub', 'xdgateway']:
-        nm2id[nm] = 'n'+str(self.nid)]
+        nm2id[nm] = 'n'+str(self.nid)
         self.nid += 1
       elif typ in ['link', 'left', 'right']:
-        nm2id[nm] = 'l'+str(self.lid)]
+        nm2id[nm] = 'l'+str(self.lid)
         self.lid += 1
       elif typ in ['canvas']:
-        nm2id[nm] = 'c'+str(self.cid)]
+        nm2id[nm] = 'c'+str(self.cid)
         self.cid += 1
     return nm2id[nm]
 
@@ -117,8 +119,9 @@ class ingress(base): pass
 # Layout classes also derived from base class
 class layout(base): 
   def get_node_layout(nod):
-    x = [for n in self.nodelayout if n.hostname == nod]
-    return x[0] if len(x) == 1 else raise Exception ('Error getting layout for:' + nod)
+    x = [n for n in self.nodelayout if n.hostname == nod]
+    if len(x) != 1: raise Exception ('Error getting layout for:' + nod)
+    return x[0] 
  
 class canvas(base): pass
 class option(base): pass
@@ -132,12 +135,13 @@ class bbox(base): pass
 
 if __name__ == '__main__':
   args = get_args()
-  with open(args.file, 'r') as inf: conf = json.load(inf)
-  with open(args.layout, 'r') as inf: layo = json.load(inf)
+  with open(args.file, 'r')   as inf1: conf = json.load(inf1)
+  with open(args.layout, 'r') as inf2: layo = json.load(inf2)
 
   scen = compose('scenario',conf)
   locs = compose('layout',layo)
 
-  #traverse(scen,'scenario',0,'basic',locs)
-  #traverse(locs,'layout',0,'basic',locs)
+  #print(traverse(scen,'scenario',0,'basic',locs))
+  #print(traverse(locs,'layout',  0,'basic',locs))
+
   #scen.render(0,'imn',locs)
