@@ -9,6 +9,7 @@ def get_args():
   p = ArgumentParser(description='CLOSURE Scenario Configuration')
   p.add_argument('-f', '--file', required=True, type=str, help='Input config file')
   p.add_argument('-l', '--layout', required=True, type=str, help='Input layout file')
+  p.add_argument('-o', '--outfile', required=True, type=str, help='Output IMN file')
   return p.parse_args()
 
 # Base class for object containment hierarchy built from JSON
@@ -219,7 +220,7 @@ if __name__ == '__main__':
 
   ret = scen.render(0,'imn',locs)
   ret += locs.render(0,'imn',None)
-  with open('out.imn','w') as outf: outf.write(ret)  # XXX: make output file an argument?
+  with open(args.outfile,'w') as outf: outf.write(ret)
 
   #print(traverse(scen,'scenario',0,'basic',locs))
   #print(traverse(locs,'scenlayout',  0,'basic',locs))
