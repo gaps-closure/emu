@@ -38,8 +38,8 @@ sudo cp linux-kernel-amd64-eoan /IMAGES
 sudo cp linux-kernel-arm64-xenial /IMAGES
 sudo cp ubuntu-amd64-eoan-qemu.qcow2 /IMAGES
 sudo cp ubuntu-arm64-eoan-qemu.qcow2 /IMAGES
-sudo chmod ugo-wx /IMAGES/linux-kernel-*
-sudo chmod ugo-wx /IMAGES/ubuntu-*.qcow2
+sudo chown root.root /IMAGES/linux-kernel-* /IMAGES/ubuntu-*.qcow2 
+sudo chmod 444 /IMAGES/linux-kernel-* /IMAGES/ubuntu-*.qcow2
 ```
 
 Finally create a snapshot for each node in the scenario with corresponding architecture, netplan, and CLOSURE software.
