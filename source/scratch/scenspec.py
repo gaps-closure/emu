@@ -137,7 +137,8 @@ class xdgateway(basewid):
 ## TODO
 class link(basewid): 
   def render(self,depth,style='imn',layout=None): 
-    return 'link to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+    lid = basewid.get_id(None,'link')
+    return 'link %s { to be handled ... }\n' % (lid) if style is 'imn' else super().render(depth,style,layout)
 
 ## TODO
 class xdlink(basewid): 
