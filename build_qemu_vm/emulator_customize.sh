@@ -6,7 +6,6 @@ QARCH="arm64"
 OFIL="snap.qcow2"
 NPLAN=""
 
-# XXX: create argument to pass netplan
 usage_exit() {
   [[ -n "$1" ]] && echo $1
   echo "Usage: $0 [ -h ] \\"
@@ -49,7 +48,7 @@ start_qemu_initshell() {
       QEMUCMD="sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=$OFIL,format=qcow2 -net nic -net user -kernel $KRNL -append \"earlycon console=ttyS0 root=/dev/sda rw\" -rtc base=$CURDT"
       ;;
     arm64)
-      QEMUCMD="sudo qemu-system-aarch64  -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=$OFIL,format=qcow2 -kernel $KNRL -append \"earlycon console=ttyAMA0 root=/dev/vda rw\" -netdev user,id=unet -device virtio-net-device,netdev=unet -rtc base=$CURDT"
+      QEMUCMD="sudo qemu-system-aarch64  -nographic -M virt -cpu cortex-a53 -m 1024 -drive file=$OFIL,format=qcow2 -kernel $KRNL -append \"earlycon console=ttyAMA0 root=/dev/vda rw\" -netdev user,id=unet -device virtio-net-device,netdev=unet -rtc base=$CURDT"
       ;;
     *)
       echo "No support for $QARCH"
@@ -64,7 +63,8 @@ make_snapshot() {
 }
 
 configure_snapshot() {
-  start_qemu_initshell "file=$OFIL,format=qcow2"
+  start_qemu_initshell
+  echo $QEMUCMD
   if [ ! -f id_closure_rsa ]; then
     ssh-keygen -t rsa -b 4096 -N "" -f id_closure_rsa 
   fi
