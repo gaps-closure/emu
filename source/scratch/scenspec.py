@@ -3,22 +3,6 @@
 from   argparse import ArgumentParser
 from   inspect  import isclass
 import json
-import random
-
-# Base class of all scenario objects
-class base: 
-  def __init__(self,**kwargs): 
-    for k in kwargs: setattr(self,k,kwargs[k])
-  def render(self,depth,style='basic',layout=None): 
-    if style is 'basic':
-      return ' ' * depth + self.__class__.__name__ + '\n'
-    else:
-      raise Exception('Unsupported style: ' + style)
-  def field_render(depth,fldval,fldnam,style='basic',layout=None): 
-    if style is 'basic':
-      return ' ' * depth + fldnam + ':' + str(fldval) + '\n'
-    else:
-      raise Exception('Unsupported style: ' + style)
 
 # Parse arguments
 def get_args():
@@ -27,7 +11,18 @@ def get_args():
   p.add_argument('-l', '--layout', required=True, type=str, help='Input layout file')
   return p.parse_args()
 
-# Non-function, non-internal fields of scenario class instance
+# Base class for object containment hierarchy built from JSON
+class base: 
+  def __init__(self,**kwargs): 
+    for k in kwargs: setattr(self,k,kwargs[k])
+  def render(self,depth,style='basic',layout=None): 
+    if style is not 'basic': raise Exception('Unsupported style: ' + style)
+    return ' ' * depth + self.__class__.__name__ + '\n'
+  def field_render(depth,fldval,fldnam,style='basic',layout=None): 
+    if style is not 'basic': raise Exception('Unsupported style: ' + style)
+    return ' ' * depth + fldnam + ':' + str(fldval) + '\n'
+
+# Return non-function, non-internal fields of scenario class instance
 def fields(v):
   return [a for a in dir(v) if not callable(getattr(v,a)) and not a.startswith("__")]
 
@@ -75,7 +70,7 @@ def render_children(v,depth,style,layout,exclude=[]):
     elif valid_class_instance(x): 
       ret += x.render(depth+1,style,layout)
     else:
-      pass # ignore all non class fields in generic render_children
+      pass # note, we ignore all non class fields in generic render_children
   return ret
 
 ##############################################
@@ -86,34 +81,37 @@ class IDGen():
     self.nid = 0
     self.lid = 0
     self.cid = 0
+    self.aid = 0
     self.nm2id = {}
 
   def get_id(self,nm,typ):
-    if nm not in self.nm2id: 
+    if nm is None or nm not in self.nm2id: 
       if typ in ['NODE', 'xdhost', 'inthost', 'hub', 'xdgateway']:
-        self.nm2id[nm] = 'n'+str(self.nid)
         self.nid += 1
+        mnm = 'n'+str(self.nid)
       elif typ in ['link', 'left', 'right']:
-        self.nm2id[nm] = 'l'+str(self.lid)
         self.lid += 1
+        mnm = 'l'+str(self.lid)
       elif typ in ['canvas']:
-        self.nm2id[nm] = 'c'+str(self.cid)
         self.cid += 1
-    return self.nm2id[nm]
+        mnm = 'c'+str(self.cid)
+      elif typ in ['annotation']:
+        self.aid += 1
+        mnm = 'a'+str(self.aid) 
+    self.nm2id[mnm if nm is None else nm] = mnm 
+    return mnm
 
 # Extend base with a class member and class method for ID generation/mapping
 class basewid(base):  
   __idgen__ = IDGen()  
   def get_id(nm,typ): return basewid.__idgen__.get_id(nm,typ)
-
-# Scenario classes 
-class scenario(basewid):  
   def render(self,depth,style='imn',layout=None): 
     return render_children(self,depth,style,layout) if style is 'imn' else super().render(depth,style,layout)
 
-class enclave(basewid): 
-  def render(self,depth,style='imn',layout=None): 
-    return render_children(self,depth,style,layout) if style is 'imn' else super().render(depth,style,layout)
+#####################################################################################################
+# Scenario classes derived from basewid
+class scenario(basewid): pass # use basewid rendering
+class enclave(basewid):  pass # use basewid rendering
 
 ## TODO
 class xdhost(basewid): 
@@ -128,7 +126,6 @@ class inthost(basewid):
 ## TODO
 class hub(basewid): 
   def render(self,depth,style='imn',layout=None): 
-    #tstr = 'hub to be handled, use of get_id: ' + self.hostname + ' ' + basewid.__idgen__.get_id(self.hostname,'hub')
     tstr = 'hub to be handled, use of get_id: ' + self.hostname + ' ' + basewid.get_id(self.hostname,'hub')
     return tstr + '\n' if style is 'imn' else super().render(depth,style,layout)
 
@@ -176,35 +173,40 @@ class scenlayout(basewid):
     if len(x) != 1: raise Exception ('Error getting layout for:' + nod)
     return x[0] 
 
-class option(basewid):
-  def render(self,depth,style='imn',layout=None): 
-    return render_children(self,depth,style,layout) if style is 'imn' else super().render(depth,style,layout)
+class option(basewid): pass # use basewid rendering
 
-## TODO
-class nodelayout(basewid): pass
-## TODO
-class iconcoords(basewid): pass
-## TODO
-class labelcoords(basewid): pass
-
-## TODO
-class canvas(basewid):
-  def render(self,depth,style='imn',layout=None): 
-    return 'canvas to be handled\n' if style is 'imn' else super().render(depth,style,layout)
 ## TODO
 class optglobal(basewid):
   def render(self,depth,style='imn',layout=None): 
-    return 'optglobal to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+    return 'option global { to be handled ... }\n' if style is 'imn' else super().render(depth,style,layout)
+
 ## TODO
 class session(basewid):
   def render(self,depth,style='imn',layout=None): 
-    return 'session to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+    return 'option session { to be handled ... }\n' if style is 'imn' else super().render(depth,style,layout)
+
+class canvas(basewid):
+  def render(self,depth,style='imn',layout=None): 
+    cid = basewid.get_id(self.name,'canvas')
+    return 'canvas %s { name { %s } }\n' % (cid,self.name) if style is 'imn' else super().render(depth,style,layout)
+
 ## TODO
 class annotation(basewid):
   def render(self,depth,style='imn',layout=None): 
-    return 'annotation to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+    aid = basewid.get_id(None,'annotation')
+    return 'annotation %s { to be handled ... }\n' % (aid) if style is 'imn' else super().render(depth,style,layout)
+
 ## TODO
 class bbox(basewid): pass
+
+## TODO
+class nodelayout(basewid): pass
+
+## TODO
+class iconcoords(basewid): pass
+
+## TODO
+class labelcoords(basewid): pass
 
 if __name__ == '__main__':
   args = get_args()
@@ -214,10 +216,10 @@ if __name__ == '__main__':
   scen = compose('scenario',conf)
   locs = compose('scenlayout',layo)
 
-  #print(traverse(scen,'scenario',0,'basic',locs))
-  #print(traverse(locs,'scenlayout',  0,'basic',locs))
-
   ret = scen.render(0,'imn',locs)
   ret += locs.render(0,'imn',None)
-  print(ret)
-  print(basewid.__idgen__.nm2id)
+  with open('out.imn','w') as outf: outf.write(ret)  # XXX: make output file an argument?
+
+  #print(traverse(scen,'scenario',0,'basic',locs))
+  #print(traverse(locs,'scenlayout',  0,'basic',locs))
+  #print(basewid.__idgen__.nm2id)

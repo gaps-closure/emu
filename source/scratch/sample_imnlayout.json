@@ -1,5 +1,5 @@
 {
- "canvas": { "id": "c1", "name": "Canvas1" },
+ "canvas": { "name": "Canvas1" },
  "option": {
   "optglobal": {
    "interface_names": "no",
@@ -75,7 +75,7 @@
   {
     "bbox": {"x1":56.0, "y1": 36.0, "x2": 399.0, "y2": 322.0},
     "type": "rectangle",
-    "label": "",
+    "label": "Annotation1",
     "labelcolor": "black",
     "fontfamily": "Arial",
     "fontsize": 12,
@@ -88,7 +88,7 @@
   {
     "bbox": {"x1":607.0, "y1": 41.0, "x2": 918.0, "y2": 327.0},
     "type": "rectangle",
-    "label": "",
+    "label": "Annotation2",
     "labelcolor": "black",
     "fontfamily": "Arial",
     "fontsize": 12,
