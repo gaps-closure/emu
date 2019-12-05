@@ -48,7 +48,7 @@ def compose(n,d):
 # Generic traversal using depth-first search
 def traverse(v,name,depth,style,layout=None):
   ret = ''
-  if valid_class_instance(v): 
+  if valid_class_instance(v):
     ret += v.render(depth,style=style,layout=layout)
     for i in fields(v): 
       x = getattr(v,i)
@@ -86,7 +86,9 @@ class IDGen():
     self.nm2id = {}
 
   def get_id(self,nm,typ):
-    if nm is None or nm not in self.nm2id: 
+    if nm in self.nm2id:
+      return self.nm2id[nm]
+    else:
       if typ in ['NODE', 'xdhost', 'inthost', 'hub', 'xdgateway']:
         self.nid += 1
         mnm = 'n'+str(self.nid)
@@ -98,9 +100,9 @@ class IDGen():
         mnm = 'c'+str(self.cid)
       elif typ in ['annotation']:
         self.aid += 1
-        mnm = 'a'+str(self.aid) 
-    self.nm2id[mnm if nm is None else nm] = mnm 
-    return mnm
+        mnm = 'a'+str(self.aid)
+      self.nm2id[mnm if nm is None else nm] = mnm
+      return mnm
 
 # Extend base with a class member and class method for ID generation/mapping
 class basewid(base):  
@@ -114,101 +116,222 @@ class basewid(base):
 class scenario(basewid): pass # use basewid rendering
 class enclave(basewid):  pass # use basewid rendering
 
-## TODO
 class xdhost(basewid): 
-  def render(self,depth,style='imn',layout=None): 
-    return 'xdhost to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+  def render(self,depth,style='imn',layout=None):
+    if style is 'imn':
+      ret = ""
+      nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
+      nodelayout = layout.get_node_layout(self.hostname)
+      ret+=f'''node {nid} {{
+    type router
+    model host
+    network-config {{
+\thostname {self.hostname}
+\t!
+'''   
+      ret += self.nwconf.render(depth, style, layout)
+      ret += '    }\n'
+      ret += nodelayout.render(depth, style, layout)
+      for p in self.ifpeer:
+        ret += p.render(depth, style, layout)
+      ret += '}\n'
+      return ret
+    else:
+      return super().render(depth,style,layout)
 
-## TODO
-class inthost(basewid): 
-  def render(self,depth,style='imn',layout=None): 
-    return 'inthost to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+class inthost(basewid):
+  def render(self,depth,style='imn',layout=None):
+    if style is 'imn':
+      nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
+      nodelayout = layout.get_node_layout(self.hostname)
+      ret=f'''node {nid} {{
+    type router
+    model host
+    network-config {{
+\thostname {self.hostname}
+\t!\n'''   
+      ret += self.nwconf.render(depth, style, layout)
+      ret += '    }\n'
+      ret += nodelayout.render(depth, style, layout)
+      for p in self.ifpeer:
+        ret += p.render(depth, style, layout)
+      ret += '}\n'
+      return ret
+    else:
+      return super().render(depth, style, layout)
 
-## TODO
 class hub(basewid): 
-  def render(self,depth,style='imn',layout=None): 
-    tstr = 'hub to be handled, use of get_id: ' + self.hostname + ' ' + basewid.get_id(self.hostname,'hub')
-    return tstr + '\n' if style is 'imn' else super().render(depth,style,layout)
+  def render(self,depth,style='imn',layout=None):
+    if style is 'imn':
+      nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
+      nodelayout = layout.get_node_layout(self.hostname)
+      ret=f'''node {nid} {{
+    type hub
+    network-config {{
+\thostname {self.hostname}
+\t!
+    }}\n'''
+      ret += nodelayout.render(depth, style, layout)
+      for i in self.ifpeer:
+        ret += i.render(depth, style, layout)
+      ret += '}\n'
+      return ret
+    else:
+      return super().render(depth, style, layout)
 
-## TODO
 class xdgateway(basewid): 
-  def render(self,depth,style='imn',layout=None): 
-    return 'xdgateway to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+  def render(self,depth, style='imn',layout=None):
+    if style is 'imn':
+      nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
+      nodelayout = layout.get_node_layout(self.hostname)
+      ret=f'''node {nid} {{
+    type router
+    model host
+    network-config {{
+\thostname {self.hostname}
+\t!
+'''
+      ret += self.nwconf.render(depth, style, layout)
+      ret += '    }\n'
+      ret += nodelayout.render(depth, style, layout)
+      for p in self.ifpeer:
+        ret += p.render(depth,style, layout)
+      ret += '    services {IPForward}\n}\n'
+      return ret
+    else:
+      return super().render(depth,style,layout)
 
-## TODO
 class link(basewid): 
-  def render(self,depth,style='imn',layout=None): 
-    lid = basewid.get_id(None,'link')
-    return 'link %s { to be handled ... }\n' % (lid) if style is 'imn' else super().render(depth,style,layout)
+  def render(self,depth,style='imn',layout=None):
+    lid = basewid.__idgen__.get_id(self.f+'<-->'+self.t, type(self).__name__)
+    return f'''link {lid} {{
+    nodes {{{basewid.__idgen__.get_id(self.f, type(self).__name__)} {basewid.__idgen__.get_id(self.t, type(self).__name__)}}}
+    bandwidth {self.bandwidth}
+    delay {self.delay}
+}}\n''' if style is 'imn' else super().render(depth,style,layout)
 
-## TODO
 class xdlink(basewid): 
-  def render(self,depth,style='imn',layout=None): 
-    return 'xdlink to be handled\n' if style is 'imn' else super().render(depth,style,layout)
+  def render(self,depth,style='imn',layout=None):
+    if style is 'imn':
+      ret = self.left.render(depth,style,layout)
+      ret += self.right.render(depth,style,layout)
+      return ret
+    else:
+      return super().render(depth,style,layout)
 
 ## TODO
 class hwconf(basewid): pass
 ## TODO
 class swconf(basewid): pass
-## TODO
-class nwconf(basewid): pass
-## TODO
-class interface(basewid): pass
-## TODO
-class ifpeer(basewid): pass
-## TODO
-class left(basewid): pass
-## TODO
-class right(basewid): pass
-## TODO
+
+class nwconf(basewid):
+  def render(self, depth, style='imn', layout=None):
+    if style is 'imn':
+      ret = ""
+      for i in self.interface:
+        ret += i.render(depth, style, layout)
+      return ret
+    else:
+      return super().render(depth,style,layout)
+
+class interface(basewid):
+  def render(self, depth, style='imn', layout=None):
+    return f"\tinterface {self.ifname}\n\tip address {self.addr}\n\t!\n" if style is 'imn' else super().render(depth,style,layout)
+
+class ifpeer(basewid):
+  def render(self, depth, style='imn', layout=None):
+      return f'    interface-peer {{{self.ifname} {basewid.__idgen__.get_id(self.peername, "NODE")}}}\n' if style is 'imn' else super().render(depth,style,layout)
+      
+class left(basewid):
+  def render(self, depth, style='imn', layout=None):
+    lid = basewid.__idgen__.get_id(self.f+'<-->'+self.t, type(self).__name__)
+    return f'''link {lid} {{
+    nodes {{{basewid.__idgen__.get_id(self.f, type(self).__name__)} {basewid.__idgen__.get_id(self.t, type(self).__name__)}}}
+    bandwidth {{{self.egress.bandwidth} {self.ingress.bandwidth}}}
+    delay {{{self.egress.delay} {self.ingress.delay}}}
+}}\n''' if style is 'imn' else super().render(depth,style,layout)
+
+class right(basewid):
+  def render(self, depth, style='imn', layout=None):
+    lid = basewid.__idgen__.get_id(self.f+'<-->'+self.t, type(self).__name__)
+    return f'''link {lid} {{
+    nodes {{{basewid.__idgen__.get_id(self.f, type(self).__name__)} {basewid.__idgen__.get_id(self.t, type(self).__name__)}}}
+    bandwidth {{{self.egress.bandwidth} {self.ingress.bandwidth}}}
+    delay {{{self.egress.delay} {self.ingress.delay}}}
+}}\n''' if style is 'imn' else super().render(depth,style,layout)
+
+## TODO      
 class egress(basewid): pass
 ## TODO
 class ingress(basewid): pass
 
 # Layout classes
-## TODO
 class scenlayout(basewid): 
   def render(self,depth,style='imn',layout=None): 
     return render_children(self,depth,style,layout,exclude=['nodelayout']) if style is 'imn' else super().render(depth,style,layout)
-  def get_node_layout(nod):
+  def get_node_layout(self, nod):
     x = [n for n in self.nodelayout if n.hostname == nod]
     if len(x) != 1: raise Exception ('Error getting layout for:' + nod)
     return x[0] 
 
-class option(basewid): pass # use basewid rendering
+class option(basewid): pass 
 
-## TODO
 class optglobal(basewid):
-  def render(self,depth,style='imn',layout=None): 
-    return 'option global { to be handled ... }\n' if style is 'imn' else super().render(depth,style,layout)
+  def render(self,depth,style='imn',layout=None):
+    return f'''option global {{
+    interface_names {self.interface_names}
+    ip_addresses {self.ip_addresses}
+    ipv6_addresses {self.ipv6_addresses}
+    node_labels {self.node_labels}
+    link_labels {self.link_labels}
+    show_api {self.show_api}
+    background_images {self.background_images}
+    annotations {self.annotations}
+    grid {self.grid}
+    traffic_start {self.traffic_start}
+}}\n''' if style is 'imn' else super().render(depth,style,layout)
 
-## TODO
 class session(basewid):
   def render(self,depth,style='imn',layout=None): 
-    return 'option session { to be handled ... }\n' if style is 'imn' else super().render(depth,style,layout)
+    return 'option session { }\n' if style is 'imn' else super().render(depth,style,layout)
 
 class canvas(basewid):
   def render(self,depth,style='imn',layout=None): 
     cid = basewid.get_id(self.name,'canvas')
     return 'canvas %s { name { %s } }\n' % (cid,self.name) if style is 'imn' else super().render(depth,style,layout)
 
-## TODO
 class annotation(basewid):
-  def render(self,depth,style='imn',layout=None): 
+  def render(self,depth,style='imn',layout=None):
     aid = basewid.get_id(None,'annotation')
-    return 'annotation %s { to be handled ... }\n' % (aid) if style is 'imn' else super().render(depth,style,layout)
+    return f'''annotation {aid} {{
+    {self.bbox.render(depth, style, layout)}
+    type {self.type}
+    label {self.label}
+    labelcolor {self.labelcolor}
+    fontfamily {self.fontfamily}
+    fontsize {self.fontsize}
+    color {self.color}
+    width {self.width}
+    border {self.border}
+    rad {self.rad}
+    canvas {basewid.__idgen__.get_id(self.canvas, 'canvas')}
+}}\n''' if style is 'imn' else super().render(depth,style,layout)
 
-## TODO
-class bbox(basewid): pass
+class bbox(basewid):
+  def render(self, depth, style='imn', layout=None):
+    return f'iconcoords {{{self.x1} {self.y1} {self.x2} {self.y2}}}' if style is 'imn' else super().render(depth,style,layout)
 
-## TODO
-class nodelayout(basewid): pass
+class nodelayout(basewid):
+  def render(self, depth, style='imn', layout=None):
+    return f'    canvas {basewid.__idgen__.get_id(self.canvas, "canvas")}\n    {self.iconcoords.render(depth, style, layout)}\n    {self.labelcoords.render(depth, style, layout)}\n' if style is 'imn' else super().render(depth,style,layout)
 
-## TODO
-class iconcoords(basewid): pass
+class iconcoords(basewid):
+  def render(self, depth, style='imn', layout=None):
+    return f'iconcoords {{{self.x} {self.y}}}' if style is 'imn' else super().render(depth,style,layout)
 
-## TODO
-class labelcoords(basewid): pass
+class labelcoords(basewid):
+  def render(self, depth, style='imn', layout=None):
+    return f'labelcoords {{{self.x} {self.y}}}' if style is 'imn' else super().render(depth,style,layout)
 
 if __name__ == '__main__':
   args = get_args()

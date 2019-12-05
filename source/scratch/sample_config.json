@@ -14,7 +14,7 @@
 		    [{"ifname" :"eth0", "addr":"10.0.101.1/24"},
  		     {"ifname" :"eth1", "addr":"10.0.1.2/24"}] },
 	  "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"},
-	            {"ifname": "eth1", "peername": "orange-purple-xd-gateway"}]
+	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}]
 	}
       ],
       "inthost":
@@ -34,9 +34,9 @@
       ],
       "link": 
       [
-	{"f": "orange-hub", "t":"orange-1", "bandwidth": "unlimited", "delay": 0},
-        {"f": "orange-hub", "t":"orange-2", "bandwidth": "unlimited", "delay": 0},
-        {"f": "orange-hub", "t":"orange-enclave-gw", "bandwidth": "unlimited", "delay": 0} 
+	{"f": "orange-hub", "t":"orange-1", "bandwidth": "100000000", "delay": 0},
+        {"f": "orange-hub", "t":"orange-2", "bandwidth": "100000000", "delay": 0},
+        {"f": "orange-hub", "t":"orange-enclave-gw", "bandwidth": "100000000", "delay": 0} 
       ],
       "hub": 
       [
@@ -79,9 +79,9 @@
       ],
       "link": 
       [
-	{"f": "purple-hub", "t":"purple-1", "bandwidth": "unlimited", "delay": 0}, 
-        {"f": "purple-hub", "t":"purple-2", "bandwidth": "unlimited", "delay": 0}, 
-        {"f": "purple-hub", "t":"purple-enclave-gw", "bandwidth": "unlimited", "delay": 0} 
+	{"f": "purple-hub", "t":"purple-1", "bandwidth": "100000000", "delay": 0}, 
+        {"f": "purple-hub", "t":"purple-2", "bandwidth": "100000000", "delay": 0}, 
+        {"f": "purple-hub", "t":"purple-enclave-gw", "bandwidth": "100000000", "delay": 0} 
       ],
       "hub": 
       [
@@ -108,11 +108,11 @@
   [
     { "model":  "BITW", 
       "left":   {"f": "orange-enclave-gw", "t":"orange-purple-xd-gw", 
-	         "egress":   {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}, 
-                 "ingress":  {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}}, 
+	         "egress":   {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}, 
+                 "ingress":  {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}}, 
       "right":  {"f": "orange-purple-xd-gw", "t":"purple-enclave-gw",
-	         "egress":   {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}, 
-                 "ingress":   {"filterspec": "passthru", "bandwidth":"unlimited", "delay": 0}}
+	         "egress":   {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}, 
+                 "ingress":   {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}}
     }
   ]
 }
