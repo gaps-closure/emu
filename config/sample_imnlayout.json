@@ -98,41 +98,5 @@
     "rad": 25,
     "canvas": "Canvas1"
   }
- ],
- "custom_config":
- {
-   "custom_config_id": "service:UserDefined",
-   "custom_command": "UserDefined",
-   "config":{"dirs": [{"d": "/root"}]}
- },
- "nodeservice": [
-   {
-     "hostname": "orange-enclave-gw",
-     "service": [{"s": "UserDefined"}]
-   },
-   {
-     "hostname": "purple-enclave-gw",
-     "service": [{"s": "UserDefined"}]
-   },
-   {
-     "hostname": "orange-1",
-     "service": [{"s": "UserDefined"}]
-   },
-   {
-     "hostname": "orange-2",
-     "service": [{"s": "UserDefined"}]
-   },
-   {
-     "hostname": "purple-1",
-     "service": [{"s": "UserDefined"}]
-   },
-   {
-     "hostname": "purple-2",
-     "service": [{"s": "UserDefined"}]
-   },
-   {
-     "hostname": "orange-purple-xd-gw",
-     "service": [{"s": "UserDefined"},
-		 {"s": "IPForward"}]
-   }]
+ ]
 }

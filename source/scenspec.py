@@ -122,7 +122,6 @@ class xdhost(basewid):
       ret = ""
       nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
       nodelayout = layout.get_node_layout(self.hostname)
-      nodeservice = layout.get_node_service(self.hostname)
       ret+=f'''node {nid} {{
     type router
     model host
@@ -133,10 +132,10 @@ class xdhost(basewid):
       ret += self.nwconf.render(depth, style, layout)
       ret += '    }\n'
       ret += nodelayout.render(depth, style, layout)
-      ret += nodeservice.render(depth, style, layout)
+      ret += self.swconf.render(depth, style, layout)
       for p in self.ifpeer:
         ret += p.render(depth, style, layout)
-      ret += layout.custom_config.render(depth, style, layout)
+      ret += self.custom.render(depth, style, layout)
       ret += '}\n'
       return ret
     else:
@@ -147,7 +146,6 @@ class inthost(basewid):
     if style is 'imn':
       nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
       nodelayout = layout.get_node_layout(self.hostname)
-      nodeservice = layout.get_node_service(self.hostname)
       ret=f'''node {nid} {{
     type router
     model host
@@ -157,10 +155,10 @@ class inthost(basewid):
       ret += self.nwconf.render(depth, style, layout)
       ret += '    }\n'
       ret += nodelayout.render(depth, style, layout)
-      ret += nodeservice.render(depth, style, layout)
+      ret += self.swconf.render(depth, style, layout)
       for p in self.ifpeer:
         ret += p.render(depth, style, layout)
-      ret += layout.custom_config.render(depth, style, layout)
+      ret += self.custom.render(depth, style, layout)
       ret += '}\n'
       return ret
     else:
@@ -190,7 +188,6 @@ class xdgateway(basewid):
     if style is 'imn':
       nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
       nodelayout = layout.get_node_layout(self.hostname)
-      nodeservice = layout.get_node_service(self.hostname)
       ret=f'''node {nid} {{
     type router
     model host
@@ -201,10 +198,10 @@ class xdgateway(basewid):
       ret += self.nwconf.render(depth, style, layout)
       ret += '    }\n'
       ret += nodelayout.render(depth, style, layout)
-      ret += nodeservice.render(depth, style, layout)
+      ret += self.swconf.render(depth, style, layout)
       for p in self.ifpeer:
         ret += p.render(depth,style, layout)
-      ret += layout.custom_config.render(depth, style, layout)
+      ret += self.custom.render(depth, style, layout)
       ret += '}\n'
       return ret
     else:
@@ -230,8 +227,12 @@ class xdlink(basewid):
 
 ## TODO
 class hwconf(basewid): pass
-## TODO
-class swconf(basewid): pass
+
+class swconf(basewid):
+  def render(self, depth, style='imn', layout=None):
+    svcs = ' '.join(svc.s for svc in self.service) 
+    ret = f'    services {{{svcs}}}\n'
+    return ret if style is 'imn' else super().render(depth, style, layout)
 
 class nwconf(basewid):
   def render(self, depth, style='imn', layout=None):
@@ -346,30 +347,25 @@ class labelcoords(basewid):
   def render(self, depth, style='imn', layout=None):
     return f'labelcoords {{{self.x} {self.y}}}' if style is 'imn' else super().render(depth,style,layout)
 
-class custom_config(basewid):
+class custom(basewid):
   def render (self, depth, style='imn', layout=None):
     return f'    custom-config {{\n\tcustom-config-id {self.custom_config_id}\n\tcustom-command {self.custom_command}\n\t' + self.config.render(depth, style, layout) + f'    }}\n' 
 
 class config (basewid):
   def render(self, depth, style='imn', layout=None):
     dirstr = 'dirs=('
-    for d in self.dirs:
-      dirstr += d.render(depth,style,layout) + ','
-    return f'config {{\n\t{dirstr} )\n    \t}}\n' if style is 'imn' else super().render(depth,style,layout)
+    for dir in self.dirs:
+      dirstr += f"'{dir.d}', "
+    cmdupstr = 'cmdup=('
+    for c in self.cmdup:
+      cmdupstr += f"'{c.cmd}', "
+    cmdupstr += ')'
+    return f'config {{\n\t{dirstr} )\n\t{cmdupstr}\n    \t}}\n' if style is 'imn' else super().render(depth,style,layout)
 
-class dirs (basewid):
-  def render(self, depth, style='imn', layout=None):
-    return f"'{self.d}'" if style is 'imn' else super().render(depth,style,layout)
+class dirs (basewid): pass
+class service(basewid): pass
+class cmdup(basewid): pass
 
-class nodeservice(basewid):
-  def render(self, depth, style='imn', layout=None):
-    servs = ' '.join(s.render(depth,style,layout) for s in self.service)
-    return f'    services {{{servs}}}\n' if style is 'imn' else super().render(depth,style,layout)
-
-class service (basewid):
-  def render(self, depth, style='imn', layout=None):
-    return self.s if style is 'imn' else super().render(depth,style,layout)
-  
 if __name__ == '__main__':
   args = get_args()
   with open(args.file, 'r')    as inf1: conf = json.load(inf1)
