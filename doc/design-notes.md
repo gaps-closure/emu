@@ -112,7 +112,10 @@ Code to be specified.
 
 # Dependencies Installation and QEMU VM Disk Image Creation and OS Installation Notes
 
-We have developed a non-interactive script that automatically builds QEMU VM images, and installs Ubuntu, and configures it. We save the kernels and a golden copy of the QEMU VM images. We take snapshots of the images and customize them for use wihtin the emulator.  The script can optionally also install pre-requisites and NRL CORE on the build server.
+We have developed a non-interactive script that automatically builds QEMU VM images, and installs Ubuntu, and configures it.
+The scripted process is much easier to use and less error-prone. Our initial process was manual, and details are documented at the end as some of the information could be useful during development. 
+
+Using the `build_qemu_vm_images.sh` script we fetch the kernels, build and minimally configure the VM disk images, and then save a golden copy of the kernels and images. Then using `emulator_customize.sh`, we take snapshots of the images and customize them for use wihtin the emulator as needed.  The script can optionally also install pre-requisites and NRL CORE on the build server.
 
 ```
 ./build_qemu_vm_images.sh -h
@@ -125,19 +128,83 @@ We have developed a non-interactive script that automatically builds QEMU VM ima
 # -d UDIST  Ubuntu distro [eoan(default)]
 # -s SIZE   Image size [20G(default),<any>]
 # -k KDIST  Ubuntu distro for kernel [xenial(default),<any>]
+```
 
-# For making an AMD64 image
-./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G
-# Perform post-install configuration
-./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G -u
+Ensure sudo group is allowed to work without passwords, otherwise expect scripting will fail on sudo.
+First create a virgin image for each architecture for the supported distro (currently eoan):
 
-# ARM64 requires use of an older kernel
+```
+# AMD64, use -p option for first time to ensure prerequisites are installed
+./build_qemu_vm_images.sh -p -a amd64 -d eoan -k eoan -s 20G
+# ARM64
 ./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G
+```
+
+This will fetch the kernel (e.g., linux-kernel-amd64-eoan), initrd (linux-initrd-amd64-eoan.gz), and build the virgin qemu vm image (e.g., ubuntu-amd64-eoan-qemu.qcow2.virgin) using debootstrap.
+
+Now configure the virgin image to make it usable generally with user networking support (allows host-based NAT-ted access to Internet):
+
+```
+# AMD64
+./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G -u
+# ARM64
 ./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G -u
+```
+
+You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created.  This image and the associated kernel should be saved to a common location (e.g., /IMAGES) and the files should be made read-only.  Any use of this for the emulator will first involve snapshotting and further configuration.
+
+Optionally, take a test snapshot, boot into it, and login as closure user.
+
+```
+cd ./build
+qemu-img create -f qcow2 -b ubuntu-amd64-eoan-qemu.qcow2 test-snapshot.qcow2
+sudo qemu-system-x86_64 -nographic -enable-kvm -m 4G -smp 2 -drive file=test-snapshot.qcow2,format=qcow2 -net nic -net user -kernel linux-kernel-amd64-eoan -append "earlycon console=ttyS0 root=/dev/sda rw"
+```
+
+From the build directory, move golden images to a common directory `/IMAGES` and make read-only.
+```
+cd ./build
+sudo cp linux-kernel-amd64-eoan /IMAGES
+sudo cp linux-kernel-arm64-xenial /IMAGES
+sudo cp ubuntu-amd64-eoan-qemu.qcow2 /IMAGES
+sudo cp ubuntu-arm64-eoan-qemu.qcow2 /IMAGES
+sudo chown root.root /IMAGES/linux-kernel-* /IMAGES/ubuntu-*.qcow2 
+sudo chmod 444 /IMAGES/linux-kernel-* /IMAGES/ubuntu-*.qcow2
+```
+
+Finally create a snapshot for each node in the scenario with corresponding architecture, netplan, and CLOSURE software.
+
+```
+./emulator_customize.sh -h
+# Usage: ./emulator_customize.sh [ -h ] \
+#           [ -g GIMG ] [ -k KRNL ] [-o OFIL ] [-a QARCH]
+# -h        Help
+# -g GIMG   Full path to golden image, required
+# -k KRNL   Full path to kernel, required
+# -o OFIL   Name of output snapshot, required
+# -a QARCH  Architecture [arm64(default), amd64]
+
+# To create an amd64 instance for use in CLOSURE emulation scenario
+./emulator_customize.sh -g /IMAGES/ubuntu-amd64-eoan-qemu.qcow2 \
+                        -k /IMAGES/linux-kernel-amd64-eoan \
+                        -a amd64 \
+                        -o snap.qcow2 \
+                        -n /home/rkrishnan/gaps/top-level/emulator/config/qemu_config_netplan_core_x86.txt 
+                        
+# To create an arm64 instance for use in CLOSURE scenario
+./emulator_customize.sh -g /IMAGES/ubuntu-arm64-eoan-qemu.qcow2 \
+                        -k /IMAGES/linux-kernel-arm64-xenial \
+                        -a arm64 \
+                        -o snap1.qcow2 \
+                        -n /home/rkrishnan/gaps/top-level/emulator/config/qemu_config_netplan_core_arm.txt 
 
 ```
 
-The scripted process above is much easier to use and less error-prone. Our initial process was manual, and details are documented at the end as some of the information could be useful during development. Also see [Image Management Process](image-management-process.md) for more information.
+The `emulator_customize.sh` script creates `snap.cow2` and `snap1.cow` in the `build` subdirectory. he emulation scenario generator will call this script and may use a different output filename for the snapshot. The script uses the keypair `id_closure_rsa`/`id_closure_rsa.pub` from the `build` directory, and newly creates them if they are missing. Make sure all images for emulation scenario use same key. 
+
+Software installation such as zmq-cat and other CLOSURE software has been deferred to the emulation scenario -- it can install software via ssh over the management interface included in the netplan.
+
+
 
 # Plumbing QEMU node inside CORE node for emulator 
 Plumbing the QEMU node to the CORE node is done as follows. This will need to be scripted as well.
@@ -223,53 +290,46 @@ The initial emulator will use a simple line-oriented grep/sed style filter to do
 However, if a full hardware testbed is available to us, the need for full-featured emulation of guard functionality is diminished.
 
 # Todo
-0. Documentation
-    * PARTIAL, this document
-    * Figures needs to be updated, addresses should match sample scenario 
-    * Move code segments into actual scripts, reference, and discuss only functionality and usage
-1. Prepare QEMU image for x86 with Ubuntu 19.10
-    * DONE, image saved under workhorse:/IMAGES, may be refined as needed (e.g., more software)
-2. Prepare QEMU image for ARM with Ubuntu 19.10
-    * DONE, using debootstrap and external xenial kernel
-    * Need to check on newer host OS if we can use newer kernels, and if we can put it within rootfs of the VM
-3. Fully automated (non-interactive) script for building VM images for specific arch and distro
+0. Documentation -- DONE, this document
+    * Needs to be reviewed and brought up to date with current state of emulator 
+1. Prepare QEMU image for x86 with Ubuntu 19.10 -- DONE, superseded by script
+2. Prepare QEMU image for ARM with Ubuntu 19.10 -- DONE, superseded by script
+    * Check if we can switch to eoan kernel with the newer qemu 4.0.0 on jaga/eoan
+3. Fully automated (non-interactive) script for building VM images for specific arch and distro --DONE
     * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
-    * PARTIAL, additional script to customize the snapshot for each node in the emulation scenario (*need to add zmqcat, configure ssh key, configure netplan, additional CLOSURE software*)
-4. Create a sample IMN file using CORE GUI
-    * DONE, for 2 enclave scenario, but will be refined as needed
-5. Implement sample TA1 device emulators (pass,BITW,BKEND)
-    * PARTIAL, passthrough and BITW plumbing implemented and tested
+4. Create a sample IMN file using CORE GUI, DONE, sample 2 enclave scenario checked in
+    * Need to shadown /root directory and invoke scripts to do actual GAPS emulation tasks
+5. Implement sample TA1 device emulators (pass,BITW,BKEND) -- DONE
     * BKEND fully worked out, not tested
     * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
     * must include stats and wire-shark support
-6. Protoype the end-to-end QEMU build and sample scenario manually
-    * PARTIAL
-    * Done end-to-end comms over emulated BITW with some manual configruation steps
-    * Done developing/testing plumbing of QEMU with CORE, needs to be added to scenario script
-    * Done adding command scripting interface (redir ssh port, use vmcd and ssh), to be integrated
-7. Prepare a sample partitioned program 
+6. Protoype the end-to-end QEMU build and sample scenario manually, DONE
+    * Integrate HAL (TA2-TA1 interface) and GAPS application and test
+7. Prepare a sample partitioned program, IN-PROGRESS 
     * Include install script (e.g., deb package)
     * Include systemd scripts that will start application on boot and respawn on failure
     * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
-8. Create a high level configuration file containing:
-    * PARTIAL, Mike is working on this, currently program, JSON spec would be preferable as it can be spit out by CLOSURE tools
-    * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc. for the hosts 
-    * TA1 device capabilities and type, e.g.,
-    * ID (pass-through)
-    * BITW style
-    * Bookends style
-    * Specific guard functions supported on device
-    * Software topology and mappings – names of executables and which node they will run on
-9. From the configuration generate IMN + scripting for GAPS scenario
-    * PARTIAL, Mike is working on this
-    * Read in configuration file
-    * Instantiate CORE nodes, do the necessary internal plumbing (for either BITW or Bookends style), and deploy application
-    * Instantiate QEMU nodes and do needed plumbing
-    * Manage GAPS components (application, gpsd, TA1 device emulation)
-    * Configure TA1 device (control API)
-    * Preferably, write the above functionality as a Python library (not a monolithic script)
-10. Basic GUI for the high-level config?
-    * Nice to have, defer to Phase 2
+8. Create a high level configuration file, DONE
+    * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc.
+    * Intra-enclave links
+    * Cross-domain interconnections: type and configuration
+    * Software topology: executables and which node they will run on
+9. From the configuration generate IMN + scripting for GAPS scenario, PARTIAL
+    * Reads in config file and generates IMN
+    * Shadowing /root, adding /root/.ssh/config to ignore StrictHostChecking on CORE node, add emulation scripts
+    * Auto start of emulation scripts using cmdup 
+    * Call script to customizing VM snapshots for each xdhost
+    * Call script for L2 bridge and tap plumbing and invocation of qemu-system on CORE node
+    * May want to use a good nice value for the ARM64 instances
+    * Call script to check if QEMU VMs are ready, i.e., booted and accepting ssh connections
+    * Call script to plumb the TA1 emulation for BKEND, BITW, or PASSTHRU
+    * Call script to install latest CLOSURE software: CLOSURE libraries/utilities, HAL service, GAPS demo application
+    * all script to initiate (i) the HAL service, and (ii) the CLOSURE application, e.g., via "systemctl restart" 
+10. Script that spits out the config JSON and layout for "common case 2,3,4 enclave scenarios 
+    * Use same structure for all enclaves
+    * enclaves placed one per quadrant, each with different color
+    * full mesh of xdlink connections across enclaves
+    * provide option to use single xdhost with multiple links or separate xdhost for each link in the enclaves
 
 
 # APPENDIX 1: Manual Dependency Installation, QEMU VM image building, and configuration (DEPRECATED)
