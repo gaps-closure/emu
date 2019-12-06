@@ -298,7 +298,7 @@ However, if a full hardware testbed is available to us, the need for full-featur
 3. Fully automated (non-interactive) script for building VM images for specific arch and distro --DONE
     * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
 4. Create a sample IMN file using CORE GUI, DONE, sample 2 enclave scenario checked in
-    * Need to shadown /root directory and invoke scripts to do actual GAPS emulation tasks
+    * Need to shadown /root directory and invoke scripts to do actual GAPS emulation tasks (chmod /root on dev server to 755 so it can be shadowed)
 5. Implement sample TA1 device emulators (pass,BITW,BKEND) -- DONE
     * BKEND fully worked out, not tested
     * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
