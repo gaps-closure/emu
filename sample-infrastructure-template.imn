@@ -230,8 +230,6 @@ hook 3:instantiation_hook.sh {
     cp $DIR_EM/go.sh $SESSION_DIR/orange-enclave-gw.conf/  
     cp $DIR_EM/go.sh $SESSION_DIR/purple-enclave-gw.conf/  
     cp $DIR_EM/filterproc.py $SESSION_DIR/cross-domain-gw.conf/
-    cp $DIR_EM/pty_cfg.sh $SESSION_DIR/orange-enclave-gw.conf/  
-    cp $DIR_EM/pty_cfg.sh $SESSION_DIR/purple-enclave-gw.conf/  
 }
 
 option global {
