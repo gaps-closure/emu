@@ -21,7 +21,7 @@
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
 	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "ssh_setup.sh"}],
+		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
 		      "cmddown":[]}
 	  }
 	}
@@ -38,7 +38,7 @@
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
 	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "ssh_setup.sh"}],
+		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
 		      "cmddown":[]}
 	  }
 	},
@@ -52,7 +52,7 @@
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
 	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "ssh_setup.sh"}],
+		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
 		      "cmddown":[]}
 	  }
 	}
@@ -90,7 +90,7 @@
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
 	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "ssh_setup.sh"}],
+		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
 		      "cmddown":[]}
 	  }
 	}
@@ -107,7 +107,7 @@
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
 	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "ssh_setup.sh"}],
+		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
 		      "cmddown":[]}
 	  }
 	},
@@ -121,7 +121,7 @@
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
 	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "ssh_setup.sh"}],
+		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
 		      "cmddown":[]}
 	  }
 	}
@@ -156,7 +156,7 @@
 	"custom_config_id": "service:UserDefined",
 	"custom_command": "UserDefined",
 	"config":{"dirs": [{"d": "/root"}],
-		  "cmdup": [{"cmd": "ssh_setup.sh"}],
+		  "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
 		  "cmddown":[]}
       }
     }
