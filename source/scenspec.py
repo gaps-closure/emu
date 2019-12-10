@@ -2,6 +2,7 @@
 
 from   argparse import ArgumentParser
 from   inspect  import isclass
+from   scenexec import execute
 import json
 import os
 
@@ -130,7 +131,7 @@ class scenario(basewid):
     ret = 'hook 3:instantiation_hook.sh {\n'
     for n in self.get_hostnames():
       ret += f'    mkdir $SESSION_DIR/{n}.conf/scripts\n'
-      ret += f'    cp {settings["emu_root"]}/scripts/* $SESSION_DIR/{n}.conf/scripts\n'
+      ret += f'    cp {settings["emuroot"]}/scripts/* $SESSION_DIR/{n}.conf/scripts\n' #TODO: This should not require dict lookup
     ret += '}\n'
     return ret if style is 'imn' else ""
 
@@ -403,6 +404,9 @@ if __name__ == '__main__':
   ret += locs.render(0,'imn',None, None)
   
   with open(args.outfile,'w') as outf: outf.write(ret)
+  outf.close()
+
+  execute(scen, locs, sets, args)
 
   #print(traverse(scen','scenario',0,'basic',locs))
   #print(traverse(locs,'scenlayout',  0,'basic',locs))

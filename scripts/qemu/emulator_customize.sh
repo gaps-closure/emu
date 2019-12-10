@@ -5,29 +5,33 @@ KRNL=""
 QARCH="arm64"
 OFIL="snap.qcow2"
 NPLAN=""
+BDIR="build"
 
 usage_exit() {
   [[ -n "$1" ]] && echo $1
   echo "Usage: $0 [ -h ] \\"
-  echo "          [ -g GIMG ] [ -k KRNL ] [-o OFIL ] [-a QARCH] -n [NPLAN]" 
+  echo "          [ -g GIMG ] [ -k KRNL ] [-o OFIL ] [-a QARCH] -n [NPLAN] -b [BDIR]" 
   echo "-h        Help"
   echo "-g GIMG   Full path to golden image, required"
   echo "-k KRNL   Full path to kernel, required"
   echo "-o OFIL   Name of output snapshot, required"
   echo "-a QARCH  Architecture [arm64(default), amd64]"
   echo "-n NPLAN  Netplan file, required"
+  echo "-b BDIR   Directory for building snapshots, build(default)"
+  
   exit 1
 }
 
 handle_opts() {
   local OPTIND
-  while getopts "a:g:k:o:n:h" options; do
+  while getopts "a:g:k:o:n:hb:" options; do
     case "${options}" in
       a) QARCH=${OPTARG}  ;;
       g) GIMG=${OPTARG}   ;;
       k) KRNL=${OPTARG}   ;;
       o) OFIL=${OPTARG}   ;;
       n) NPLAN=${OPTARG}  ;;
+      b) BDIR=${OPTARG}   ;;
       h) usage_exit       ;;
       :) usage_exit "Error: -${OPTARG} requires an argument." ;;
       *) usage_exit       ;;
@@ -137,8 +141,8 @@ END
 }
 
 handle_opts "$@"
-mkdir -p ./build
-cd ./build
+mkdir -p $BDIR
+cd $BDIR
 make_snapshot
 configure_snapshot
 

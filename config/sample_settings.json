@@ -1,3 +1,5 @@
 {
-    "emu_root": "/home/mkaplan/gaps/top-level/emulator/source"
+  "emuroot": "/home/mkaplan/gaps/top-level/emulator",
+  "imgdir": "/IMAGES",
+  "snapdir": ".snapshots"
 }

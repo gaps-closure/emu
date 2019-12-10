@@ -11,3 +11,7 @@ do
     ifconfig br$i up
 done
 
+tunctl -t qemutap2
+ip link set qemutap2 up
+ip addr add 10.200.0.2 dev qemutap2
+ip route add 10.200.0.0/24 dev qemutap2
