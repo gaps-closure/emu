@@ -102,11 +102,11 @@ In the bookends model, the filter functions are moved into the QEMU VM running o
 
 ### Bidirectional BOOKEND filter
 
-In bookends model, socat sends virtual device to a local address/port (127.0.0.1 54321 in the figure below); TA1 guard functions reads that port, passes the data through an egress filter (e.g., orange uses the left-egress-spec), then write to the gateway (e.g., orange writes to 10.0.1.1) using the enclave's external interace. The conversion between IP packets and the filtering operations is again done using a netcat (nc) script. Note that the filter function is split and moved into the QEMU VM running on the two enclave-gateway nodes. The cross-domain CORE router is a simple pass through in the Bookends case.
+In bookends model, socat sends virtual device to a local address/port (127.0.0.1:54321 in the figure below); TA1 guard functions reads that port, passes the data through an egress filter (e.g., orange uses the left-egress-spec), then write to the gateway (e.g., orange writes to 10.0.1.1:12345) using the enclave's external interace. The conversion between IP packets and the filtering operations is again done using a netcat (nc) scripts. Note that the filter function is split and moved into the QEMU VM running on the two enclave-gateway nodes. The cross-domain CORE router is a simple pass through in the Bookends case.
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BOOKEND.png)
 
-The script below shows the imlmentation o the booends model in the orange node
+The script below shows the imlmentation of the booends model in the orange node
 
 ```
 #orange 
