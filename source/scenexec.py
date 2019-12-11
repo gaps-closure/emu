@@ -7,7 +7,7 @@ def execute(scenario, layout, settings, args):
     start_core_scenario(scenario, settings, args.outfile)
 
 def clean_snapshots(settings):
-    p = subprocess.run(['rm', '-rf', settings.snapdir])
+    subprocess.run(['rm', '-rf', settings.snapdir])
 
 def create_qemu_snapshots(scenario, settings, clean=True):
     if clean: clean_snapshots(settings)
@@ -33,7 +33,7 @@ def create_qemu_snapshots(scenario, settings, clean=True):
                 continue
             make_netplan(x, f'{SNAPDIR}/{OFIL}.np')
             NPLN = f'{OFIL}.np'
-            p = subprocess.run([f'{QSCRIPTSDIR}/emulator_customize.sh', '-g', GIMG, '-k', KRNL, '-a', QARCH, '-o', OFIL, '-n', NPLN, '-b', SNAPDIR])
+            subprocess.run([f'{QSCRIPTSDIR}/emulator_customize.sh', '-g', GIMG, '-k', KRNL, '-a', QARCH, '-o', OFIL, '-n', NPLN, '-b', SNAPDIR])
 
 def make_netplan(xdhost, outfile):
     ifmap = {}
