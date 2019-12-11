@@ -70,7 +70,7 @@ GW_PURPLE_PORT="12346"
 
 ### Bidirectional BITW filter
 
-The gateway can control data passing between enclaves by adding a filter in the forward and reverse paths. The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout.
+The gateway can control data passing between enclaves by adding filters in the forward and reverse paths. The figure below gives an example, with a filter (filterproc.py) that takes a spec, reads from stdin, filters according to spec, then writes to stdout.
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BITW.png)
 
@@ -80,34 +80,50 @@ The gateway can control data passing between enclaves by adding a filter in the 
         mkfifo fifo-right
         nc -4 -k -l ${GW_ORANGE_IP} ${GW_ORANGE_PORT} \
           < fifo-left \
-          | python3 filterproc.py left-ingress-spec   \
-          | python3 filterproc.py right-egress-spec   \
+          | python3 filterproc.py left-egress-spec   \
+          | python3 filterproc.py right-ingress-spec   \
           > fifo-right &
         nc -4 -k -l ${GW_PURPLE_IP} ${GW_PURPLE_PORT} \
           < fifo-right \
-          | python3 filterproc.py right-ingress-spec  \
-          | python3 filterproc.py left-egress-spec    \
+          | python3 filterproc.py right-egress-spec  \
+          | python3 filterproc.py left-ingress-spec    \
           > fifo-left &
 ```
 
 Only the gateway node processing pipeline is enhanced from the pass-through case (the orange and purple nodes are unchanged). The addition of the second fifo (fifo-right) enables splitting the script into two separate (more symmetrical and easy to comprehend) commands; but this could also have been written with one fifo (and one line), as with the pass-through example above.
 
+The use of a pair of filters in each direction allows specification of what is allowed to leave one domain (e.g., left-egress-spec for what can leave the orange domain) and what is allowed to enter a second domain (e.g., right-ingress-spec for getting into the purple domain).  The use of a pair of filters also allows splitting the filters into two halves for the bookends model (see below).
+
 ## Bookend Model
 
 ![Emulator Architecture for Bookend-style Cross-Domain Devices](emulator-bookend.png)
 
-In bookends model, socat sends virtual device to a local address/port; TA1 guard functions reads that port and write to eth0 (and vice versa). Only the QEMU isnide the CORE node is shown, but the rest of the scenario is the same as in the BITW case, except the cross-domain CORE router is a simple pass through in the Bookends case. 
+In the bookends model, the filter functions are moved into the QEMU VM running on the two enclave-gateway nodes. The application again writes to the char device in the QEMU vM (the same as with the BITW model); but now the filtering function occurs inside the QEMU node on the end nodes. The fiture below gives an example of the high-level design for the orange-gateway node.
 
 ### Bidirectional BOOKEND filter
 
-The filter function is split and moved into the devices on the two end nodes. For example, the figure below shows one possible implementation on the orange node.
+In bookends model, socat sends virtual device to a local address/port (127.0.0.1 54321 in the figure below); TA1 guard functions reads that port, passes the data through an egress filter (e.g., orange uses the left-egress-spec), then write to the gateway (e.g., orange writes to 10.0.1.1) using the enclave's external interace. The conversion between IP packets and the filtering operations is again done using a netcat (nc) script. Note that the filter function is split and moved into the QEMU VM running on the two enclave-gateway nodes. The cross-domain CORE router is a simple pass through in the Bookends case.
 
 ![Pass-through BITW-style Cross-Domain link](socat-bidirectional-filter-BOOKEND.png)
 
-**FIXME: The naming of the filter specs ingress/egress is confusing (it is correct in the BITW. The nc at the egress should be a client not a listener (drop -l).**
+The script below shows the imlmentation o the booends model in the orange node
 
 ```
-Code to be specified.
+#orange 
+   terminal-1:
+        mkfifo fifo-left
+        mkfifo fifo-right
+        nc -4 -k -l ${LOCAL_IP} ${LOCAL_PORT} < fifo-left \
+          | python3 filterproc.py left-egress-spec  > fifo-right &
+        nc -4       ${GW_ORANGE_IP} ${GW_ORANGE_PORT} < fifo-right \
+          | python3 filterproc.py left-ingress-spec > fifo-left  &
+        socat -d -d -lf ${SOCAT_ORANGE_LOGS} \
+          pty,link=${DEV_ORANGE},raw,ignoreeof,unlink-close=0,echo=0 \
+          tcp:${LOCAL_IP}:${LOCAL_PORT},ignoreeof &
+        sleep 1
+        cat ${DEV_ORANGE}
+   terminal-2:
+        echo "Orange sends a message" > ${DEV_ORANGE}
 ```
 
 # Dependencies Installation and QEMU VM Disk Image Creation and OS Installation Notes
