@@ -20,9 +20,7 @@
 	  "custom": {
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
-		      "cmddown":[]}
+	    "config":{"dirs": [{"d": "/root"}]}
 	  }
 	}
       ],
@@ -37,9 +35,7 @@
 	  "custom": {
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
-		      "cmddown":[]}
+	    "config":{"dirs": [{"d": "/root"}]}
 	  }
 	},
 	{
@@ -51,9 +47,7 @@
 	  "custom": {
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
-		      "cmddown":[]}
+	    "config":{"dirs": [{"d": "/root"}]}
 	  }
 	}
       ],
@@ -89,9 +83,7 @@
 	  "custom": {
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
-		      "cmddown":[]}
+	    "config":{"dirs": [{"d": "/root"}]}
 	  }
 	}
       ],
@@ -106,9 +98,7 @@
 	  "custom": {
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
-		      "cmddown":[]}
+	    "config":{"dirs": [{"d": "/root"}]}
 	  }
 	},
 	{
@@ -120,9 +110,7 @@
 	  "custom": {
 	    "custom_config_id": "service:UserDefined",
 	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}],
-		      "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
-		      "cmddown":[]}
+	    "config":{"dirs": [{"d": "/root"}]}
 	  }
 	}
       ],
@@ -155,9 +143,7 @@
       "custom": {
 	"custom_config_id": "service:UserDefined",
 	"custom_command": "UserDefined",
-	"config":{"dirs": [{"d": "/root"}],
-		  "cmdup": [{"cmd": "sh scripts/ssh_setup.sh"}],
-		  "cmddown":[]}
+	"config":{"dirs": [{"d": "/root"}]}
       }
     }
   ],

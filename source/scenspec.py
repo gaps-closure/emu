@@ -131,7 +131,7 @@ class scenario(basewid):
     ret = 'hook 3:instantiation_hook.sh {\n'
     for n in self.get_hostnames():
       ret += f'    mkdir $SESSION_DIR/{n}.conf/scripts\n'
-      ret += f'    cp {settings["emuroot"]}/scripts/* $SESSION_DIR/{n}.conf/scripts\n' #TODO: This should not require dict lookup
+      ret += f'    cp -r {settings.emuroot}/scripts/* $SESSION_DIR/{n}.conf/scripts\n' 
     ret += '}\n'
     return ret if style is 'imn' else ""
 
@@ -161,6 +161,11 @@ class xdhost(basewid):
         ret += p.render(depth, style, layout, settings)
       ret += self.custom.render(depth, style, layout, settings)
       ret += '}\n'
+      cmdup= "cmdup=("
+      for c in gen_cmdup(self, settings):
+        cmdup += f"'{c}', "
+      cmdup += ')'
+      ret = ret.replace('cmdup=XXX', cmdup)
       return ret
     else:
       return super().render(depth,style,layout,settings)
@@ -184,6 +189,11 @@ class inthost(basewid):
         ret += p.render(depth, style, layout, settings)
       ret += self.custom.render(depth, style, layout, settings)
       ret += '}\n'
+      cmdup= "cmdup=("
+      for c in gen_cmdup(self, settings):
+        cmdup += f"'{c}', "
+      cmdup += ')'
+      ret = ret.replace('cmdup=XXX', cmdup)
       return ret
     else:
       return super().render(depth, style, layout, settings)
@@ -227,6 +237,11 @@ class xdgateway(basewid):
         ret += p.render(depth,style, layout, settings)
       ret += self.custom.render(depth, style, layout, settings)
       ret += '}\n'
+      cmdup= "cmdup=("
+      for c in gen_cmdup(self, settings):
+        cmdup += f"'{c}', "
+      cmdup += ')'
+      ret = ret.replace('cmdup=XXX', cmdup)
       return ret
     else:
       return super().render(depth,style,layout,settings)
@@ -380,16 +395,20 @@ class config (basewid):
     dirstr = 'dirs=('
     for dir in self.dirs:
       dirstr += f"'{dir.d}', "
-    cmdupstr = 'cmdup=('
-    for c in self.cmdup:
-      cmdupstr += f"'{c.cmd}', "
-    cmdupstr += ')'
+    cmdupstr = 'cmdup=XXX'
     return f'config {{\n\t{dirstr} )\n\t{cmdupstr}\n    \t}}\n' if style is 'imn' else super().render(depth,style,layout,settings)
 
 class dirs (basewid): pass
 class service(basewid): pass
-class cmdup(basewid): pass
 class settings(basewid): pass
+
+def gen_cmdup(x, settings):
+  cmds = []
+  cmds.append(f'scripts/common/ssh_setup.sh {settings.emuroot}/{settings.snapdir}')
+  if type(x).__name__ is 'xdhost':
+    cmds.append(f'scripts/xdhost/bridge_and_tap.sh')
+    cmds.append(f'scripts/xdhost/start_qemu.sh {x.hwconf.arch} {settings.emuroot}/{settings.snapdir}/{x.swconf.os}-{x.hwconf.arch}-{x.hostname}.qcow2 {settings.imgdir}/linux-kernel-{x.hwconf.arch}-{x.swconf.kernel} {os.environ["USER"]}')
+  return cmds
 
 if __name__ == '__main__':
   args = get_args()
@@ -400,7 +419,7 @@ if __name__ == '__main__':
   locs = compose('scenlayout',layo)
   sets = compose('settings', sett)
 
-  ret = scen.render(0,'imn',locs,sett)
+  ret = scen.render(0,'imn',locs,sets)
   ret += locs.render(0,'imn',None, None)
   
   with open(args.outfile,'w') as outf: outf.write(ret)
