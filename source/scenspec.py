@@ -159,7 +159,7 @@ class xdhost(basewid):
       ret += self.swconf.render(depth,style,layout,settings)
       for p in self.ifpeer:
         ret += p.render(depth, style, layout, settings)
-      ret += self.custom.render(depth, style, layout, settings)
+      ret += gen_custom_config(settings)
       ret += '}\n'
       cmdup= "cmdup=("
       for c in gen_cmdup(self, settings):
@@ -187,7 +187,7 @@ class inthost(basewid):
       ret += self.swconf.render(depth, style, layout, settings)
       for p in self.ifpeer:
         ret += p.render(depth, style, layout, settings)
-      ret += self.custom.render(depth, style, layout, settings)
+      ret += gen_custom_config(settings)
       ret += '}\n'
       cmdup= "cmdup=("
       for c in gen_cmdup(self, settings):
@@ -235,7 +235,7 @@ class xdgateway(basewid):
       ret += self.swconf.render(depth, style, layout, settings)
       for p in self.ifpeer:
         ret += p.render(depth,style, layout, settings)
-      ret += self.custom.render(depth, style, layout, settings)
+      ret += gen_custom_config(settings)
       ret += '}\n'
       cmdup= "cmdup=("
       for c in gen_cmdup(self, settings):
@@ -317,7 +317,7 @@ class ingress(basewid): pass
 # Layout classes
 class scenlayout(basewid): 
   def render(self,depth,style='imn',layout=None,settings=None): 
-    return render_children(self,depth,style,layout,settings,exclude=['nodelayout', 'custom_config', 'nodeservice']) if style is 'imn' else super().render(depth,style,layout,settings)
+    return render_children(self,depth,style,layout,settings,exclude=['nodelayout']) if style is 'imn' else super().render(depth,style,layout,settings)
   def get_node_layout(self, nod):
     x = [n for n in self.nodelayout if n.hostname == nod]
     if len(x) != 1: raise Exception ('Error getting layout for:' + nod)
@@ -386,21 +386,17 @@ class labelcoords(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
     return f'labelcoords {{{self.x} {self.y}}}' if style is 'imn' else super().render(depth,style,layout,settings)
 
-class custom(basewid):
-  def render (self, depth, style='imn', layout=None, settings=None):
-    return f'    custom-config {{\n\tcustom-config-id {self.custom_config_id}\n\tcustom-command {self.custom_command}\n\t' + self.config.render(depth, style, layout, settings) + f'    }}\n' 
-
-class config (basewid):
-  def render(self, depth, style='imn', layout=None, settings=None):
-    dirstr = 'dirs=('
-    for dir in self.dirs:
-      dirstr += f"'{dir.d}', "
-    cmdupstr = 'cmdup=XXX'
-    return f'config {{\n\t{dirstr} )\n\t{cmdupstr}\n    \t}}\n' if style is 'imn' else super().render(depth,style,layout,settings)
-
-class dirs (basewid): pass
 class service(basewid): pass
 class settings(basewid): pass
+
+def gen_custom_config(settings):
+  ret = f'    custom-config {{\n\tcustom-config-id service:UserDefined\n\tcustom-command UserDefined\n\t'
+  dirstr = 'dirs=('
+  for dir in settings.shadow_directories.rstrip(';').split(';'):
+    dirstr += f"'{dir}', "
+  cmdupstr = 'cmdup=XXX'
+  ret += f'config {{\n\t{dirstr} )\n\t{cmdupstr}\n    \t}}\n    }}\n'
+  return ret
 
 def gen_cmdup(x, settings):
   cmds = []

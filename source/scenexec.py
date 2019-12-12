@@ -5,6 +5,7 @@ import time
 def execute(scenario, layout, settings, args):
     create_qemu_snapshots(scenario, settings, clean=False)
     start_core_scenario(scenario, settings, args.outfile)
+    #cmdup commands executed per node (see IMN file)
     check_vm_status(scenario, settings)
 
 def clean_snapshots(settings):
@@ -75,6 +76,7 @@ def start_core_scenario(scenario, settings, filename):
             f.close()
             return
         tries+=1
+        f.close()
         time.sleep(1)
     raise Exception('ERROR: CORE session failed to start')
 

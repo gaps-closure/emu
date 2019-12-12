@@ -1,6 +1,7 @@
 {
+  "core_timeout": 30,
   "emuroot": "/home/mkaplan/gaps/top-level/emulator",
   "imgdir": "/IMAGES",
-  "snapdir": ".snapshots",
-  "core_timeout": 30
+  "shadow_directories": "/root;",
+  "snapdir": ".snapshots"
 }

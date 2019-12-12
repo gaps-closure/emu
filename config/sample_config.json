@@ -16,12 +16,7 @@
 		    [{"ifname" :"eth0", "addr":"10.0.101.1/24"},
  		     {"ifname" :"eth1", "addr":"10.0.1.2/24"}] },
 	  "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"},
-	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}],
-	  "custom": {
-	    "custom_config_id": "service:UserDefined",
-	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}]}
-	  }
+	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}]
 	}
       ],
       "inthost":
@@ -31,24 +26,14 @@
 	  "swconf":{"service": [{"s": "UserDefined"}]},
 	  "nwconf":{"interface":
 		    [{"ifname": "eth0", "addr": "10.0.101.2/24"}] },
-          "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"}],
-	  "custom": {
-	    "custom_config_id": "service:UserDefined",
-	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}]}
-	  }
+          "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"}]
 	},
 	{
 	  "hostname": "orange-2",
 	  "swconf":{"service": [{"s": "UserDefined"}]},
 	  "nwconf":{"interface":
 		    [{"ifname": "eth0", "addr": "10.0.101.3/24"}] },
-	  "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"}],
-	  "custom": {
-	    "custom_config_id": "service:UserDefined",
-	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}]}
-	  }
+	  "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"}]
 	}
       ],
       "link": 
@@ -79,12 +64,7 @@
 		    [{"ifname" :"eth0", "addr":"10.0.102.1/24"},
  		     {"ifname" :"eth1", "addr":"10.0.2.2/24"}] },
 	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"},
-	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}],
-	  "custom": {
-	    "custom_config_id": "service:UserDefined",
-	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}]}
-	  }
+	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}]
 	}
       ],
       "inthost":
@@ -94,24 +74,14 @@
 	  "swconf":{"service": [{"s": "UserDefined"}]},
 	  "nwconf":{"interface":
 		    [{"ifname": "eth0", "addr": "10.0.102.2/24"}] },
-	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}],
-	  "custom": {
-	    "custom_config_id": "service:UserDefined",
-	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}]}
-	  }
+	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}]
 	},
 	{
 	  "hostname": "purple-2",
 	  "swconf":{"service": [{"s": "UserDefined"}]},
 	  "nwconf":{"interface":
 		    [{"ifname": "eth0", "addr": "10.0.102.3/24"}] },
-	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}],
-	  "custom": {
-	    "custom_config_id": "service:UserDefined",
-	    "custom_command": "UserDefined",
-	    "config":{"dirs": [{"d": "/root"}]}
-	  }
+	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}]
 	}
       ],
       "link": 
@@ -139,12 +109,7 @@
 		[{"ifname": "eth0", "addr": "10.0.1.1/24"},
 		 {"ifname": "eth1", "addr": "10.0.2.1/24"}] },
       "ifpeer":[{"ifname": "eth0", "peername": "orange-enclave-gw"},
-		{"ifname": "eth1", "peername": "purple-enclave-gw"}],
-      "custom": {
-	"custom_config_id": "service:UserDefined",
-	"custom_command": "UserDefined",
-	"config":{"dirs": [{"d": "/root"}]}
-      }
+		{"ifname": "eth1", "peername": "purple-enclave-gw"}]
     }
   ],
   "xdlink": 
