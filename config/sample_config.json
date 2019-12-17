@@ -115,12 +115,12 @@
   "xdlink": 
   [
     { "model":  "BITW", 
-      "left":   {"f": "orange-enclave-gw", "t":"orange-purple-xd-gw", 
-	         "egress":   {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}, 
-                 "ingress":  {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}}, 
+      "left":   {"f": "orange-enclave-gw", "t":"orange-purple-xd-gw",
+	         "egress":   {"filterspec": "left-egress-spec", "bandwidth":"100000000", "delay": 0},
+                 "ingress":  {"filterspec": "left-ingress-spec", "bandwidth":"100000000", "delay": 0}},
       "right":  {"f": "orange-purple-xd-gw", "t":"purple-enclave-gw",
-	         "egress":   {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}, 
-                 "ingress":   {"filterspec": "passthru", "bandwidth":"100000000", "delay": 0}}
+	         "egress":   {"filterspec": "right-egress-spec", "bandwidth":"100000000", "delay": 0},
+                 "ingress":   {"filterspec": "right-ingress-spec", "bandwidth":"100000000", "delay": 0}}
     }
   ]
 }

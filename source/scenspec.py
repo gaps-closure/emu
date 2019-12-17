@@ -126,12 +126,24 @@ class scenario(basewid):
       names.append(h.hostname)
     return names
 
+  def get_xdlinks_for_xdgateway(self, xdg):
+    links = []
+    xd_peers = []
+    for p in xdg.ifpeer:
+      xd_peers.append(p.peername)
+    for xdlink in self.xdlink:
+      if xdlink.left.f in xd_peers and xdlink.right.t in xd_peers:
+        links.append(xdlink)
+    return links
+
   def render_addons(self, depth, style, layout, settings):
     #instantiation hook
     ret = 'hook 3:instantiation_hook.sh {\n'
     for n in self.get_hostnames():
       ret += f'    mkdir $SESSION_DIR/{n}.conf/scripts\n'
-      ret += f'    cp -r {settings.emuroot}/scripts/* $SESSION_DIR/{n}.conf/scripts\n' 
+      ret += f'    mkdir $SESSION_DIR/{n}.conf/tools\n'
+      ret += f'    cp -r {settings.emuroot}/scripts/* $SESSION_DIR/{n}.conf/scripts\n'
+      ret += f'    cp -r {settings.emuroot}/tools/* $SESSION_DIR/{n}.conf/tools\n'
     ret += '}\n'
     return ret if style is 'imn' else ""
 
@@ -400,10 +412,10 @@ def gen_custom_config(settings):
 
 def gen_cmdup(x, settings):
   cmds = []
-  cmds.append(f'scripts/common/ssh_setup.sh {settings.emuroot}/{settings.snapdir}')
+  cmds.append(f'scripts/common/common-config-ssh.sh {settings.emuroot}/{settings.snapdir}')
   if type(x).__name__ is 'xdhost':
-    cmds.append(f'scripts/xdhost/bridge_and_tap.sh')
-    cmds.append(f'scripts/xdhost/start_qemu.sh {x.hwconf.arch} {settings.emuroot}/{settings.snapdir}/{x.swconf.os}-{x.hwconf.arch}-{x.hostname}.qcow2 {settings.imgdir}/linux-kernel-{x.hwconf.arch}-{x.swconf.kernel} {os.environ["USER"]}')
+    cmds.append(f'scripts/xdh/xdh-config-core-interfaces.sh')
+    cmds.append(f'scripts/xdh/xdh-start-qemu-instance.sh {x.hwconf.arch} {settings.emuroot}/{settings.snapdir}/{x.swconf.os}-{x.hwconf.arch}-{x.hostname}.qcow2 {settings.imgdir}/linux-kernel-{x.hwconf.arch}-{x.swconf.kernel} {os.environ["USER"]}')
   return cmds
 
 if __name__ == '__main__':
