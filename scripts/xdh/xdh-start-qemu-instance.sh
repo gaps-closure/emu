@@ -9,7 +9,7 @@ CURDT=`date -u --iso-8601=seconds | sed -e 's/ /T/'`
 echo "Starting QEMU=$QEMU_ARCH with interfaces: at $CURDT"
 case $QEMU_ARCH in
     amd64)
-        qemu-system-x86_64 -nographic -enable-kvm -m 1G -smp 1 \
+        nice -n -20 qemu-system-x86_64 -nographic -enable-kvm -m 2048 -smp 1 \
              -drive file=${SNAPSHOT},format=qcow2 \
              -kernel ${KERNEL} -append 'earlycon console=ttyS0 root=/dev/sda rw' \
              -net nic -net tap,ifname=qemutap0,script=no,downscript=no \
@@ -19,7 +19,7 @@ case $QEMU_ARCH in
              1> /tmp/qemu_${QEMU_ARCH}_${USER_INITIALS}.log &
         ;;
     arm64)
-        qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
+        nice -n -20 qemu-system-aarch64 -nographic -M virt -cpu cortex-a53 -m 1024 \
              -drive file=${SNAPSHOT},format=qcow2 \
              -kernel ${KERNEL} -append 'earlycon root=/dev/vda rw' \
              -netdev tap,id=unet0,ifname=qemutap1,script=no,downscript=no -device virtio-net-device,netdev=unet0 \
