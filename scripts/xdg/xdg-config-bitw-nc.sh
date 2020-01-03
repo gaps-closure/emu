@@ -26,3 +26,4 @@ nohup bash -c "nc -4 -k -l ${IP_RIGHT} ${PORT_RIGHT} \
     | python3 ${TOOLS}/filterproc.py ${RISPEC}   \
     | python3 ${TOOLS}/filterproc.py ${LESPEC}   \
               > fifo-left &" &> /dev/null
+echo "SUCCESS"

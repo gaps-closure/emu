@@ -12,11 +12,8 @@ ISPEC=$7
 
 TOOLS="${SESSION_DIR}/${NODE_NAME}.conf/tools"
 
-ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP} 'mkdir -p tools'
-scp -i /root/.ssh/id_closure_rsa ${TOOLS}/* closure@${MGMT_IP}:tools
-
 python3 <<END
-from pexpect import pxssh
+import pexpect
 import time
 import sys
 
@@ -26,26 +23,45 @@ def spl_print(lines):
     if y!=b'': print(y.decode('utf-8'))
   sys.stdout.write(l[-1].decode('utf-8'))
 
-s = pxssh.pxssh()
-s.login(server='${MGMT_IP}', username='closure', ssh_key='/root/.ssh/id_closure_rsa')
-s.sendline('rm -f fifo*')
-s.prompt()
-spl_print(s.before+s.after)
-s.sendline('mkfifo fifo-left')
-s.prompt()
-spl_print(s.before+s.after)
-s.sendline('mkfifo fifo-right')
-s.prompt()
-spl_print(s.before+s.after)
-time.sleep(1)
-cmd = 'nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} < fifo-left  | python3 tools/filterproc.py ${ESPEC} > fifo-right &'
-s.sendline(cmd)
-s.prompt()
-spl_print(s.before+s.after)
-cmd = 'nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | python3 tools/filterproc.py ${ISPEC} > fifo-left  &'
-s.sendline(cmd)
-s.prompt()
-spl_print(s.before+s.after)
-s.logout()
+prompt = 'closure@.* '
+
+i = 0
+s = None
+while(i < 60):
+  try:
+    s = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP} -o ConnectTimeout=5')
+    s.expect(prompt, timeout=1)
+    break
+  except:
+    i += 1
+  if i == 60:
+    print('ERROR: ssh failed')
+    exit()
+try:
+  s.sendline('mkdir -p tools')
+  s.expect(prompt)
+  spl_print(s.before+s.after)
+  scp = pexpect.spawn('scp -i /root/.ssh/id_closure_rsa ${TOOLS}/filterproc.py closure@${MGMT_IP}:tools')
+  scp.expect(pexpect.EOF)
+  s.sendline('rm -f fifo*')
+  s.expect(prompt)
+  spl_print(s.before+s.after)
+  s.sendline('mkfifo fifo-left')
+  s.expect(prompt)
+  spl_print(s.before+s.after)
+  s.sendline('mkfifo fifo-right')
+  s.expect(prompt)
+  spl_print(s.before+s.after)
+  cmd = 'nohup bash -c "nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} < fifo-left  | python3 tools/filterproc.py ${ESPEC} > fifo-right &" &'
+  s.sendline(cmd)
+  s.expect(prompt)	
+  spl_print(s.before+s.after)
+  cmd = 'nohup bash -c "nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | python3 tools/filterproc.py ${ISPEC} > fifo-left &" &'
+  s.sendline(cmd)
+  s.expect(prompt)
+  spl_print(s.before+s.after)
+except Exception as e:
+  print('ERROR: failure during nc setup (%s)' % (e))
+  exit()
+print('SUCCESS')
 END
-echo "DONE"

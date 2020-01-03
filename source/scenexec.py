@@ -2,8 +2,11 @@ import os
 import subprocess
 import time
 
+DBG=False
+
 def execute(scenario, layout, settings, args):
     create_qemu_snapshots(scenario, settings, clean=False)
+    os.system('reset')
     start_core_scenario(scenario, settings, args.outfile)
     #cmdup commands executed per node (see IMN file)
     check_vm_status(scenario, settings)
@@ -88,6 +91,7 @@ def check_vm_status(scenario, settings):
             print(f'Checking QEMU up at {x.hostname}...', end="", flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
             res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-check-qemu-up.sh'], text=True)
+            if DBG: print(res)
             if 'SUCCESS' not in res:
                 raise Exception (f'Failure to boot/ssh into {x.hostname}: {res}')
             print('DONE!', flush=True)
@@ -125,7 +129,10 @@ def configure_xdgateways_nc(scenario):
                 args += [lispec, respec, rispec, lespec]
             cmd = ['vcmd', '-c', core_path, '--', f'scripts/xdg/xdg-config-{xdl.model.lower()}-nc.sh'] + args
             #print('exec: '+ ' '.join(cmd), flush=True)
-            subprocess.run(cmd)
+            res = subprocess.check_output(cmd, text=True)
+            if DBG: print(res)
+            if 'SUCCESS' not in res:
+                raise Exception (f'Failure to start nc at {xdg.hostname}')
             print('DONE!', flush=True)
 
 def configure_xdhosts_nc_socat(scenario, settings):
@@ -158,9 +165,12 @@ def configure_xdhosts_nc_socat(scenario, settings):
                             right_port = '12346'
                             specs = [respec, rispec]
                         core_path = f'/tmp/pycore.{scenario.core_session_id}/{h}'
-                        print(f'Starting nc processes on {h}...', flush=True)
-                        subprocess.run(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-config-bknd-nc.sh', '127.0.0.1', '54321', right_ip, right_port, settings.mgmt_ip] + specs)
-                        print('DONE!\n', flush=True)
+                        print(f'Starting nc processes on {h}...', end="", flush=True)
+                        res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-config-bknd-nc.sh', '127.0.0.1', '54321', right_ip, right_port, settings.mgmt_ip] + specs, text=True)
+                        if DBG: print(res)
+                        if 'SUCCESS' not in res:
+                            raise Exception (f'Failure to start nc on {h}: {res}')
+                        print('DONE!', flush=True)
 
                 # install socat
                 for h in [lhost, rhost]:
@@ -175,6 +185,9 @@ def configure_xdhosts_nc_socat(scenario, settings):
                         else:
                             socat_port = 12346
                     core_path = f'/tmp/pycore.{scenario.core_session_id}/{h}'
-                    print(f'Starting charcter device (socat) on {h}...', flush =True)
-                    subprocess.run(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-config-socat.sh', settings.mgmt_ip, socat_ip, str(socat_port)])
-                    print('\nDONE!')
+                    print(f'Starting charcter device (socat) on {h}...', flush =True, end="")
+                    res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-config-socat.sh', settings.mgmt_ip, socat_ip, str(socat_port)], text=True)
+                    if DBG: print(res)
+                    if 'SUCCESS' not in res:
+                        raise Exception (f'Failure to start socat on {h}: {res}')
+                    print('DONE!')
