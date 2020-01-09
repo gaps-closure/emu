@@ -3,3 +3,4 @@ imgs
 build
 *pycache*
 .snapshots
+*.imn
