@@ -189,7 +189,7 @@ class inthost(basewid):
       nodelayout = layout.get_node_layout(self.hostname)
       ret=f'''node {nid} {{
     type router
-    model host
+    model PC
     network-config {{
 \thostname {self.hostname}
 \t!\n'''   
@@ -236,7 +236,7 @@ class xdgateway(basewid):
       nodelayout = layout.get_node_layout(self.hostname)
       ret=f'''node {nid} {{
     type router
-    model host
+    model router
     network-config {{
 \thostname {self.hostname}
 \t!
