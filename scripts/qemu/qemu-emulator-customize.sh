@@ -125,11 +125,11 @@ do_cmd(p, 'mkdir -p ~/.ssh && chmod 700 ~/.ssh')
 do_cmd(p, 'echo "$PUBKEY" >> ~/.ssh/authorized_keys')
 do_cmd(p, 'chmod 600 ~/.ssh/authorized_keys')
 
-# Disable DNS lookup in sshd
-do_cmd(p, 'sudo chmod 777 /etc/ssh/sshd_config')
-do_cmd(p, 'echo "UsePAM yes" >> /etc/ssh/sshd_config')
-do_cmd(p, 'echo "UseDNS no" >> /etc/ssh/sshd_config')
-do_cmd(p, 'sudo chmod 644 /etc/ssh/sshd_config')
+# Disable DNS lookup in sshd (effort to get sshd to work more reliably)
+# do_cmd(p, 'sudo chmod 777 /etc/ssh/sshd_config')
+# do_cmd(p, 'echo "UsePAM yes" >> /etc/ssh/sshd_config')
+# do_cmd(p, 'echo "UseDNS no" >> /etc/ssh/sshd_config')
+# do_cmd(p, 'sudo chmod 644 /etc/ssh/sshd_config')
 
 # Apply scenario-node specific netplan to copy to /etc/netplan
 do_cmd(p, 'sudo mkdir -p /etc/netplan')
