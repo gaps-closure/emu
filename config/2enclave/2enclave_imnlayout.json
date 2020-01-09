@@ -17,13 +17,13 @@
  },
  "nodelayout": [
   {
-   "hostname":"orange-enclave-gw",
+   "hostname":"orange-enclave-gw-P",
    "canvas":"Canvas1",
    "iconcoords": {"x":265.0, "y":171.0},
    "labelcoords": {"x":265.0, "y":203.0}
   },
   {
-   "hostname":"purple-enclave-gw",
+   "hostname":"purple-enclave-gw-O",
    "canvas":"Canvas1",
    "iconcoords": {"x":697.0, "y":168.0},
    "labelcoords": {"x":697.0, "y":200.0}
