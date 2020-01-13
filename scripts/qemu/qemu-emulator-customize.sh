@@ -120,6 +120,12 @@ do_cmd(p, 'sudo apt install -y haveged')
 #print('\nReconfiguring ssh')
 #do_cmd(p, 'sudo dpkg-reconfigure openssh-server')
 
+print('\nInstalling ImageMagick')
+do_cmd(p, 'sudo apt install -y imagemagick')
+
+print('\nInstalling xauth')
+do_cmd(p, 'sudo apt install -y xauth')
+
 # Add ssh key for remote access and configure .ssh directory perms
 do_cmd(p, 'mkdir -p ~/.ssh && chmod 700 ~/.ssh')
 do_cmd(p, 'echo "$PUBKEY" >> ~/.ssh/authorized_keys')
