@@ -80,8 +80,8 @@ prep_build_machine() {
       bash bridge-utils ebtables iproute2 xterm mgen traceroute ethtool \
       build-essential libssl-dev libffi-dev \
       python3 python3-pip python3-dev libev-dev python3-venv \
-      tcl8.6 tk8.6 libtk-img quagga \
-      ubuntu-dev-tools qemu qemu-efi qemu-user-static qemu-system-arm qemu-system-x86
+      tcl8.6 tk8.6 libtk-img quagga uml-utilities \
+      ubuntu-dev-tools qemu qemu-efi qemu-user-static qemu-system-arm qemu-system-x86 qemu-user
     sudo -H pip3 install --upgrade pip
     sudo -H pip3 install pexpect
     if [ $NRLCORE == "yes" ]; then
