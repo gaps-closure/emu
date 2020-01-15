@@ -5,18 +5,19 @@ import time
 import sys
 import pexpect
 
-i = 0
+GIVEUP=300
 success = False
-while (i < 300 and not success):
+start = time.time()
+while (not success and (time.time() - start) < GIVEUP):
   try:
     prompt = 'closure@.* '
-    p = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1 -o ConnectTimeout=2')
-    p.expect(prompt, timeout=1)
+    p = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1 -o ConnectTimeout=10')
+    p.expect(prompt, timeout=10)
     success = True
   except:
-    i += 1
+    time.sleep(1)
 if not success:
-  print('ERROR: ssh through management interface failed')
+  print('ERROR: ssh through management interface failed, tried for %ds' % (GIVEUP))
 else:
   print('SUCCESS')
 END

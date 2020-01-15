@@ -77,6 +77,7 @@ configure_snapshot() {
 import os
 import sys
 import pexpect
+import time
 
 def spl_print(lines): 
   l = lines.splitlines() 
@@ -147,6 +148,8 @@ do_cmd(p, 'cat /etc/netplan/config.yaml')
 do_cmd(p, 'sudo netplan generate')
 
 do_cmd(p, '# Additional commands here')
+do_cmd(p, 'sync;sync')
+time.sleep(60)
 do_cmd(p, 'sync;sync')
 print('\nCompleted configuration')
 END

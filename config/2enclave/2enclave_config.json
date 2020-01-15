@@ -57,8 +57,8 @@
       [
 	{
 	  "hostname": "purple-enclave-gw-O",
-	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "hwconf":{"arch": "arm64"},
+	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "xenial",
 		    "service": [{"s": "UserDefined"}]}, 
 	  "nwconf":{"interface": 
 		    [{"ifname" :"eth0", "addr":"10.0.102.1/24"},
@@ -106,15 +106,15 @@
       "hostname": "orange-purple-xd-gw",
       "swconf":{"service": [{"s": "UserDefined"}, {"s": "IPForward"}]},
       "nwconf":{"interface":
-		[{"ifname": "eth0", "addr": "10.0.1.1/24"},
-		 {"ifname": "eth1", "addr": "10.0.2.1/24"}] },
+		[{"ifname": "eth0", "addr": "10.1.2.1/24"},
+		 {"ifname": "eth1", "addr": "10.2.1.1/24"}] },
       "ifpeer":[{"ifname": "eth0", "peername": "orange-enclave-gw-P"},
 		{"ifname": "eth1", "peername": "purple-enclave-gw-O"}]
     }
   ],
   "xdlink": 
   [
-    { "model":  "BKND", 
+    { "model":  "BITW",
       "left":   {"f": "orange-enclave-gw-P", "t":"orange-purple-xd-gw",
 	         "egress":   {"filterspec": "left-egress-spec", "bandwidth":"100000000", "delay": 0},
                  "ingress":  {"filterspec": "left-ingress-spec", "bandwidth":"100000000", "delay": 0}},
