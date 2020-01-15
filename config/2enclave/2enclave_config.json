@@ -106,8 +106,8 @@
       "hostname": "orange-purple-xd-gw",
       "swconf":{"service": [{"s": "UserDefined"}, {"s": "IPForward"}]},
       "nwconf":{"interface":
-		[{"ifname": "eth0", "addr": "10.0.1.1/24"},
-		 {"ifname": "eth1", "addr": "10.0.2.1/24"}] },
+		[{"ifname": "eth0", "addr": "10.1.2.1/24"},
+		 {"ifname": "eth1", "addr": "10.2.1.1/24"}] },
       "ifpeer":[{"ifname": "eth0", "peername": "orange-enclave-gw-P"},
 		{"ifname": "eth1", "peername": "purple-enclave-gw-O"}]
     }
