@@ -57,8 +57,8 @@
       [
 	{
 	  "hostname": "purple-enclave-gw-O",
-	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "hwconf":{"arch": "arm64"},
+	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "xenial",
 		    "service": [{"s": "UserDefined"}]}, 
 	  "nwconf":{"interface": 
 		    [{"ifname" :"eth0", "addr":"10.0.102.1/24"},
@@ -114,7 +114,7 @@
   ],
   "xdlink": 
   [
-    { "model":  "BKND", 
+    { "model":  "BITW",
       "left":   {"f": "orange-enclave-gw-P", "t":"orange-purple-xd-gw",
 	         "egress":   {"filterspec": "left-egress-spec", "bandwidth":"100000000", "delay": 0},
                  "ingress":  {"filterspec": "left-ingress-spec", "bandwidth":"100000000", "delay": 0}},
