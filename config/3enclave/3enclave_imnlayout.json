@@ -6,7 +6,7 @@
    "ip_addresses": "no",
    "ipv6_addresses": "no",
    "node_labels": "yes",
-   "link_labels": "yes",
+   "link_labels": "no",
    "show_api": "no",
    "background_images": "no",
    "annotations": "yes",
