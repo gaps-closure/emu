@@ -25,18 +25,19 @@ def spl_print(lines):
 
 prompt = 'closure@.* '
 
-i = 0
 s = None
-while(i < 60):
+GIVEUP=300
+start = time.time()
+while(time.time() - start < GIVEUP):
   try:
-    s = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP} -o ConnectTimeout=5')
-    s.expect(prompt, timeout=1)
+    s = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP}')
+    s.expect(prompt, timeout=30)
     break
   except:
-    i += 1
-  if i == 60:
-    print('ERROR: ssh failed')
-    exit()
+    time.sleep(1)
+if (time.time() - start >= GIVEUP):
+  print('ERROR: ssh failed')
+  exit()
 try:
   s.sendline('mkdir -p tools')
   s.expect(prompt)

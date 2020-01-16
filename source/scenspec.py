@@ -142,8 +142,10 @@ class scenario(basewid):
     for n in self.get_hostnames():
       ret += f'    mkdir $SESSION_DIR/{n}.conf/scripts\n'
       ret += f'    mkdir $SESSION_DIR/{n}.conf/tools\n'
+      ret += f'    mkdir $SESSION_DIR/{n}.conf/apps\n'
       ret += f'    cp -r {settings.emuroot}/scripts/* $SESSION_DIR/{n}.conf/scripts\n'
       ret += f'    cp -r {settings.emuroot}/tools/* $SESSION_DIR/{n}.conf/tools\n'
+      ret += f'    cp -r {settings.emuroot}/.apps/*{n}* $SESSION_DIR/{n}.conf/apps &> /dev/null\n'
     ret += '}\n'
     return ret if style is 'imn' else ""
 

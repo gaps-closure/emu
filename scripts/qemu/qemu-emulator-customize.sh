@@ -100,10 +100,10 @@ while i!=0:
   i = p.expect(['login: ','\n\['])
   spl_print(p.before+p.after)
 p.sendline('closure')   # XXX: username, should be an argument to script
-p.expect('Password:.*')
+p.expect('Password:.*', timeout=300)
 spl_print(p.before+p.after)
 p.sendline('closure')   # XXX: password, should be an argument to script
-p.expect(prompt)
+p.expect(prompt, timeout=300)
 spl_print(p.before+p.after)
 
 print('\nLogged in, configuring snapshot')

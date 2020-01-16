@@ -12,6 +12,7 @@ def execute(scenario, layout, settings, args):
     check_vm_status(scenario, settings)
     configure_xdgateways_nc(scenario)
     configure_xdhosts_nc_socat(scenario, settings)
+    install_apps(scenario, settings)
 
 def clean_snapshots(settings):
     subprocess.run(['rm', '-rf', settings.snapdir])
@@ -191,3 +192,14 @@ def configure_xdhosts_nc_socat(scenario, settings):
                     if 'SUCCESS' not in res:
                         raise Exception (f'Failure to start socat on {h}: {res}')
                     print('DONE!')
+
+def install_apps(scenario, settings):
+    for enc in scenario.enclave:
+        for x in enc.xdhost:
+            print(f'Installing Apps on {x.hostname}...', end="", flush=True)
+            core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
+            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-apps.sh', settings.mgmt_ip], text=True)
+            if DBG: print(res)
+            if 'SUCCESS' not in res:
+                raise Exception (f'Unable to install apps on {x.hostname}: {res}')
+            print('DONE!', flush=True)
