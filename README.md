@@ -4,7 +4,7 @@ This repository hosts the open source components of the EMU for Multi-ISA cross-
 This repository is maintained by Perspecta Labs.
 
 ## Installing External Dependencies
-EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We recommend this distribution to simplify installation of external dependencies. Upon cloning the EMU repository, follow these steps to install required packages (assumes sudo permissions enabled for using `apt`):
+EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We recommend this distribution to simplify installation of external dependencies. Upon cloning the EMU repository, follow these steps to install required packages (assumes sudo permissions enabled for calling `apt`):
 ```
 cd scripts/qemu
 ./qemu-build-vm-images.sh -p -c
