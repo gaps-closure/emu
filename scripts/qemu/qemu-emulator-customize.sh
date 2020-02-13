@@ -149,7 +149,7 @@ do_cmd(p, 'sudo netplan generate')
 
 do_cmd(p, '# Additional commands here')
 do_cmd(p, 'sync;sync')
-time.sleep(60)
+time.sleep(20)
 do_cmd(p, 'sync;sync')
 print('\nCompleted configuration')
 END

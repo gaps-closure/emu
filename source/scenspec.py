@@ -431,8 +431,12 @@ if __name__ == '__main__':
 
   ret = scen.render(0,'imn',locs,sets)
   ret += locs.render(0,'imn',None, None)
-  
-  with open(args.outfile,'w') as outf: outf.write(ret)
+
+  IMNDIR=f'{sets.emuroot}/{sets.imndir}'
+  if not os.path.exists(IMNDIR):
+    os.mkdir(IMNDIR)
+  setattr(args, 'imnAbsPath', f'{sets.emuroot}/{sets.imndir}/{args.outfile}')
+  with open(args.imnAbsPath,'w') as outf: outf.write(ret)
   outf.close()
 
   execute(scen, locs, sets, args)

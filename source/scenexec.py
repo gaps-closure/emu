@@ -6,8 +6,8 @@ DBG=False
 
 def execute(scenario, layout, settings, args):
     create_qemu_snapshots(scenario, settings, clean=False)
-    #os.system('reset')
-    start_core_scenario(scenario, settings, args.outfile)
+    os.system('reset')
+    start_core_scenario(scenario, settings, args.imnAbsPath)
     #cmdup commands executed per node (see IMN file)
     check_vm_status(scenario, settings)
     configure_xdgateways_nc(scenario)
