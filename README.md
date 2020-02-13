@@ -9,4 +9,4 @@ EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We
 cd scripts/qemu
 sudo ./qemu-build-vm-images.sh -p -c
 ```
-Key dependencies include NRL CORE (nrl.navy.mil/itd/ncs/products/core), QEMU, and Linux bridge utilities
+Key dependencies include [NRL CORE](http://nrl.navy.mil/itd/ncs/products/core), [QEMU](http://qemu.org), and Linux bridge utilities.
