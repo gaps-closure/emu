@@ -53,16 +53,21 @@ try:
   s.sendline('mkfifo fifo-right')
   s.expect(prompt)
   spl_print(s.before+s.after)
-  cmd = 'nohup bash -c "nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} < fifo-left  | python3 tools/filterproc.py ${ESPEC} > fifo-right &" &'
-  s.sendline(cmd)
-  s.expect(prompt)	
-  spl_print(s.before+s.after)
-  cmd = 'nohup bash -c "nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | python3 tools/filterproc.py ${ISPEC} > fifo-left &" &'
-  s.sendline(cmd)
-  s.expect(prompt)
-  spl_print(s.before+s.after)
+  s.close()
 except Exception as e:
   print('ERROR: failure during nc setup (%s)' % (e))
   exit()
-print('SUCCESS')
+#print('SUCCESS')
 END
+
+ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1 "nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} < fifo-left  | python3 tools/filterproc.py ${ESPEC} > fifo-right &" &
+
+sleep 1
+
+ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1 "nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | python3 tools/filterproc.py ${ISPEC} > fifo-left &" &
+
+sleep 5
+pkill -f "ssh -i"
+
+echo "SUCCESS"
+
