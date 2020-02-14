@@ -16,6 +16,7 @@ This repository is maintained by Perspecta Labs.
 - [Accessing the QEMU Instance](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#accessing-the-qemu-instance)
 - [Utilizing the Emulated SDH Device](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#utilizing-the-emulated-sdh-device)
 - [Planned Enhancements](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#planned-enhancements)
+
 ## Installing External Dependencies
 EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We recommend this distribution to simplify installation of external dependencies. Upon cloning the EMU repository, follow these steps to install required packages (assumes sudo permissions enabled for calling `apt`):
 ```
@@ -23,6 +24,7 @@ cd scripts/qemu
 ./qemu-build-vm-images.sh -p -c
 ```
 Key dependencies include [NRL CORE](http://nrl.navy.mil/itd/ncs/products/core), [QEMU](http://qemu.org), and Linux bridge utilities.
+
 ## Provisioning QEMU VM Disk Images
 EMU uses QEMU instances to represent enclave gateways, the nodes designated for cross-domain transactions via a character device to the SDH. This allows us to model multi-domain, multi-ISA environments on which the partitioned software will execute. As a prerequisite to executing the emulator, it is necessary to build clean VM instances (referred to as the "golden images") from which EMU will generate runtime snapshots per experiment. The snapshots allow EMU to quickly spawn clean VM instances for each experiment as well as support multiple experiments in parallel without interfering among users.
 
@@ -67,6 +69,7 @@ ls -l /IMAGES
 -r--r--r-- 1 root root 2016935936 Dec  3 21:05 ubuntu-amd64-eoan-qemu.qcow2
 -r--r--r-- 1 root root 1001259008 Dec  3 21:05 ubuntu-arm64-eoan-qemu.qcow2
 ```
+
 ## Configuration
 EMU comes prepackaged with configuration for 2, 3, and 4 enclaves (GAPS Phase 1, Phase 2, and Phase 3 topologies respectively). The configuration files are JSON formatted and will eventually be generated automatically by CLOSURE tools from the target application's requirements and security policies. Until then, these files are manually built and maintained. The  files include:
 ```
@@ -74,7 +77,8 @@ enclaves.json   # GAPS cross-domain topology description
 layout.json     # controls visual layout of nodes
 settings.json   # miscellaneous settings
 ```
-Configuration files are located in the subdirectory `config/[N]enclave` where [N] is the number of enclaves. Users will need to modify `enclaves.json` to adjust the ISA and OS for the cross-domain hosts. Layout and Settings JSON files should not require modification.
+Configuration files are located in the subdirectory `config/[N]enclave` where [N] is the number of enclaves. Users will need to modify `enclaves.json` to adjust the ISA and OS for the cross-domain hosts. `settings.json` will require modification if you install VM images to a location other than `/IMAGES`. `layout.json` should not be modified.
+
 ### Selecting the ISA for Enclave Gateways/Cross-Domain Hosts (xdhost)
 Consider the following snippet from `config/2enclave/enclave.json`:
 ```json
@@ -89,6 +93,7 @@ To change orange-enclave-gw-P to use ARM64, modify the configuration as follows:
 "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "xenial",
 ```
 EMU has been tested using AMD64(eoan) and ARM64(xenial) images. Other architecture/OS instances can be built by following the above provisioning steps, but has not been tested.
+
 ### Selecting the SDH Model for Cross-Domain Links (xdlink)
 EMU supports Bookends (BKND) and Bump-In-The-Wire (BITW) SDH deployments. Selection of the model is specified in the `xdlink` section of enclaves.json:
 ```json
@@ -109,6 +114,7 @@ The above specifies a BITW model. Simply change to the following to use BKND:
 "model": "BKND"
 ```
 For detailed description of the BITW/BKND Emulator design, see [Design Notes](doc/design-notes.md)
+
 ## Preparing Applications  
 In the Emulator root directory (i.e. gaps-emulator/), create a subdirctory .apps:
 ```
@@ -116,22 +122,26 @@ gaps-emulator$ mkdir .apps
 cd .apps
 ```
 Within this directory, place files of the form [hostname].tar where [hostname] corresponds to the hostname of the target node (e.g. orange-enclave-gw-P.tar). The tar file should include an executable binary and any auxillary files required to run. The tarball will be unpacked to the `/home/closure/apps` on the QEMU instance (app installation is only supported for enclave gateways).
+
 ## Running the Emulator
 A quick-start script is provided to launch the emulator (complete above steps first).
 ```
 gaps-emulator$ ./start.sh [N] # [N] = number of enclaves (2,3, or 4)
 ```
 The start script will retrieve the appropriate configuration files and launch the EMU GUI. 
+
 ## Accessing the QEMU instance
 Double click an enclave-gateway node to open a terminal to the respective node. Note that this terminal is to that of the CORE node, not the QEMU instance running inside of that node. To enter the QEMU instance:
 ```
 ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1
 ```
+
 ## Utilizing the Emulated SDH Device
 The QEMU instance at an enclave gateway will instantiate a character device (`/dev/vcom`) to which a GAPS application can read/write to exchange data. A proof-of-concept test of the device can be conducted as follows:
 1. Open terminals to the QEMU instances of a cross-domain pair (e.g. orange-enclave-gw-P and purple-enclave-gw-O)
 2. On one enclave, run `cat /dev/vcom`. On the other enclave run `echo "hello world!" > /dev/vcom`. If the emulator is running correctly, `"hello world!"` will appear on the terminal of the enclave running `cat`.
 In practice applications will read and write binary data to the character device.
+
 ## Planned Enhancements
 The GAPS Emulator is under active development. Features planned for upcoming releases include:
 * Hardware Abstraction Layer (HAL) to provide a standard API for GAPS-applications and on-wire formats compatible with vendor solutions
