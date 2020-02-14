@@ -2,6 +2,9 @@
 This repository hosts the open source components of the EMU for Multi-ISA cross-domain systems test and evaluation. The `master` branch contains the most recent public release software while `develop` contains bleeding-edge updates and work-in-progress features for use by beta testers and early adopters.
 
 This repository is maintained by Perspecta Labs.
+
+<img src="https://github.com/gaps-closure/gaps-emulator/blob/master/2enclave.png" width="511" height="423">
+
 ## Contents
 - [Installing External Dependencies](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#installing-external-dependencies)
 - [Provisioning QEMU VM Disk Images](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#provisioning-qemu-vm-disk-images)
