@@ -49,11 +49,11 @@ You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in 
 
 An example installation into `/IMAGES/` including AMD64 and ARM64 instances will look like the following:
 ```
-/IMAGES/
-/IMAGES/ubuntu-amd64-eoan-qemu.qcow2
-/IMAGES/ubuntu-arm64-eoan-qemu.qcow2
-/IMAGES/linux-kernel-arm64-xenial
-/IMAGES/linux-kernel-amd64-eoan
+ls -l /IMAGES/
+-r--r--r-- 1 root root   11391736 Dec  3 21:05 linux-kernel-amd64-eoan
+-r--r--r-- 1 root root   14678016 Dec  3 21:05 linux-kernel-arm64-xenial
+-r--r--r-- 1 root root 2016935936 Dec  3 21:05 ubuntu-amd64-eoan-qemu.qcow2
+-r--r--r-- 1 root root 1001259008 Dec  3 21:05 ubuntu-arm64-eoan-qemu.qcow2
 ```
 
 
