@@ -45,7 +45,7 @@ Now configure the virgin image to make it usable generally with user networking 
 # ARM64
 ./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G -u
 ```
-You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in `scripts/qemu/build`. This image and the associated kernel should be saved to a common location (e.g., `/IMAGES`) and the files should be made read-only. EMU automates snapshotting the golden images.
+You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in `scripts/qemu/build`. This image and the associated kernel should be saved to a common location (e.g., `/IMAGES`) and the files should be made read-only. 
 
 An example installation into `/IMAGES/` including AMD64 and ARM64 instances will look like the following:
 ```
