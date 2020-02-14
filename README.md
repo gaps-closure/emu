@@ -98,7 +98,7 @@ The above specifies a BITW model. Simply change to the following to use BKND:
 ```json
 "model": "BKND"
 ```
-For detailed description of the BITW/BKND Emulator design, see [Design Notes]
+For detailed description of the BITW/BKND Emulator design, see [Design Notes](doc/design-notes.md)
 
 
 ## Preparing Applications for EMU 
