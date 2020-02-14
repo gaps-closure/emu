@@ -143,7 +143,7 @@ class scenario(basewid):
       ret += f'    mkdir $SESSION_DIR/{n}.conf/scripts\n'
       ret += f'    mkdir $SESSION_DIR/{n}.conf/tools\n'
       ret += f'    mkdir $SESSION_DIR/{n}.conf/apps\n'
-      ret += f'    cp -r {settings.emuroot}/scripts/* $SESSION_DIR/{n}.conf/scripts\n'
+      ret += f"    rsync -avm --include='*.sh' -f 'hide,! */' {settings.emuroot}/scripts/. $SESSION_DIR/{n}.conf/scripts\n"
       ret += f'    cp -r {settings.emuroot}/tools/* $SESSION_DIR/{n}.conf/tools\n'
       ret += f'    cp -r {settings.emuroot}/.apps/*{n}* $SESSION_DIR/{n}.conf/apps &> /dev/null\n'
     ret += '}\n'
