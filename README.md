@@ -76,7 +76,7 @@ To change orange-enclave-gw-P to use ARM64, modify the above as follows:
 ```
 Layout and Settings JSON files should not require modification.
 
-## Preparing Applications for EMU (Optional)
+## Preparing Applications for EMU 
 In the Emulator root directory (i.e. gaps-emulator/), create a subdirctory .apps:
 ```
 gaps-emulator$ mkdir .apps
@@ -85,7 +85,7 @@ cd .apps
 Within this directory, place files of the form [hostname].tar where [hostname] corresponds to the hostname of the target node (e.g. orange-enclave-gw-P.tar). The tar file should include an executable binary and any auxillary files required to run. The tarball will be unpacked to the `/home/closure/apps` on the QEMU instance (app installation is only supported for enclave gateways).
 
 ## Running the Emulator
-A quick-start script is provided to launch the emulator (complete all non-optional steps above first).
+A quick-start script is provided to launch the emulator (complete above steps first).
 ```
 gaps-emulator$ ./start.sh [N] # [N] = number of enclaves (2,3, or 4)
 ```
