@@ -62,19 +62,44 @@ enclaves.json   # GAPS cross-domain topology description
 layout.json     # controls visual layout of nodes
 settings.json   # miscellaneous settings
 ```
-Configuration files are located in the subdirectory `config/[N]enclave` where [N] is the number of enclaves. Users will need to modify `enclaves.json` to adjust the ISA and OS for the cross-domain hosts. Consider the following snippet from `config/2enclave/enclave.json`:
+Configuration files are located in the subdirectory `config/[N]enclave` where [N] is the number of enclaves. Users will need to modify `enclaves.json` to adjust the ISA and OS for the cross-domain hosts. Layout and Settings JSON files should not require modification.
+
+### Selecting the ISA for Enclave Gateways/Cross-Domain Hosts (xdhosts)
+Consider the following snippet from `config/2enclave/enclave.json`:
 ```json
 "hostname": "orange-enclave-gw-P",
 "hwconf":{"arch": "amd64"},
 "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
 ```
-To change orange-enclave-gw-P to use ARM64, modify the above as follows:
+To change orange-enclave-gw-P to use ARM64, modify the configuration as follows:
 ```json
 "hostname": "orange-enclave-gw-P",
 "hwconf":{"arch": "arm64"},
 "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "xenial",
 ```
-Layout and Settings JSON files should not require modification.
+EMU has been tested using AMD64(eoan) and ARM64(xenial) images. Other architecture/OS instances can be built by following the above provisioning steps, but has not been tested.
+
+### Selecting the SDH Model for Cross-Domain Links
+EMU supports Bookends (BKND) and Bump-In-The-Wire (BITW) SDH deployments. Selection of the model is specified in the `xdlink` section of enclaves.json:
+```json
+"xdlink": 
+  [
+    { "model":  "BITW",
+      "left":   {"f": "orange-enclave-gw-P", "t":"orange-purple-xd-gw",
+                 "egress":   {"filterspec": "left-egress-spec", "bandwidth":"100000000", "delay": 0},
+                 "ingress":  {"filterspec": "left-ingress-spec", "bandwidth":"100000000", "delay": 0}},
+      "right":  {"f": "orange-purple-xd-gw", "t":"purple-enclave-gw-O",
+                 "egress":   {"filterspec": "right-egress-spec", "bandwidth":"100000000", "delay": 0},
+                 "ingress":   {"filterspec": "right-ingress-spec", "bandwidth":"100000000", "delay": 0}}
+    }
+  ]
+```
+The above specifies a BITW model. Simply change to the following to use BKND:
+```json
+"model": "BKND"
+```
+For detailed description of the BITW/BKND Emulator design, see [Design Notes]
+
 
 ## Preparing Applications for EMU 
 In the Emulator root directory (i.e. gaps-emulator/), create a subdirctory .apps:
