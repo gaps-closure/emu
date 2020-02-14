@@ -47,14 +47,54 @@ Now configure the virgin image to make it usable generally with user networking 
 ```
 You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in `scripts/qemu/build`. This image and the associated kernel should be saved to a common location (e.g., `/IMAGES`) and the files should be made read-only. 
 
-An example installation into `/IMAGES/` including AMD64 and ARM64 instances will look like the following:
+An example installation into `/IMAGES` including AMD64 and ARM64 instances will look like the following:
 ```
-ls -l /IMAGES/
+ls -l /IMAGES
 -r--r--r-- 1 root root   11391736 Dec  3 21:05 linux-kernel-amd64-eoan
 -r--r--r-- 1 root root   14678016 Dec  3 21:05 linux-kernel-arm64-xenial
 -r--r--r-- 1 root root 2016935936 Dec  3 21:05 ubuntu-amd64-eoan-qemu.qcow2
 -r--r--r-- 1 root root 1001259008 Dec  3 21:05 ubuntu-arm64-eoan-qemu.qcow2
 ```
+## EMU Configuration
+EMU comes prepackaged with configuration for 2, 3, and 4 enclaves (GAPS Phase 1, Phase 2, and Phase 3 topologies respectively). The configuration files are JSON formatted and will eventually be generated automatically by CLOSURE tools from the target application's requirements and security policies. Until then, these files are manually built and maintained. The  files include:
+```
+enclaves.json   # GAPS cross-domain topology description
+layout.json     # controls visual layout of nodes
+settings.json   # miscellaneous settings
+```
+Configuration files are located in the subdirectory `config/[N]enclave` where [N] is the number of enclaves. Users will need to modify `enclaves.json` to adjust the ISA and OS for the cross-domain hosts. Consider the following snippet from `config/2enclave/enclave.json`:
+```json
+"hostname": "orange-enclave-gw-P",
+"hwconf":{"arch": "amd64"},
+"swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+```
+To change orange-enclave-gw-P to use ARM64, modify the above as follows:
+```json
+"hostname": "orange-enclave-gw-P",
+"hwconf":{"arch": "arm64"},
+"swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "xenial",
+```
+Layout and Settings JSON files should not require modification.
+
+## Preparing Applications for EMU (Optional)
+In the Emulator root directory (i.e. gaps-emulator/), create a subdirctory .apps:
+```
+gaps-emulator$ mkdir .apps
+cd .apps
+```
+Within this directory, place files of the form [hostname].tar where [hostname] corresponds to the hostname of the target node (e.g. orange-enclave-gw-P.tar). The tar file should include an executable binary and any auxillary files required to run. The tarball will be unpacked to the `/home/closure/apps` on the QEMU instance (app installation is only supported for enclave gateways).
+
+## Running the Emulator
+A quick-start script is provided to launch the emulator (complete all non-optional steps above first).
+```
+gaps-emulator$ ./start.sh [N] # [N] = number of enclaves (2,3, or 4)
+```
+The start script will retrieve the appropriate configuration files and launch the EMU GUI. 
+
+## 
+  
+  
+
 
 
 
