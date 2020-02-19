@@ -1,11 +1,10 @@
 #!/bin/bash
 
+XDH_SCRIPTS="${SESSION_DIR}/${NODE_NAME}.conf/scripts/xdh/"
+
 MGMT_IP="$1"
 IP="$2"
 PORT="$3"
-
-DEV_PTY="/dev/vcom"
-LOG="/tmp/socat.out"
 
 python3 <<END
 import pexpect
@@ -20,28 +19,27 @@ def spl_print(lines):
 
 prompt ='closure@.* '
 
+s = None
+GIVEUP=300
+start = time.time()
+while(time.time() - start < GIVEUP):
+  try:
+    s = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP}')
+    s.expect(prompt, timeout=30)
+    break
+  except:
+    time.sleep(1)
+if (time.time() - start >= GIVEUP):
+  print('ERROR: ssh failed')
+  exit()
 try:
-  p = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP}')
-  p.expect(prompt, timeout=300)
-  p.sendline('sudo socat -d -d -lf ${LOG} pty,link=${DEV_PTY},raw,ignoreeof,unlink-close=0,echo=0 tcp:${IP}:${PORT},ignoreeof &')
-  p.expect(prompt)
-  spl_print(p.before+p.after)
-  status=False
-  for i in range(0, 10):
-    p.sendline('ls -l ${DEV_PTY}')
-    p.expect(prompt)
-    if 'No such file' in (p.before).decode('utf-8'):
-      time.sleep(1)
-    else:
-      p.sendline('sudo chmod 666 ${DEV_PTY}')
-      p.expect(prompt)
-      spl_print(p.before+p.after)
-      status=True
-      break
-  if not status:
-    print('ERROR: unable to create socat\n')
-  else:
-    print('SUCCESS')
+  scp = pexpect.spawn('scp -i /root/.ssh/id_closure_rsa ${XDH_SCRIPTS}/start_socat.sh closure@${MGMT_IP}:')
+  scp.expect(pexpect.EOF)
+  s.sendline('./start_socat.sh ${IP} ${PORT}')
+  s.expect(prompt)
+  spl_print(s.before+s.after)
+  s.close()
+  print('SUCCESS')
 except Exception as e:
   print('ERROR: ' + str(e))
   exit()
