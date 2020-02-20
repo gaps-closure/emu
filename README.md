@@ -21,7 +21,7 @@ This repository is maintained by Perspecta Labs.
 EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We recommend this distribution to simplify installation of external dependencies. Upon cloning the EMU repository, follow these steps to install required packages (assumes sudo permissions enabled for calling `apt`):
 ```
 cd scripts/install
-./install_deps.sh
+./install-deps.sh
 ```
 Key dependencies include [NRL CORE](http://nrl.navy.mil/itd/ncs/products/core), [QEMU](http://qemu.org), and Linux bridge utilities.
 
