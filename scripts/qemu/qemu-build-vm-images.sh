@@ -249,8 +249,8 @@ END
 build_vm_image() {
   if [ ! -d $OUTDIR ]
     then
-	mkdir -p $OUTDIR
-	chmod 777 $OUTDIR
+	sudo mkdir -p $OUTDIR
+	sudo chmod 777 $OUTDIR
   fi
   pushd `pwd`
   cd $OUTDIR
