@@ -6,16 +6,16 @@ This repository is maintained by Perspecta Labs.
 <img src="https://github.com/gaps-closure/gaps-emulator/blob/master/2enclave.png" width="511" height="423">
 
 ## Contents
-- [Installing External Dependencies](https://github.com/gaps-closure/gaps-emulator#installing-external-dependencies)
-- [Provisioning QEMU VM Disk Images](https://github.com/gaps-closure/gaps-emulator#provisioning-qemu-vm-disk-images)
-- [Configuration](https://github.com/gaps-closure/gaps-emulator#configuration)
-  * [Selecting ISA/OS](https://github.com/gaps-closure/gaps-emulator#selecting-the-isa-for-enclave-gatewayscross-domain-hosts-xdhost)
-  * [Selecting SDH Model](https://github.com/gaps-closure/gaps-emulator#selecting-the-sdh-model-for-cross-domain-links-xdlink)
-- [Preparing Applications](https://github.com/gaps-closure/gaps-emulator#preparing-applications)
-- [Running the Emulator](https://github.com/gaps-closure/gaps-emulator#running-the-emulator)
-- [Accessing the QEMU Instance](https://github.com/gaps-closure/gaps-emulator#accessing-the-qemu-instance)
-- [Utilizing the Emulated SDH Device](https://github.com/gaps-closure/gaps-emulator#utilizing-the-emulated-sdh-device)
-- [Planned Enhancements](https://github.com/gaps-closure/gaps-emulator#planned-enhancements)
+- [Installing External Dependencies](#installing-external-dependencies)
+- [Provisioning QEMU VM Disk Images](#provisioning-qemu-vm-disk-images)
+- [Configuration](#configuration)
+  * [Selecting ISA/OS](#selecting-the-isa-for-enclave-gatewayscross-domain-hosts-xdhost)
+  * [Selecting SDH Model](#selecting-the-sdh-model-for-cross-domain-links-xdlink)
+- [Preparing Applications](#preparing-applications)
+- [Running the Emulator](#running-the-emulator)
+- [Accessing the QEMU Instance](#accessing-the-qemu-instance)
+- [Utilizing the Emulated SDH Device](#utilizing-the-emulated-sdh-device)
+- [Planned Enhancements](#planned-enhancements)
 
 ## Installing External Dependencies
 EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We recommend this distribution to simplify installation of external dependencies. Upon cloning the EMU repository, follow these steps to install required packages (assumes sudo permissions enabled for calling `apt`):
