@@ -45,9 +45,9 @@ cd scripts/qemu
 # -k KDIST  Ubuntu distro for kernel [xenial(default),<any>]
 # -o OUTDIR Directory to output images [./build(default)]
 ```
-We recommend storing the built images in a common directory accessible to all users (this README assumes that directory is `/IMAGES`). Ensure sudo group is allowed to work without passwords, otherwise expect scripting to fail on sudo attempts. <b>Note: Pre-built VMs and kernels available under assets in EMU releases.</b>
+We recommend storing the built images in a common directory accessible to all users (this README assumes that directory is `/IMAGES`). Ensure sudo group is allowed to work without passwords, otherwise expect scripting to fail on sudo attempts. <b>Note: Pre-built VMs and kernels available under assets in EMU releases. Consider downloading and placing in your image directory to skip the VM build process.</b>
 
-If building your own images, next create a virgin image for each architecture for the supported distro (currently eoan): 
+If building your own images, create a virgin image for each architecture for the supported distro (currently eoan): 
 
 ```
 # AMD64
