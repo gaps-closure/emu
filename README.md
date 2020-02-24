@@ -20,6 +20,7 @@ This repository is maintained by Perspecta Labs.
 ## Installing External Dependencies
 EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We recommend this distribution to simplify installation of external dependencies. Upon cloning the EMU repository, follow these steps to install required packages (assumes sudo permissions enabled for calling `apt`):
 ```
+# Ensure 'main' 'restricted' and 'universe' are included in your apt sources.list
 cd scripts/install
 ./install-deps.sh
 ```
