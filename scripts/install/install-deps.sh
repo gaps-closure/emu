@@ -10,6 +10,7 @@ install_nrl_core () {
     wget $COREURL/$COREDEB
     sudo -H pip3 install -r requirements.txt 
     sudo dpkg -i $COREDEB
+    sudo cp -r /usr/lib/python3.6/dist-packages /usr/lib/python3/
     rm -f requirements.txt $COREDEB
 }
 
