@@ -126,7 +126,7 @@ The start script will retrieve the appropriate configuration files and launch th
 ## Accessing the QEMU instance
 Double click an enclave-gateway node to open a terminal to the respective node. Note that this terminal is to that of the CORE node, not the QEMU instance running inside of that node. To enter the QEMU instance:
 ```
-ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1
+ssh vm
 ```
 
 ## Utilizing the Emulated SDH Device
