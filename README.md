@@ -34,7 +34,7 @@ VM images can be automatically built using `qemu-build-vm-images.sh`. The script
 cd scripts/qemu
 ./qemu-build-vm-images.sh -h
 # Usage: ./qemu-build-vm-images.sh [ -h ] [ -p ] [ -c ] \
-#           [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ]
+#           [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ] [-o OUTDIR]
 # -h        Help
 # -p        Install pre-requisites on build server
 # -c        Intall NRL CORE on build server
@@ -42,33 +42,26 @@ cd scripts/qemu
 # -d UDIST  Ubuntu distro [eoan(default)]
 # -s SIZE   Image size [20G(default),<any>]
 # -k KDIST  Ubuntu distro for kernel [xenial(default),<any>]
+# -o OUTDIR Directory to output images [./build(default)]
 ```
-Ensure sudo group is allowed to work without passwords, otherwise expect scripting to fail on sudo attempts. First create a virgin image for each architecture for the supported distro (currently eoan):
+We recommend storing the built images in a common directory accessible to all users (this README assumes that directory is `/IMAGES`). Ensure sudo group is allowed to work without passwords, otherwise expect scripting to fail on sudo attempts. You may now create a virgin image for each architecture for the supported distro (currently eoan): 
 ```
 # AMD64
-./qemu-build-vm-images.sh -a amd64 -d eoan -k eoan -s 20G
+./qemu-build-vm-images.sh -a amd64 -d eoan -k eoan -s 20G -o /IMAGES
 # ARM64
-./qemu-build-vm-images.sh -a arm64 -d eoan -k xenial -s 20G
+./qemu-build-vm-images.sh -a arm64 -d eoan -k xenial -s 20G -o /IMAGES
 ```
 This will fetch the kernel (e.g., linux-kernel-amd64-eoan), initrd (linux-initrd-amd64-eoan.gz), and build the virgin qemu vm image (e.g., ubuntu-amd64-eoan-qemu.qcow2.virgin) using debootstrap.
 
 Now configure the virgin image to make it usable generally with user networking support (allows host-based NAT-ted access to Internet):
 ```
 # AMD64
-./qemu-build-vm-images.sh -a amd64 -d eoan -k eoan -s 20G -u
+./qemu-build-vm-images.sh -a amd64 -d eoan -k eoan -s 20G -o /IMAGES -u 
 # ARM64
-./qemu-build-vm-images.sh -a arm64 -d eoan -k xenial -s 20G -u
+./qemu-build-vm-images.sh -a arm64 -d eoan -k xenial -s 20G -o /IMAGES -u
 ```
-You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in `scripts/qemu/build`. This image and the associated kernel should be saved to a common location (e.g., `/IMAGES`) and the files should be made read-only. 
+You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in the directory specified by the `-o` argument (e.g. `/IMAGES`). Note that the [Emulator Configuration](https://github.com/gaps-closure/gaps-emulator#configuration) settings.json file requires you to specify the images directory if not using `/IMAGES`.
 
-An example installation into `/IMAGES` including AMD64 and ARM64 instances will look like the following:
-```
-ls -l /IMAGES
--r--r--r-- 1 root root   11391736 Dec  3 21:05 linux-kernel-amd64-eoan
--r--r--r-- 1 root root   14678016 Dec  3 21:05 linux-kernel-arm64-xenial
--r--r--r-- 1 root root 2016935936 Dec  3 21:05 ubuntu-amd64-eoan-qemu.qcow2
--r--r--r-- 1 root root 1001259008 Dec  3 21:05 ubuntu-arm64-eoan-qemu.qcow2
-```
 
 ## Configuration
 EMU comes prepackaged with configuration for 2, 3, and 4 enclaves (GAPS Phase 1, Phase 2, and Phase 3 topologies respectively). The configuration files are JSON formatted and will eventually be generated automatically by CLOSURE tools from the target application's requirements and security policies. Until then, these files are manually built and maintained. The  files include:
