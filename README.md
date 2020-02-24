@@ -6,35 +6,35 @@ This repository is maintained by Perspecta Labs.
 <img src="https://github.com/gaps-closure/gaps-emulator/blob/master/2enclave.png" width="511" height="423">
 
 ## Contents
-- [Installing External Dependencies](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#installing-external-dependencies)
-- [Provisioning QEMU VM Disk Images](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#provisioning-qemu-vm-disk-images)
-- [Configuration](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#configuration)
-  * [Selecting ISA/OS](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#selecting-the-isa-for-enclave-gatewayscross-domain-hosts-xdhost)
-  * [Selecting SDH Model](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#selecting-the-sdh-model-for-cross-domain-links-xdlink)
-- [Preparing Applications](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#preparing-applications)
-- [Running the Emulator](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#running-the-emulator)
-- [Accessing the QEMU Instance](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#accessing-the-qemu-instance)
-- [Utilizing the Emulated SDH Device](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#utilizing-the-emulated-sdh-device)
-- [Planned Enhancements](https://github.com/gaps-closure/gaps-emulator/blob/develop/README.md#planned-enhancements)
+- [Installing External Dependencies](https://github.com/gaps-closure/gaps-emulator#installing-external-dependencies)
+- [Provisioning QEMU VM Disk Images](https://github.com/gaps-closure/gaps-emulator#provisioning-qemu-vm-disk-images)
+- [Configuration](https://github.com/gaps-closure/gaps-emulator#configuration)
+  * [Selecting ISA/OS](https://github.com/gaps-closure/gaps-emulator#selecting-the-isa-for-enclave-gatewayscross-domain-hosts-xdhost)
+  * [Selecting SDH Model](https://github.com/gaps-closure/gaps-emulator#selecting-the-sdh-model-for-cross-domain-links-xdlink)
+- [Preparing Applications](https://github.com/gaps-closure/gaps-emulator#preparing-applications)
+- [Running the Emulator](https://github.com/gaps-closure/gaps-emulator#running-the-emulator)
+- [Accessing the QEMU Instance](https://github.com/gaps-closure/gaps-emulator#accessing-the-qemu-instance)
+- [Utilizing the Emulated SDH Device](https://github.com/gaps-closure/gaps-emulator#utilizing-the-emulated-sdh-device)
+- [Planned Enhancements](https://github.com/gaps-closure/gaps-emulator#planned-enhancements)
 
 ## Installing External Dependencies
 EMU has been developed, deployed, and tested using Ubuntu 19.10 x86_64 Linux. We recommend this distribution to simplify installation of external dependencies. Upon cloning the EMU repository, follow these steps to install required packages (assumes sudo permissions enabled for calling `apt`):
 ```
-cd scripts/qemu
-./qemu-build-vm-images.sh -p -c
+cd scripts/install
+./install-deps.sh
 ```
 Key dependencies include [NRL CORE](http://nrl.navy.mil/itd/ncs/products/core), [QEMU](http://qemu.org), and Linux bridge utilities.
 
 ## Provisioning QEMU VM Disk Images
 EMU uses QEMU instances to represent enclave gateways, the nodes designated for cross-domain transactions via a character device to the SDH. This allows us to model multi-domain, multi-ISA environments on which the partitioned software will execute. As a prerequisite to executing the emulator, it is necessary to build clean VM instances (referred to as the "golden images") from which EMU will generate runtime snapshots per experiment. The snapshots allow EMU to quickly spawn clean VM instances for each experiment as well as support multiple experiments in parallel without interfering among users.
 
-VM images can be automatically built using `build_qemu_vm_images.sh`. The script fetches the kernel, builds and minimally configures the VM disk images, and saves a golden copy of the kernels and images. 
+VM images can be automatically built using `qemu-build-vm-images.sh`. The script fetches the kernel, builds and minimally configures the VM disk images, and saves a golden copy of the kernels and images. 
 
 ```
 cd scripts/qemu
-./build_qemu_vm_images.sh -h
-# Usage: ./build_qemu_vm_images.sh [ -h ] [ -p ] [ -c ] \
-#           [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ]
+./qemu-build-vm-images.sh -h
+# Usage: ./qemu-build-vm-images.sh [ -h ] [ -p ] [ -c ] \
+#           [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ] [-o OUTDIR]
 # -h        Help
 # -p        Install pre-requisites on build server
 # -c        Intall NRL CORE on build server
@@ -42,33 +42,26 @@ cd scripts/qemu
 # -d UDIST  Ubuntu distro [eoan(default)]
 # -s SIZE   Image size [20G(default),<any>]
 # -k KDIST  Ubuntu distro for kernel [xenial(default),<any>]
+# -o OUTDIR Directory to output images [./build(default)]
 ```
-Ensure sudo group is allowed to work without passwords, otherwise expect scripting to fail on sudo attempts. First create a virgin image for each architecture for the supported distro (currently eoan):
+We recommend storing the built images in a common directory accessible to all users (this README assumes that directory is `/IMAGES`). Ensure sudo group is allowed to work without passwords, otherwise expect scripting to fail on sudo attempts. You may now create a virgin image for each architecture for the supported distro (currently eoan): 
 ```
 # AMD64
-./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G
+./qemu-build-vm-images.sh -a amd64 -d eoan -k eoan -s 20G -o /IMAGES
 # ARM64
-./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G
+./qemu-build-vm-images.sh -a arm64 -d eoan -k xenial -s 20G -o /IMAGES
 ```
 This will fetch the kernel (e.g., linux-kernel-amd64-eoan), initrd (linux-initrd-amd64-eoan.gz), and build the virgin qemu vm image (e.g., ubuntu-amd64-eoan-qemu.qcow2.virgin) using debootstrap.
 
 Now configure the virgin image to make it usable generally with user networking support (allows host-based NAT-ted access to Internet):
 ```
 # AMD64
-./build_qemu_vm_images.sh -a amd64 -d eoan -k eoan -s 20G -u
+./qemu-build-vm-images.sh -a amd64 -d eoan -k eoan -s 20G -o /IMAGES -u 
 # ARM64
-./build_qemu_vm_images.sh -a arm64 -d eoan -k xenial -s 20G -u
+./qemu-build-vm-images.sh -a arm64 -d eoan -k xenial -s 20G -o /IMAGES -u
 ```
-You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in `scripts/qemu/build`. This image and the associated kernel should be saved to a common location (e.g., `/IMAGES`) and the files should be made read-only. 
+You should find the golden copy (e.g., ubuntu-amd64-eoan-qemu.qcow2) created in the directory specified by the `-o` argument (e.g. `/IMAGES`). Note that the [Emulator Configuration](https://github.com/gaps-closure/gaps-emulator#configuration) settings.json file requires you to specify the images directory if not using `/IMAGES`.
 
-An example installation into `/IMAGES` including AMD64 and ARM64 instances will look like the following:
-```
-ls -l /IMAGES
--r--r--r-- 1 root root   11391736 Dec  3 21:05 linux-kernel-amd64-eoan
--r--r--r-- 1 root root   14678016 Dec  3 21:05 linux-kernel-arm64-xenial
--r--r--r-- 1 root root 2016935936 Dec  3 21:05 ubuntu-amd64-eoan-qemu.qcow2
--r--r--r-- 1 root root 1001259008 Dec  3 21:05 ubuntu-arm64-eoan-qemu.qcow2
-```
 
 ## Configuration
 EMU comes prepackaged with configuration for 2, 3, and 4 enclaves (GAPS Phase 1, Phase 2, and Phase 3 topologies respectively). The configuration files are JSON formatted and will eventually be generated automatically by CLOSURE tools from the target application's requirements and security policies. Until then, these files are manually built and maintained. The  files include:
@@ -133,7 +126,7 @@ The start script will retrieve the appropriate configuration files and launch th
 ## Accessing the QEMU instance
 Double click an enclave-gateway node to open a terminal to the respective node. Note that this terminal is to that of the CORE node, not the QEMU instance running inside of that node. To enter the QEMU instance:
 ```
-ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1
+ssh vm
 ```
 
 ## Utilizing the Emulated SDH Device

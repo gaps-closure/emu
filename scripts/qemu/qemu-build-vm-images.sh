@@ -8,11 +8,12 @@ QARCH="arm64"
 UDIST="eoan"
 SIZE="20G"
 KDIST="xenial" # ARM64 breaks on kernels after xenial on workhorse
+OUTDIR="./build"
 
 usage_exit() {
   [[ -n "$1" ]] && echo $1
   echo "Usage: $0 [ -cpuh ] \\"
-  echo "          [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ]" 
+  echo "          [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ] [-o OUTDIR]" 
   echo "-h        Help"
   echo "-p        Install pre-requisites on build server"
   echo "-c        Intall NRL CORE on build server"
@@ -21,12 +22,13 @@ usage_exit() {
   echo "-d UDIST  Ubuntu distro [eoan(default)]"
   echo "-s SIZE   Image size [20G(default),<any>]"
   echo "-k KDIST  Ubuntu distro for kernel [xenial(default),<any>]"
+  echo "-o OUTDIR Directory to output images [./build(default)]"
   exit 1
 }
 
 handle_opts() {
   local OPTIND
-  while getopts "a:d:s:k:pcuh" options; do
+  while getopts "a:d:s:k:o:pcuh" options; do
     case "${options}" in
       k) KDIST=${OPTARG}  ;;
       a) QARCH=${OPTARG}  ;;
@@ -35,6 +37,7 @@ handle_opts() {
       p) PREPSRV="yes"    ;;
       c) NRLCORE="yes"    ;;
       u) UPDATEONLY="yes" ;;
+      o) OUTDIR=${OPTARG} ;;
       h) usage_exit       ;;
       :) usage_exit "Error: -${OPTARG} requires an argument." ;;
       *) usage_exit       ;;
@@ -244,8 +247,13 @@ END
 }
 
 build_vm_image() {
-  mkdir -p ./build
-  cd ./build
+  if [ ! -d $OUTDIR ]
+    then
+	sudo mkdir -p $OUTDIR
+	sudo chmod 777 $OUTDIR
+  fi
+  pushd `pwd`
+  cd $OUTDIR
   if [ $UPDATEONLY != "yes" ]; then
     echo "Building QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
     fetch_kernel
@@ -255,7 +263,11 @@ build_vm_image() {
   else
     echo "Configuring QEMU VM Image: $QARCH $UDIST (kern $KDIST) $SIZE"
     configure_golden_cow
+    rm *.virgin
+    rm *.gz
   fi
+  chmod 644 *
+  popd
 }
 
 handle_opts "$@"

@@ -11,6 +11,7 @@ ESPEC=$6
 ISPEC=$7
 
 TOOLS="${SESSION_DIR}/${NODE_NAME}.conf/tools"
+XDH_SCRIPTS="${SESSION_DIR}/${NODE_NAME}.conf/scripts/xdh/"
 
 python3 <<END
 import pexpect
@@ -44,30 +45,14 @@ try:
   spl_print(s.before+s.after)
   scp = pexpect.spawn('scp -i /root/.ssh/id_closure_rsa ${TOOLS}/filterproc.py closure@${MGMT_IP}:tools')
   scp.expect(pexpect.EOF)
-  s.sendline('rm -f fifo*')
-  s.expect(prompt)
-  spl_print(s.before+s.after)
-  s.sendline('mkfifo fifo-left')
-  s.expect(prompt)
-  spl_print(s.before+s.after)
-  s.sendline('mkfifo fifo-right')
+  scp = pexpect.spawn('scp -i /root/.ssh/id_closure_rsa ${XDH_SCRIPTS}/start_netcat.sh closure@${MGMT_IP}:')
+  scp.expect(pexpect.EOF)
+  s.sendline('./start_netcat.sh ${IP_LEFT} ${PORT_LEFT} ${IP_RIGHT} ${PORT_RIGHT} ${ESPEC} ${ISPEC}')
   s.expect(prompt)
   spl_print(s.before+s.after)
   s.close()
 except Exception as e:
   print('ERROR: failure during nc setup (%s)' % (e))
   exit()
-#print('SUCCESS')
+print('SUCCESS')
 END
-
-ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1 "nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} < fifo-left  | python3 tools/filterproc.py ${ESPEC} > fifo-right &" &
-
-sleep 1
-
-ssh -i /root/.ssh/id_closure_rsa closure@10.200.0.1 "nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | python3 tools/filterproc.py ${ISPEC} > fifo-left &" &
-
-sleep 5
-pkill -f "ssh -i"
-
-echo "SUCCESS"
-
