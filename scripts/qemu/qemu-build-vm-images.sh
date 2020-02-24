@@ -22,7 +22,7 @@ usage_exit() {
   echo "-d UDIST  Ubuntu distro [eoan(default)]"
   echo "-s SIZE   Image size [20G(default),<any>]"
   echo "-k KDIST  Ubuntu distro for kernel [xenial(default),<any>]"
-  echo "-o OUTDIR Directory to output images [./build(default]"
+  echo "-o OUTDIR Directory to output images [./build(default)]"
   exit 1
 }
 
