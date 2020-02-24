@@ -13,7 +13,7 @@ OUTDIR="./build"
 usage_exit() {
   [[ -n "$1" ]] && echo $1
   echo "Usage: $0 [ -cpuh ] \\"
-  echo "          [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ]" 
+  echo "          [ -a QARCH ] [ -d UDIST ] [-s SIZE ] [-k KDIST ] [-o OUTDIR]" 
   echo "-h        Help"
   echo "-p        Install pre-requisites on build server"
   echo "-c        Intall NRL CORE on build server"
