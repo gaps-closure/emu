@@ -127,6 +127,15 @@ do_cmd(p, 'sudo apt install -y imagemagick')
 print('\nInstalling xauth')
 do_cmd(p, 'sudo apt install -y xauth')
 
+#hal libraries
+if("$QARCH" == "amd64"):
+  print("\nInstalling native hal dependencies")
+  do_cmd(p, 'sudo apt install -y libconfig9 libzmq5')
+else:
+  #assume non native builds used the libzmq static lib
+  print("\nInstalling $QARCH hal dependencies")
+  do_cmd(p, 'sudo apt install -y libconfig9 libunwind8 libsodium23 liblzma5')
+
 # Add ssh key for remote access and configure .ssh directory perms
 do_cmd(p, 'mkdir -p ~/.ssh && chmod 700 ~/.ssh')
 do_cmd(p, 'echo "$PUBKEY" >> ~/.ssh/authorized_keys')
