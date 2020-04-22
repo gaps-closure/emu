@@ -1,4 +1,5 @@
 import os
+import os.path
 import subprocess
 import time
 
@@ -211,8 +212,14 @@ def install_start_hal(scenario, settings):
             print(f'Install/Start HAL on {x.hostname}...', end="", flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
             cfg = f'{settings.emuroot}/config/{scenario.qname}/{x.halconf}'
-            hal = f'{settings.emuroot}/../hal/daemon/hal'
-            zc  = f'{settings.emuroot}/../hal/zc/zc'
+            if(os.path.isdir(f'{settings.emuroot}/../mbig/{x.hwconf.arch}')):
+                print(f'{x.hwconf.arch} HAL...', end="", flush=True)
+                hal = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/daemon/hal'
+                zc  = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/zc/zc'
+            else:
+                print('NATIVE HAL...', end="", flush=True)
+                hal = f'{settings.emuroot}/../hal/daemon/hal'
+                zc  = f'{settings.emuroot}/../hal/zc/zc'
             res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'mkdir', '-p', 'hal/zc'], text=True)
             res = subprocess.check_output(['cp', cfg, f'{core_path}.conf/hal/{x.halconf}'], text=True)
             res = subprocess.check_output(['cp', hal, f'{core_path}.conf/hal/hal'], text=True)
