@@ -13,9 +13,9 @@ rm -f fifo*
 mkfifo fifo-left
 mkfifo fifo-right
 
-nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} < fifo-left  | python3 tools/filterproc.py ${ESPEC} > fifo-right &
+nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} < fifo-left | cat > fifo-right &
 sleep 2
-nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | python3 tools/filterproc.py ${ISPEC} > fifo-left &
+nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | cat > fifo-left &
 sleep 2
 
 N= `ps -ef | grep "nc -4 | grep -v grep | wc -l`

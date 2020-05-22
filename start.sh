@@ -1,13 +1,5 @@
 #!/bin/bash
-SZ=$1
-SCEN=${SZ}enclave
-
-
-if [ $SZ -ne 2 ] && [ $SZ -ne 3 ] && [ $SZ -ne 4 ]
-then
-    echo "Usage: start.sh [enclaves] (start.sh supports 2-4 enclaves)"
-    exit
-fi
+SCEN=$1
 
 PWD=`pwd`
 sed -i -e "s;<NOT SET>;$PWD;g" config/${SCEN}/settings.json

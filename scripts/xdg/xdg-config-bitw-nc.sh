@@ -18,12 +18,12 @@ mkfifo fifo-left
 mkfifo fifo-right   # Can we get rid of the second fifo, but then get very long pipeline
 nohup bash -c "nc -4 -k -l ${IP_LEFT} ${PORT_LEFT} \
    < fifo-left \
-    | python3 ${TOOLS}/filterproc.py ${LISPEC}   \
-    | python3 ${TOOLS}/filterproc.py ${RESPEC}   \
+    | python3 -u ${TOOLS}/filterproc.py ${LISPEC}   \
+    | python3 -u ${TOOLS}/filterproc.py ${RESPEC}   \
               > fifo-right &" &> /dev/null
 nohup bash -c "nc -4 -k -l ${IP_RIGHT} ${PORT_RIGHT} \
    < fifo-right \
-    | python3 ${TOOLS}/filterproc.py ${RISPEC}   \
-    | python3 ${TOOLS}/filterproc.py ${LESPEC}   \
+    | python3 -u ${TOOLS}/filterproc.py ${RISPEC}   \
+    | python3 -u ${TOOLS}/filterproc.py ${LESPEC}   \
               > fifo-left &" &> /dev/null
 echo "SUCCESS"
