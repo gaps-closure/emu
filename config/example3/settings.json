@@ -1,0 +1,12 @@
+
+
+
+{
+  "core_timeout": 30,
+  "emuroot": "/home/XlioUser/gaps/build/src/emu",
+  "imgdir": "/IMAGES",
+  "mgmt_ip": "10.200.0.1",
+  "shadow_directories": "/root;",
+  "snapdir": ".snapshots",
+  "imndir": ".imnfiles"
+}
