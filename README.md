@@ -3,8 +3,6 @@ This repository hosts the open source components of the EMU for Multi-ISA cross-
 
 This repository is maintained by Perspecta Labs.
 
-<img src="https://github.com/gaps-closure/gaps-emulator/blob/master/2enclave.png" width="511" height="423">
-
 ## Contents
 - [Installing External Dependencies](#installing-external-dependencies)
 - [Provisioning QEMU VM Disk Images](#provisioning-qemu-vm-disk-images)
