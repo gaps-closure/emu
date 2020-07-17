@@ -305,49 +305,6 @@ The initial emulator will use a simple line-oriented grep/sed style filter to do
     
 However, if a full hardware testbed is available to us, the need for full-featured emulation of guard functionality is diminished.
 
-# Todo
-0. Documentation -- DONE, this document
-    * Needs to be reviewed and brought up to date with current state of emulator 
-1. Prepare QEMU image for x86 with Ubuntu 19.10 -- DONE, superseded by script
-2. Prepare QEMU image for ARM with Ubuntu 19.10 -- DONE, superseded by script
-    * Check if we can switch to eoan kernel with the newer qemu 4.0.0 on jaga/eoan
-3. Fully automated (non-interactive) script for building VM images for specific arch and distro --DONE
-    * DONE, script to build ARM64 and AMD64 qemu VM images tested for eoan
-4. Create a sample IMN file using CORE GUI, DONE, sample 2 enclave scenario checked in
-    * Need to shadown /root directory and invoke scripts to do actual GAPS emulation tasks (chmod /root on dev server to 755 so it can be shadowed)
-5. Implement sample TA1 device emulators (pass,BITW,BKEND) -- DONE
-    * BKEND fully worked out, not tested
-    * filterproc is line-oriented and is a stub -- rethink using packrat parsing or other means
-    * must include stats and wire-shark support
-6. Protoype the end-to-end QEMU build and sample scenario manually, DONE
-    * Integrate HAL (TA2-TA1 interface) and GAPS application and test
-7. Prepare a sample partitioned program, IN-PROGRESS 
-    * Include install script (e.g., deb package)
-    * Include systemd scripts that will start application on boot and respawn on failure
-    * Include a toy library for cross-domain messaging (should work on serial with framing TBD as well as Ethernet+IP)
-8. Create a high level configuration file, DONE
-    * Hardware topology for all enclaves and cross-domain devices; must specify number of cores, architecture etc.
-    * Intra-enclave links
-    * Cross-domain interconnections: type and configuration
-    * Software topology: executables and which node they will run on
-9. From the configuration generate IMN + scripting for GAPS scenario, PARTIAL
-    * Reads in config file and generates IMN
-    * Shadowing /root, adding /root/.ssh/config to ignore StrictHostChecking on CORE node, add emulation scripts
-    * Auto start of emulation scripts using cmdup 
-    * Call script to customizing VM snapshots for each xdhost
-    * Call script for L2 bridge and tap plumbing and invocation of qemu-system on CORE node
-    * May want to use a good nice value for the ARM64 instances
-    * Call script to check if QEMU VMs are ready, i.e., booted and accepting ssh connections
-    * Call script to plumb the TA1 emulation for BKEND, BITW, or PASSTHRU
-    * Call script to install latest CLOSURE software: CLOSURE libraries/utilities, HAL service, GAPS demo application
-    * all script to initiate (i) the HAL service, and (ii) the CLOSURE application, e.g., via "systemctl restart" 
-10. Script that spits out the config JSON and layout for "common case 2,3,4 enclave scenarios 
-    * Use same structure for all enclaves
-    * enclaves placed one per quadrant, each with different color
-    * full mesh of xdlink connections across enclaves
-    * provide option to use single xdhost with multiple links or separate xdhost for each link in the enclaves
-
-
 # APPENDIX 1: Manual Dependency Installation, QEMU VM image building, and configuration (DEPRECATED)
 
 These steps have been scripted (or about to be scripted soon), please use the scripts.
