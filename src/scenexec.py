@@ -14,6 +14,7 @@ def execute(scenario, layout, settings, args):
     configure_xdgateways_nc(scenario)
     configure_xdhosts_nc_socat(scenario, settings)
     install_apps(scenario, settings)
+    install_env_variables(scenario, settings)
     install_start_hal(scenario, settings)
 
 def clean_snapshots(settings):
@@ -195,6 +196,17 @@ def configure_xdhosts_nc_socat(scenario, settings):
                         raise Exception (f'Failure to start socat on {h}: {res}')
                     print('DONE!')
 
+def install_env_variables(scenario, settings):
+    for enc in scenario.enclave:
+        for x in enc.xdhost:
+            print(f'Install LD_LIBRARY_PATH on {x.hostname}...', end="",flush=True)
+            core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
+            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-env-profile.sh', settings.mgmt_ip], text=True)
+            if DBG: print(res)
+            if 'SUCCESS' not in res:
+                raise Exception (f'Unable to install enviroment script on {x.hostname}: {res}')
+            print('DONE!', flush=True)
+            
 def install_apps(scenario, settings):
     for enc in scenario.enclave:
         for x in enc.xdhost:
