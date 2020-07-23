@@ -16,6 +16,7 @@ def execute(scenario, layout, settings, args):
     install_apps(scenario, settings)
     install_env_variables(scenario, settings)
     install_start_hal(scenario, settings)
+    apply_auto_ssh(scenario, settings)
 
 def clean_snapshots(settings):
     subprocess.run(['rm', '-rf', settings.snapdir])
@@ -218,6 +219,18 @@ def install_apps(scenario, settings):
                 raise Exception (f'Unable to install apps on {x.hostname}: {res}')
             print('DONE!', flush=True)
 
+def apply_auto_ssh(scenario, settings):
+    """Add a bashrc, so when we make a new session we log into the vm via ssh"""
+    for enc in scenario.enclave:
+        for x in enc.xdhost:
+            print(f'Prepare SSH to VM on {x.hostname}...', end="",flush=True)
+            core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
+            bashrc_path = f'{core_path}.conf/root/.bashrc'
+            with open(bashrc_path, 'w') as fp:
+                fp.write("ssh vm\n")
+                
+            print('DONE!', flush=True)
+            
 def install_start_hal(scenario, settings):
     for enc in scenario.enclave:
         for x in enc.xdhost:
