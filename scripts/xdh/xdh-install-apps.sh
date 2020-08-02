@@ -28,7 +28,13 @@ try:
     scp = pexpect.spawn(cmd)
     scp.expect(pexpect.EOF)
   p.sendline('cd apps && tar -xvf *.tar && rm *.tar')
+  p.expect(prompt)
+  p.sendline('cd apps/.dependencies/linux && sudo dpkg -i *')
   p.expect(prompt) 
+  spl_print(p.before+p.after)
+  p.sendline('cd apps/.dependencies/python3 && sudo -H pip3 install --no-index --find-links . *')
+  p.expect(prompt)
+  spl_print(p.before+p.after)
 except Exception as e:
   print('ERROR: ' + str(e))
   exit()

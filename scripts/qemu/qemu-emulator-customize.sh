@@ -127,6 +127,13 @@ do_cmd(p, 'sudo apt install -y imagemagick')
 print('\nInstalling xauth')
 do_cmd(p, 'sudo apt install -y xauth')
 
+print('\nInstalling xauth')
+do_cmd(p, 'sudo apt install -y python3-pip')
+do_cmd(p, 'sudo -H pip3 install -U pip')
+
+print('\nInstalling libpython3')
+do_cmd(p, 'sudo apt install -y libpython3.7')
+
 #hal libraries
 if("$QARCH" == "amd64"):
   print("\nInstalling native hal dependencies")
