@@ -190,7 +190,7 @@ def configure_xdhosts_nc_socat(scenario, settings):
                         else:
                             socat_port = 12346
                     core_path = f'/tmp/pycore.{scenario.core_session_id}/{h}'
-                    print(f'Starting charcter device (socat) on {h}...', flush =True, end="")
+                    print(f'Starting character device (socat) on {h}...', flush =True, end="")
                     res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-config-socat.sh', settings.mgmt_ip, socat_ip, str(socat_port)], text=True)
                     if DBG: print(res)
                     if 'SUCCESS' not in res:
