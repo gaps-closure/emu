@@ -20,7 +20,7 @@ prompt ='closure@.* '
 try:
   p = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP}')
   p.expect(prompt, timeout=300)
-  p.sendline('mkdir -p apps')
+  p.sendline('rm -rf apps && mkdir -p apps')
   p.expect(prompt)
   spl_print(p.before+p.after)
   for f in os.listdir("${APPS}"):
