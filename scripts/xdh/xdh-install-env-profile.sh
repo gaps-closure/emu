@@ -1,7 +1,19 @@
 #!/bin/bash
 
 MGMT_IP="$1"
+DISP=$2
+TM=$3
 
+# set environment variables in the CORE container
+if [[ x$DISPLAY == "x" ]]; then
+    echo "export DISPLAY=$DISP" >> ~/.bashrc
+fi
+if [[ x$TERM == "xdumb" ]]; then
+    echo "export TERM=$TM" >> ~/.bashrc
+fi
+echo "ssh vm" >> ~/.bashrc
+
+# set environment variables in the QEMU Instance
 python3 <<END
 import pexpect
 import sys

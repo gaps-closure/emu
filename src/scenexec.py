@@ -16,7 +16,6 @@ def execute(scenario, layout, settings, args):
     install_apps(scenario, settings)
     install_env_variables(scenario, settings)
     install_start_hal(scenario, settings)
-    apply_auto_ssh(scenario, settings)
 
 def clean_snapshots(settings):
     subprocess.run(['rm', '-rf', settings.snapdir])
@@ -75,7 +74,7 @@ def start_core_scenario(scenario, settings, filename):
         raise Exception ("CORE scenario file not found: " + filename)
     print(f'Starting CORE session (filename={filename})...', end="", flush=True)
     subprocess.Popen(["core-gui", "-s", filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(2) # give CORE a chance to start
+    time.sleep(5) # give CORE a chance to start
     p = subprocess.run([settings.emuroot + '/scripts/core/core-get-session-id.sh'], stdout=subprocess.PIPE)
     setattr(scenario, 'core_session_id', int(p.stdout))
     tries = 0
@@ -200,9 +199,9 @@ def configure_xdhosts_nc_socat(scenario, settings):
 def install_env_variables(scenario, settings):
     for enc in scenario.enclave:
         for x in enc.xdhost:
-            print(f'Install LD_LIBRARY_PATH on {x.hostname}...', end="",flush=True)
+            print(f'Setting environment variables on {x.hostname}...', end="",flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
-            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-env-profile.sh', settings.mgmt_ip], text=True)
+            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-env-profile.sh', settings.mgmt_ip, os.environ['DISPLAY'], os.environ['TERM']], text=True)
             if DBG: print(res)
             if 'SUCCESS' not in res:
                 raise Exception (f'Unable to install enviroment script on {x.hostname}: {res}')
@@ -219,18 +218,6 @@ def install_apps(scenario, settings):
                 raise Exception (f'Unable to install apps on {x.hostname}: {res}')
             print('DONE!', flush=True)
 
-def apply_auto_ssh(scenario, settings):
-    """Add a bashrc, so when we make a new session we log into the vm via ssh"""
-    for enc in scenario.enclave:
-        for x in enc.xdhost:
-            print(f'Prepare SSH to VM on {x.hostname}...', end="",flush=True)
-            core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
-            bashrc_path = f'{core_path}.conf/root/.bashrc'
-            with open(bashrc_path, 'w') as fp:
-                fp.write("ssh vm\n")
-                
-            print('DONE!', flush=True)
-            
 def install_start_hal(scenario, settings):
     for enc in scenario.enclave:
         for x in enc.xdhost:
@@ -238,18 +225,16 @@ def install_start_hal(scenario, settings):
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
             cfg = f'{settings.emuroot}/config/{scenario.qname}/{x.halconf}'
             if(os.path.isdir(f'{settings.emuroot}/../mbig/{x.hwconf.arch}')):
-                print(f'{x.hwconf.arch} HAL...', end="", flush=True)
                 hal = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/daemon/hal'
                 zc  = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/zc/zc'
             else:
-                print('NATIVE HAL...', end="", flush=True)
                 hal = f'{settings.emuroot}/../hal/daemon/hal'
                 zc  = f'{settings.emuroot}/../hal/zc/zc'
             res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'mkdir', '-p', 'hal/zc'], text=True)
             res = subprocess.check_output(['cp', cfg, f'{core_path}.conf/hal/{x.halconf}'], text=True)
             res = subprocess.check_output(['cp', hal, f'{core_path}.conf/hal/hal'], text=True)
             res = subprocess.check_output(['cp', zc, f'{core_path}.conf/hal/zc/zc'], text=True)
-            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-start-hal.sh', cfg], text=True)
+            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-start-hal.sh', cfg], text=True, stderr=subprocess.STDOUT)
             if DBG: print(res)
             if 'SUCCESS' not in res:
                 raise Exception (f'Unable to install/start HAL on {x.hostname}: {res}')
