@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 import os.path
 import subprocess
@@ -76,7 +77,13 @@ def start_core_scenario(scenario, settings, filename):
     subprocess.Popen(["core-gui", "-s", filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(5) # give CORE a chance to start
     p = subprocess.run([settings.emuroot + '/scripts/core/core-get-session-id.sh'], stdout=subprocess.PIPE)
-    setattr(scenario, 'core_session_id', int(p.stdout))
+    id = 0
+    for tok in ((p.stdout).decode("utf-8")).split():
+        if tok.startswith('pycore.'):
+            id = tok.split('.')[-1]
+    if not id:
+        raise Exception('ERROR: unable to obtain core session id')
+    setattr(scenario, 'core_session_id', int(id))
     tries = 0
     while(tries < settings.core_timeout):
         f = open(f'/tmp/pycore.{scenario.core_session_id}/state', 'r')
