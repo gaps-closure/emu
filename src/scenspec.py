@@ -415,6 +415,7 @@ def gen_custom_config(settings):
 def gen_cmdup(x, settings):
   cmds = []
   cmds.append(f'scripts/common/common-config-ssh.sh {settings.emuroot}/{settings.snapdir}')
+  cmds.append(f'scripts/common/common-setbgcolor.sh')
   if type(x).__name__ is 'xdhost':
     cmds.append(f'scripts/xdh/xdh-config-core-interfaces.sh')
     cmds.append(f'scripts/xdh/xdh-start-qemu-instance.sh {x.hwconf.arch} {settings.emuroot}/{settings.snapdir}/{x.swconf.os}-{x.hwconf.arch}-{x.hostname}.qcow2 {settings.imgdir}/linux-kernel-{x.hwconf.arch}-{x.swconf.kernel} {os.environ["USER"]}')
