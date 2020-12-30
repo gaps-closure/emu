@@ -12,6 +12,8 @@ if [[ $COLOR == "green" ]]; then
 	COLOR=lightgreen
 elif [[ $COLOR == "purple" ]]; then
 	COLOR=magenta
+elif [[ $COLOR == "blue" ]]; then
+	COLOR=cyan
 fi	
 
 # change the color
