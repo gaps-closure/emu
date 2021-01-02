@@ -1,17 +1,12 @@
 #!/bin/bash
 
 install_nrl_core () {
-    COREURL="https://github.com/coreemu/core/releases/download/release-5.5.2"
-    COREDEB="core_python3_5.5.2_amd64.deb"
-
-    echo "Installing NRL CORE ($COREDEB) on build server"
-    rm -f requirements.txt $COREDEB
-    wget $COREURL/requirements.txt
-    wget $COREURL/$COREDEB
-    sudo -H pip3 install -r requirements.txt 
-    sudo dpkg -i $COREDEB
-    sudo cp -r /usr/lib/python3.6/dist-packages /usr/lib/python3/
-    rm -f requirements.txt $COREDEB
+    echo "Installing NRL CORE on build server"
+    git clone https://github.com/coreemu/core
+    cd core
+    sudo ./install.sh
+    cd ..
+    sudo rm -rf core
 }
 
 prep_build_machine() {
