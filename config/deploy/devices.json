@@ -1,0 +1,16 @@
+{
+  "devices": [
+    {
+      "model":    "sdh_ha_v1",
+      "path":     "./zc/zc",
+      "comms":    "ipc",
+      "mode_in":  "sub",
+      "mode_out": "pub"
+    },
+    {
+      "model":    "sdh_be_v1",
+      "path":     "/dev/vcom",
+      "comms":    "tty"
+    }
+  ]
+}
