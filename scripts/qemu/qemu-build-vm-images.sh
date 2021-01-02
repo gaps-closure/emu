@@ -45,7 +45,8 @@ handle_opts() {
   done
   shift "$((OPTIND-1))"
   case $UDIST in
-    eoan)   ;;
+    eoan)  ;;
+    focal) ;;
     *)      usage_exit "Unsupported Ubuntu distribution $UDIST" ;;
   esac
   case $QARCH in
@@ -95,8 +96,8 @@ prep_build_machine() {
 }
 
 fetch_kernel() {
-  KRNL="dists/${KDIST}/main/installer-${QARCH}/current/images/netboot/ubuntu-installer/${QARCH}/linux"
-  INRD="dists/${KDIST}/main/installer-${QARCH}/current/images/netboot/ubuntu-installer/${QARCH}/initrd.gz"
+  KRNL="dists/${KDIST}/main/installer-${QARCH}/current/legacy-images/netboot/ubuntu-installer/${QARCH}/linux"
+  INRD="dists/${KDIST}/main/installer-${QARCH}/current/legacy-images/netboot/ubuntu-installer/${QARCH}/initrd.gz"
   case $QARCH in
     amd64) KURL="http://archive.ubuntu.com/ubuntu" ;;
     arm64) KURL="http://ports.ubuntu.com/ubuntu-ports" ;;
