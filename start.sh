@@ -1,5 +1,5 @@
 #!/bin/bash
-PYTHON=python3.7
+PYTHON=python3.8
 SCEN=$1
 
 PWD=`pwd`

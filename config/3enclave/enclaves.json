@@ -9,7 +9,7 @@
 	{
           "hostname": "orange-enclave-gw-P",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]
 	  }, 
 	  "nwconf":{"interface": 
@@ -21,7 +21,7 @@
 	{
           "hostname": "orange-enclave-gw-G",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]
 	  }, 
 	  "nwconf":{"interface": 
@@ -72,7 +72,7 @@
 	{
 	  "hostname": "purple-enclave-gw-O",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]}, 
 	  "nwconf":{"interface": 
 		    [{"ifname" :"eth0", "addr":"10.0.102.1/24"},
@@ -83,7 +83,7 @@
 	{
 	  "hostname": "purple-enclave-gw-G",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]}, 
 	  "nwconf":{"interface": 
 		    [{"ifname" :"eth0", "addr":"10.0.102.2/24"},
@@ -133,7 +133,7 @@
 	{
           "hostname": "green-enclave-gw-O",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]
 	  }, 
 	  "nwconf":{"interface": 
@@ -145,7 +145,7 @@
 	{
           "hostname": "green-enclave-gw-P",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]
 	  }, 
 	  "nwconf":{"interface": 

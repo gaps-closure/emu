@@ -9,7 +9,7 @@
 	{
           "hostname": "orange-enclave-gw-P",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]
 	  }, 
 	  "nwconf":{"interface": 
@@ -58,7 +58,7 @@
 	{
 	  "hostname": "purple-enclave-gw-O",
 	  "hwconf":{"arch": "amd64"},
-	  "swconf":{"os": "ubuntu", "distro": "eoan", "kernel": "eoan",
+	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]}, 
 	  "nwconf":{"interface": 
 		    [{"ifname" :"eth0", "addr":"10.0.102.1/24"},
