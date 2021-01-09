@@ -121,7 +121,7 @@ Within this directory, place files of the form [hostname].tar where [hostname] c
 ## Running the Emulator
 A quick-start script is provided to launch the emulator (complete above steps first).
 ```
-gaps-emulator$ ./start.sh 2enclave
+./start.sh 2enclave
 ```
 The start script will retrieve the appropriate configuration files for the 2enclave scenario from the config/2enclave subdirectory and launch the EMU GUI. Each new application project must be provide relevant scenario configuration files in a separate subdirectory.
 
