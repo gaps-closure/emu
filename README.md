@@ -121,9 +121,9 @@ Within this directory, place files of the form [hostname].tar where [hostname] c
 ## Running the Emulator
 A quick-start script is provided to launch the emulator (complete above steps first).
 ```
-gaps-emulator$ ./start.sh [N] # [N] = number of enclaves (2,3, or 4)
+gaps-emulator$ ./start.sh 2enclave
 ```
-The start script will retrieve the appropriate configuration files and launch the EMU GUI. 
+The start script will retrieve the appropriate configuration files for the 2enclave scenario from the config/2enclave subdirectory and launch the EMU GUI. Each new application project must be provide relevant scenario configuration files in a separate subdirectory.
 
 ## Accessing the QEMU instance
 Double click an enclave-gateway node to open a terminal to the respective node. Note that this terminal is to that of the CORE node, not the QEMU instance running inside of that node. To enter the QEMU instance:
