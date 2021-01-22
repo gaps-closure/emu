@@ -20,7 +20,7 @@ prep_build_machine() {
       tcl tcl8.6 tk tk8.6 libtk-img quagga uml-utilities net-tools \
       ubuntu-dev-tools qemu qemu-efi qemu-user-static qemu-system-arm qemu-system-x86 qemu-user
     sudo -H pip3 install --upgrade pip
-    sudo -H pip3 install pexpect
+    sudo -H pip3 install pexpect libconf
 }
 
 prep_build_machine
