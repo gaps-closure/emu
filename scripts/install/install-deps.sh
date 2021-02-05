@@ -5,7 +5,7 @@ install_nrl_core () {
     wget "https://github.com/coreemu/core/releases/download/release-6.5.0/core_6.5.0_amd64.deb"
     sudo dpkg -i core_6.5.0_amd64.deb
     rm core_6.5.0_amd64.deb
-    sudo cp -R python3.6/dist-packages/core python3.8/dist-packages/
+    sudo cp -R /usr/local/python3.6/dist-packages/core /usr/local/python3.8/dist-packages/
     sudo -H pip3 install -r emu_requirements.txt
 }
 
