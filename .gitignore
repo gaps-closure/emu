@@ -4,3 +4,5 @@ build
 *pycache*
 .snapshots
 *.imn
+\#*
+.apps/

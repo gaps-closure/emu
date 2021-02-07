@@ -429,6 +429,7 @@ if __name__ == '__main__':
   scen = compose('scenario',conf)
   locs = compose('scenlayout',layo)
   sets = compose('settings', sett)
+  setattr(sets, 'emuroot', f'/home/{os.getenv("USER")}/gaps/build/src/emu')
 
   ret = scen.render(0,'imn',locs,sets)
   ret += locs.render(0,'imn',None, None)

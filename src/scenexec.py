@@ -234,8 +234,8 @@ def install_start_hal(scenario, settings):
                 hal = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/daemon/hal'
                 zc  = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/zc/zc'
             else:
-                hal = f'{settings.emuroot}/../hal/daemon/hal'
-                zc  = f'{settings.emuroot}/../hal/zc/zc'
+                hal = f'{settings.instdir}/bin/hal'
+                zc  = f'{settings.instdir}/bin/zc/zc'
             res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'mkdir', '-p', 'hal/zc'], text=True)
             res = subprocess.check_output(['cp', cfg, f'{core_path}.conf/hal/{x.halconf}'], text=True)
             res = subprocess.check_output(['cp', hal, f'{core_path}.conf/hal/hal'], text=True)
