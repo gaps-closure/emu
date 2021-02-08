@@ -3,7 +3,6 @@ PYTHON=python3.8
 SCEN=$1
 
 PWD=`pwd`
-sed -i -e "s;<NOT SET>;$PWD;g" config/${SCEN}/settings.json
 xhost + local:root
 
 start_core() {
