@@ -232,14 +232,11 @@ def install_start_hal(scenario, settings):
             cfg = f'{settings.emuroot}/config/{scenario.qname}/{x.halconf}'
             if(os.path.isdir(f'{settings.emuroot}/../mbig/{x.hwconf.arch}')):
                 hal = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/daemon/hal'
-                zc  = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/zc/zc'
             else:
                 hal = f'{settings.instdir}/bin/hal'
-                zc  = f'{settings.instdir}/bin/zc/zc'
-            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'mkdir', '-p', 'hal/zc'], text=True)
+            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'mkdir', '-p', 'hal'], text=True)
             res = subprocess.check_output(['cp', cfg, f'{core_path}.conf/hal/{x.halconf}'], text=True)
             res = subprocess.check_output(['cp', hal, f'{core_path}.conf/hal/hal'], text=True)
-            res = subprocess.check_output(['cp', zc, f'{core_path}.conf/hal/zc/zc'], text=True)
             res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-start-hal.sh', cfg], text=True, stderr=subprocess.STDOUT)
             if DBG: print(res)
             if 'SUCCESS' not in res:
