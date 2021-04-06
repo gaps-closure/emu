@@ -20,10 +20,10 @@ class base:
   def __init__(self,**kwargs): 
     for k in kwargs: setattr(self,k,kwargs[k])
   def render(self,depth,style='basic',layout=None, settings=None): 
-    if style is not 'basic': raise Exception('Unsupported style: ' + style)
+    if style != 'basic': raise Exception('Unsupported style: ' + style)
     return ' ' * depth + self.__class__.__name__ + '\n'
   def field_render(depth,fldval,fldnam,style='basic',layout=None, settings=None): 
-    if style is not 'basic': raise Exception('Unsupported style: ' + style)
+    if style != 'basic': raise Exception('Unsupported style: ' + style)
     return ' ' * depth + fldnam + ':' + str(fldval) + '\n'
 
 # Return non-function, non-internal fields of scenario class instance
@@ -104,7 +104,7 @@ class IDGen():
       elif typ in ['annotation']:
         self.aid += 1
         mnm = 'a'+str(self.aid)
-      self.nm2id[mnm if nm is None else nm] = mnm
+      self.nm2id[mnm if nm == None else nm] = mnm
       return mnm
 
 # Extend base with a class member and class method for ID generation/mapping
@@ -112,7 +112,7 @@ class basewid(base):
   __idgen__ = IDGen()  
   def get_id(nm,typ): return basewid.__idgen__.get_id(nm,typ)
   def render(self,depth,style='imn',layout=None,settings=None): 
-    return render_children(self,depth,style,layout,settings) if style is 'imn' else super().render(depth,style,layout,settings)
+    return render_children(self,depth,style,layout,settings) if style == 'imn' else super().render(depth,style,layout,settings)
 
 #####################################################################################################
 # Scenario classes derived from basewid
@@ -143,11 +143,11 @@ class scenario(basewid):
       ret += f'    mkdir $SESSION_DIR/{n}.conf/scripts\n'
       ret += f'    mkdir $SESSION_DIR/{n}.conf/tools\n'
       ret += f'    mkdir $SESSION_DIR/{n}.conf/apps\n'
-      ret += f"    rsync -avm --include='*.sh' -f 'hide,! */' {settings.emuroot}/scripts/. $SESSION_DIR/{n}.conf/scripts\n"
+      ret += f"    cp -r {settings.emuroot}/scripts/* $SESSION_DIR/{n}.conf/scripts\n"
       ret += f'    cp -r {settings.emuroot}/tools/* $SESSION_DIR/{n}.conf/tools\n'
       ret += f'    cp -r {settings.emuroot}/.apps/*{n}* $SESSION_DIR/{n}.conf/apps &> /dev/null\n'
     ret += '}\n'
-    return ret if style is 'imn' else ""
+    return ret if style == 'imn' else ""
 
   def render(self, depth, style='imn', layout=None, settings=None):
     return super().render(depth,style,layout,settings) + self.render_addons(depth,style,layout,settings)
@@ -156,7 +156,7 @@ class enclave(basewid):  pass # use basewid rendering
 
 class xdhost(basewid): 
   def render(self,depth,style='imn',layout=None,settings=None):
-    if style is 'imn':
+    if style == 'imn':
       ret = ""
       nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
       nodelayout = layout.get_node_layout(self.hostname)
@@ -186,7 +186,7 @@ class xdhost(basewid):
 
 class inthost(basewid):
   def render(self,depth,style='imn',layout=None,settings=None):
-    if style is 'imn':
+    if style == 'imn':
       nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
       nodelayout = layout.get_node_layout(self.hostname)
       ret=f'''node {nid} {{
@@ -214,7 +214,7 @@ class inthost(basewid):
 
 class hub(basewid): 
   def render(self,depth,style='imn',layout=None,settings=None):
-    if style is 'imn':
+    if style == 'imn':
       nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
       nodelayout = layout.get_node_layout(self.hostname)
       ret=f'''node {nid} {{
@@ -233,7 +233,7 @@ class hub(basewid):
 
 class xdgateway(basewid): 
   def render(self,depth, style='imn',layout=None,settings=None):
-    if style is 'imn':
+    if style == 'imn':
       nid = basewid.__idgen__.get_id(self.hostname, type(self).__name__)
       nodelayout = layout.get_node_layout(self.hostname)
       ret=f'''node {nid} {{
@@ -267,11 +267,11 @@ class link(basewid):
     nodes {{{basewid.__idgen__.get_id(self.f, type(self).__name__)} {basewid.__idgen__.get_id(self.t, type(self).__name__)}}}
     bandwidth {self.bandwidth}
     delay {self.delay}
-}}\n''' if style is 'imn' else super().render(depth,style,layout,settings)
+}}\n''' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class xdlink(basewid): 
   def render(self,depth,style='imn',layout=None,settings=None):
-    if style is 'imn':
+    if style == 'imn':
       ret = self.left.render(depth,style,layout,settings)
       ret += self.right.render(depth,style,layout,settings)
       return ret
@@ -285,11 +285,11 @@ class swconf(basewid):
   def render(self, depth, style='imn', layout=None,settings=None):
     svcs = ' '.join(svc.s for svc in self.service) 
     ret = f'    services {{{svcs}}}\n'
-    return ret if style is 'imn' else super().render(depth, style, layout, settings)
+    return ret if style == 'imn' else super().render(depth, style, layout, settings)
 
 class nwconf(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
-    if style is 'imn':
+    if style == 'imn':
       ret = ""
       for i in self.interface:
         ret += i.render(depth, style, layout, settings)
@@ -299,11 +299,11 @@ class nwconf(basewid):
 
 class interface(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
-    return f"\tinterface {self.ifname}\n\tip address {self.addr}\n\t!\n" if style is 'imn' else super().render(depth,style,layout,settings)
+    return f"\tinterface {self.ifname}\n\tip address {self.addr}\n\t!\n" if style == 'imn' else super().render(depth,style,layout,settings)
 
 class ifpeer(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
-      return f'    interface-peer {{{self.ifname} {basewid.__idgen__.get_id(self.peername, "NODE")}}}\n' if style is 'imn' else super().render(depth,style,layout,settings)
+      return f'    interface-peer {{{self.ifname} {basewid.__idgen__.get_id(self.peername, "NODE")}}}\n' if style == 'imn' else super().render(depth,style,layout,settings)
       
 class left(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
@@ -312,7 +312,7 @@ class left(basewid):
     nodes {{{basewid.__idgen__.get_id(self.f, type(self).__name__)} {basewid.__idgen__.get_id(self.t, type(self).__name__)}}}
     bandwidth {{{self.egress.bandwidth} {self.ingress.bandwidth}}}
     delay {{{self.egress.delay} {self.ingress.delay}}}
-}}\n''' if style is 'imn' else super().render(depth,style,layout,settings)
+}}\n''' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class right(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
@@ -321,7 +321,7 @@ class right(basewid):
     nodes {{{basewid.__idgen__.get_id(self.f, type(self).__name__)} {basewid.__idgen__.get_id(self.t, type(self).__name__)}}}
     bandwidth {{{self.egress.bandwidth} {self.ingress.bandwidth}}}
     delay {{{self.egress.delay} {self.ingress.delay}}}
-}}\n''' if style is 'imn' else super().render(depth,style,layout,settings)
+}}\n''' if style == 'imn' else super().render(depth,style,layout,settings)
 
 ## TODO      
 class egress(basewid): pass
@@ -331,7 +331,7 @@ class ingress(basewid): pass
 # Layout classes
 class scenlayout(basewid): 
   def render(self,depth,style='imn',layout=None,settings=None): 
-    return render_children(self,depth,style,layout,settings,exclude=['nodelayout']) if style is 'imn' else super().render(depth,style,layout,settings)
+    return render_children(self,depth,style,layout,settings,exclude=['nodelayout']) if style == 'imn' else super().render(depth,style,layout,settings)
   def get_node_layout(self, nod):
     x = [n for n in self.nodelayout if n.hostname == nod]
     if len(x) != 1: raise Exception ('Error getting layout for:' + nod)
@@ -356,16 +356,16 @@ class optglobal(basewid):
     annotations {self.annotations}
     grid {self.grid}
     traffic_start {self.traffic_start}
-}}\n''' if style is 'imn' else super().render(depth,style,layout,settings)
+}}\n''' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class session(basewid):
   def render(self,depth,style='imn',layout=None,settings=None): 
-    return 'option session { }\n' if style is 'imn' else super().render(depth,style,layout,settings)
+    return 'option session { }\n' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class canvas(basewid):
   def render(self,depth,style='imn',layout=None,settings=None): 
     cid = basewid.get_id(self.name,'canvas')
-    return 'canvas %s { name { %s } }\n' % (cid,self.name) if style is 'imn' else super().render(depth,style,layout,settings)
+    return 'canvas %s { name { %s } }\n' % (cid,self.name) if style == 'imn' else super().render(depth,style,layout,settings)
 
 class annotation(basewid):
   def render(self,depth,style='imn',layout=None,settings=None):
@@ -382,23 +382,23 @@ class annotation(basewid):
     border {self.border}
     rad {self.rad}
     canvas {basewid.__idgen__.get_id(self.canvas, 'canvas')}
-}}\n''' if style is 'imn' else super().render(depth,style,layout,settings)
+}}\n''' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class bbox(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
-    return f'iconcoords {{{self.x1} {self.y1} {self.x2} {self.y2}}}' if style is 'imn' else super().render(depth,style,layout,settings)
+    return f'iconcoords {{{self.x1} {self.y1} {self.x2} {self.y2}}}' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class nodelayout(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
-    return f'    canvas {basewid.__idgen__.get_id(self.canvas, "canvas")}\n    {self.iconcoords.render(depth, style, layout, settings)}\n    {self.labelcoords.render(depth, style, layout, settings)}\n' if style is 'imn' else super().render(depth,style,layout,settings)
+    return f'    canvas {basewid.__idgen__.get_id(self.canvas, "canvas")}\n    {self.iconcoords.render(depth, style, layout, settings)}\n    {self.labelcoords.render(depth, style, layout, settings)}\n' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class iconcoords(basewid):
   def render(self, depth, style='imn', layout=None,settings=None):
-    return f'iconcoords {{{self.x} {self.y}}}' if style is 'imn' else super().render(depth,style,layout,settings)
+    return f'iconcoords {{{self.x} {self.y}}}' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class labelcoords(basewid):
   def render(self, depth, style='imn', layout=None, settings=None):
-    return f'labelcoords {{{self.x} {self.y}}}' if style is 'imn' else super().render(depth,style,layout,settings)
+    return f'labelcoords {{{self.x} {self.y}}}' if style == 'imn' else super().render(depth,style,layout,settings)
 
 class service(basewid): pass
 class settings(basewid): pass
@@ -415,7 +415,8 @@ def gen_custom_config(settings):
 def gen_cmdup(x, settings):
   cmds = []
   cmds.append(f'scripts/common/common-config-ssh.sh {settings.emuroot}/{settings.snapdir}')
-  if type(x).__name__ is 'xdhost':
+  cmds.append(f'scripts/common/common-setbgcolor.sh')
+  if type(x).__name__ == 'xdhost':
     cmds.append(f'scripts/xdh/xdh-config-core-interfaces.sh')
     cmds.append(f'scripts/xdh/xdh-start-qemu-instance.sh {x.hwconf.arch} {settings.emuroot}/{settings.snapdir}/{x.swconf.os}-{x.hwconf.arch}-{x.hostname}.qcow2 {settings.imgdir}/linux-kernel-{x.hwconf.arch}-{x.swconf.kernel} {os.environ["USER"]}')
   return cmds
@@ -428,6 +429,7 @@ if __name__ == '__main__':
   scen = compose('scenario',conf)
   locs = compose('scenlayout',layo)
   sets = compose('settings', sett)
+  setattr(sets, 'emuroot', f'/home/{os.getenv("USER")}/gaps/build/src/emu')
 
   ret = scen.render(0,'imn',locs,sets)
   ret += locs.render(0,'imn',None, None)

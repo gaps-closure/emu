@@ -1,17 +1,12 @@
 #!/bin/bash
 
 install_nrl_core () {
-    COREURL="https://github.com/coreemu/core/releases/download/release-5.5.2"
-    COREDEB="core_python3_5.5.2_amd64.deb"
-
-    echo "Installing NRL CORE ($COREDEB) on build server"
-    rm -f requirements.txt $COREDEB
-    wget $COREURL/requirements.txt
-    wget $COREURL/$COREDEB
-    sudo -H pip3 install -r requirements.txt 
-    sudo dpkg -i $COREDEB
-    sudo cp -r /usr/lib/python3.6/dist-packages /usr/lib/python3/
-    rm -f requirements.txt $COREDEB
+    echo "Installing NRL CORE on build server"
+    wget "https://github.com/coreemu/core/releases/download/release-6.5.0/core_6.5.0_amd64.deb"
+    sudo dpkg -i core_6.5.0_amd64.deb
+    rm core_6.5.0_amd64.deb
+    sudo cp -R /usr/local/lib/python3.6/dist-packages/core /usr/local/lib/python3.8/dist-packages/
+    sudo -H pip3 install -r emu_requirements.txt
 }
 
 prep_build_machine() {
@@ -25,7 +20,7 @@ prep_build_machine() {
       tcl tcl8.6 tk tk8.6 libtk-img quagga uml-utilities net-tools \
       ubuntu-dev-tools qemu qemu-efi qemu-user-static qemu-system-arm qemu-system-x86 qemu-user
     sudo -H pip3 install --upgrade pip
-    sudo -H pip3 install pexpect
+    sudo -H pip3 install pexpect libconf
 }
 
 prep_build_machine

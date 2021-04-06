@@ -11,7 +11,7 @@ fi
 if [[ x$TERM == "xdumb" ]]; then
     echo "export TERM=$TM" >> ~/.bashrc
 fi
-echo "ssh vm" >> ~/.bashrc
+echo "ssh -X vm" >> ~/.bashrc
 
 # set environment variables in the QEMU Instance
 python3 <<END

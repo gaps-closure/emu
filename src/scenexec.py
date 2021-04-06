@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os
 import os.path
 import subprocess
@@ -7,7 +8,6 @@ DBG=False
 
 def execute(scenario, layout, settings, args):
     create_qemu_snapshots(scenario, settings, clean=False)
-    os.system('reset')
     start_core_scenario(scenario, settings, args.imnAbsPath)
     #cmdup commands executed per node (see IMN file)
     check_vm_status(scenario, settings)
@@ -76,7 +76,13 @@ def start_core_scenario(scenario, settings, filename):
     subprocess.Popen(["core-gui", "-s", filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(5) # give CORE a chance to start
     p = subprocess.run([settings.emuroot + '/scripts/core/core-get-session-id.sh'], stdout=subprocess.PIPE)
-    setattr(scenario, 'core_session_id', int(p.stdout))
+    id = 0
+    for tok in ((p.stdout).decode("utf-8")).split():
+        if tok.startswith('pycore.'):
+            id = tok.split('.')[-1]
+    if not id:
+        raise Exception('ERROR: unable to obtain core session id')
+    setattr(scenario, 'core_session_id', int(id))
     tries = 0
     while(tries < settings.core_timeout):
         f = open(f'/tmp/pycore.{scenario.core_session_id}/state', 'r')
@@ -226,14 +232,11 @@ def install_start_hal(scenario, settings):
             cfg = f'{settings.emuroot}/config/{scenario.qname}/{x.halconf}'
             if(os.path.isdir(f'{settings.emuroot}/../mbig/{x.hwconf.arch}')):
                 hal = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/daemon/hal'
-                zc  = f'{settings.emuroot}/../mbig/{x.hwconf.arch}/hal/zc/zc'
             else:
-                hal = f'{settings.emuroot}/../hal/daemon/hal'
-                zc  = f'{settings.emuroot}/../hal/zc/zc'
-            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'mkdir', '-p', 'hal/zc'], text=True)
+                hal = f'{settings.instdir}/bin/hal'
+            res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'mkdir', '-p', 'hal'], text=True)
             res = subprocess.check_output(['cp', cfg, f'{core_path}.conf/hal/{x.halconf}'], text=True)
             res = subprocess.check_output(['cp', hal, f'{core_path}.conf/hal/hal'], text=True)
-            res = subprocess.check_output(['cp', zc, f'{core_path}.conf/hal/zc/zc'], text=True)
             res = subprocess.check_output(['vcmd', '-c', core_path, '--', 'scripts/xdh/xdh-install-start-hal.sh', cfg], text=True, stderr=subprocess.STDOUT)
             if DBG: print(res)
             if 'SUCCESS' not in res:

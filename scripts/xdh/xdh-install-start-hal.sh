@@ -8,10 +8,8 @@ HAL="${SESSION_DIR}/${NODE_NAME}.conf/hal"
 SSH="ssh vm"
 
 $SSH "mkdir -p hal"
-$SSH "mkdir -p zc"
 scp $CFG vm:hal/$(basename $CFG)
 scp $HAL/hal vm:hal/hal
-scp $HAL/zc/zc vm:zc/zc
 scp $XDH_SCRIPTS/start_hal.sh vm:start_hal.sh
 
 CFGFILE=$(basename $CFG)

@@ -1,5 +1,5 @@
 {
-  "qname": "secdesk",
+  "qname": "deploy",
   "enclave": 
   [
     {
@@ -7,8 +7,8 @@
       "xdhost":
       [
 	{
-          "hostname": "orange-enclave-gw-P",
-	  "halconf": "secdesk_hal_orange.cfg",
+          "hostname": "orange-enclave-gw-G",
+	  "halconf": "deploy_hal_orange.cfg",
 	  "hwconf":{"arch": "amd64"},
 	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]
@@ -17,7 +17,7 @@
 		    [{"ifname" :"eth0", "addr":"10.0.101.1/24"},
  		     {"ifname" :"eth1", "addr":"10.1.2.2/24"}] },
 	  "ifpeer":[{"ifname": "eth0", "peername": "orange-hub"},
-	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}]
+	            {"ifname": "eth1", "peername": "orange-green-xd-gw"}]
 	}
       ],
       "inthost":
@@ -41,63 +41,63 @@
       [
 	{"f": "orange-hub", "t":"orange-1", "bandwidth": "100000000", "delay": 0},
         {"f": "orange-hub", "t":"orange-2", "bandwidth": "100000000", "delay": 0},
-        {"f": "orange-hub", "t":"orange-enclave-gw-P", "bandwidth": "100000000", "delay": 0} 
+        {"f": "orange-hub", "t":"orange-enclave-gw-G", "bandwidth": "100000000", "delay": 0} 
       ],
       "hub": 
       [
 	{ "hostname": "orange-hub", 
-	  "ifpeer": [{"ifname": "e0", "peername": "orange-enclave-gw-P"},
+	  "ifpeer": [{"ifname": "e0", "peername": "orange-enclave-gw-G"},
 		     {"ifname": "e1", "peername": "orange-1"},
 		     {"ifname": "e2", "peername": "orange-2"}]
 	}
       ]
     },
     {
-      "qname": "purple",
+      "qname": "green",
       "xdhost":
       [
 	{
-	  "hostname": "purple-enclave-gw-O",
-	  "halconf": "secdesk_hal_purple.cfg",
+	  "hostname": "green-enclave-gw-O",
+	  "halconf": "deploy_hal_green.cfg",
 	  "hwconf":{"arch": "amd64"},
 	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]}, 
 	  "nwconf":{"interface": 
 		    [{"ifname" :"eth0", "addr":"10.0.102.1/24"},
  		     {"ifname" :"eth1", "addr":"10.2.1.2/24"}] },
-	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"},
-	            {"ifname": "eth1", "peername": "orange-purple-xd-gw"}]
+	  "ifpeer":[{"ifname": "eth0", "peername": "green-hub"},
+	            {"ifname": "eth1", "peername": "orange-green-xd-gw"}]
 	}
       ],
       "inthost":
       [
 	{
-	  "hostname": "purple-1",
+	  "hostname": "green-1",
 	  "swconf":{"service": [{"s": "UserDefined"}]},
 	  "nwconf":{"interface":
 		    [{"ifname": "eth0", "addr": "10.0.102.2/24"}] },
-	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}]
+	  "ifpeer":[{"ifname": "eth0", "peername": "green-hub"}]
 	},
 	{
-	  "hostname": "purple-2",
+	  "hostname": "green-2",
 	  "swconf":{"service": [{"s": "UserDefined"}]},
 	  "nwconf":{"interface":
 		    [{"ifname": "eth0", "addr": "10.0.102.3/24"}] },
-	  "ifpeer":[{"ifname": "eth0", "peername": "purple-hub"}]
+	  "ifpeer":[{"ifname": "eth0", "peername": "green-hub"}]
 	}
       ],
       "link": 
       [
-	{"f": "purple-hub", "t":"purple-1", "bandwidth": "100000000", "delay": 0}, 
-        {"f": "purple-hub", "t":"purple-2", "bandwidth": "100000000", "delay": 0}, 
-        {"f": "purple-hub", "t":"purple-enclave-gw-O", "bandwidth": "100000000", "delay": 0} 
+	{"f": "green-hub", "t":"green-1", "bandwidth": "100000000", "delay": 0}, 
+        {"f": "green-hub", "t":"green-2", "bandwidth": "100000000", "delay": 0}, 
+        {"f": "green-hub", "t":"green-enclave-gw-O", "bandwidth": "100000000", "delay": 0} 
       ],
       "hub": 
       [
-	{ "hostname": "purple-hub", 
-	  "ifpeer": [{"ifname": "e0", "peername": "purple-enclave-gw-O"},
-		     {"ifname": "e1", "peername": "purple-1"},
-		     {"ifname": "e2", "peername": "purple-2"}]
+	{ "hostname": "green-hub", 
+	  "ifpeer": [{"ifname": "e0", "peername": "green-enclave-gw-O"},
+		     {"ifname": "e1", "peername": "green-1"},
+		     {"ifname": "e2", "peername": "green-2"}]
 	}
       ]
     }
@@ -105,22 +105,22 @@
   "xdgateway":
   [
     {
-      "hostname": "orange-purple-xd-gw",
+      "hostname": "orange-green-xd-gw",
       "swconf":{"service": [{"s": "UserDefined"}, {"s": "IPForward"}]},
       "nwconf":{"interface":
 		[{"ifname": "eth0", "addr": "10.1.2.1/24"},
 		 {"ifname": "eth1", "addr": "10.2.1.1/24"}] },
-      "ifpeer":[{"ifname": "eth0", "peername": "orange-enclave-gw-P"},
-		{"ifname": "eth1", "peername": "purple-enclave-gw-O"}]
+      "ifpeer":[{"ifname": "eth0", "peername": "orange-enclave-gw-G"},
+		{"ifname": "eth1", "peername": "green-enclave-gw-O"}]
     }
   ],
   "xdlink": 
   [
     { "model":  "BKND",
-      "left":   {"f": "orange-enclave-gw-P", "t":"orange-purple-xd-gw",
+      "left":   {"f": "orange-enclave-gw-G", "t":"orange-green-xd-gw",
 	         "egress":   {"filterspec": "left-egress-spec", "bandwidth":"100000000", "delay": 0},
                  "ingress":  {"filterspec": "left-ingress-spec", "bandwidth":"100000000", "delay": 0}},
-      "right":  {"f": "orange-purple-xd-gw", "t":"purple-enclave-gw-O",
+      "right":  {"f": "orange-green-xd-gw", "t":"green-enclave-gw-O",
 	         "egress":   {"filterspec": "right-egress-spec", "bandwidth":"100000000", "delay": 0},
                  "ingress":   {"filterspec": "right-ingress-spec", "bandwidth":"100000000", "delay": 0}}
     }

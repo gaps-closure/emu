@@ -20,7 +20,8 @@ prompt ='closure@.* '
 try:
   p = pexpect.spawn('ssh -i /root/.ssh/id_closure_rsa closure@${MGMT_IP}')
   p.expect(prompt, timeout=300)
-  p.sendline('rm -rf apps && mkdir -p apps')
+#  p.sendline('rm -rf apps && mkdir -p apps')
+  p.sendline('mkdir -p apps')
   p.expect(prompt)
   spl_print(p.before+p.after)
   for f in os.listdir("${APPS}"):
@@ -29,10 +30,10 @@ try:
     scp.expect(pexpect.EOF)
   p.sendline('cd apps && tar -xvf *.tar && rm *.tar')
   p.expect(prompt)
-  p.sendline('cd /home/closure/apps/.dependencies/linux && sudo dpkg -i *')
+  p.sendline('cd /home/closure/apps/.dependencies/linux/deb && sudo dpkg -E -i *')
   p.expect(prompt,timeout=300 ) 
   spl_print(p.before+p.after)
-  p.sendline('cd /home/closure/apps/.dependencies/python3 && sudo -H pip3 install --no-index --find-links . *')
+  p.sendline('cd /home/closure/apps/.dependencies/linux/python3 && sudo -H pip3 install --no-index --find-links . *')
   p.expect(prompt,timeout=300)
   spl_print(p.before+p.after)
 except Exception as e:
