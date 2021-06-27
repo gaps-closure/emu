@@ -72,8 +72,13 @@ def make_netplan(xdhost, outfile):
 def start_core_scenario(scenario, settings, filename):
     if not os.path.exists(filename):
         raise Exception ("CORE scenario file not found: " + filename)
-    print(f'Starting CORE session (filename={filename})...', end="", flush=True)
-    subprocess.Popen(["core-gui", "-s", filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if os.environ.get('CORE_NO_GUI') is not None:
+        opt_inter = "-b"
+        print(f'Starting CORE session with no GUI (filename={filename})...', end="", flush=True)
+    else:
+        opt_inter = "-s"
+        print(f'Starting CORE session (filename={filename})...', end="", flush=True)
+    subprocess.Popen(["core-gui", opt_inter, filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(5) # give CORE a chance to start
     p = subprocess.run([settings.emuroot + '/scripts/core/core-get-session-id.sh'], stdout=subprocess.PIPE)
     id = 0
