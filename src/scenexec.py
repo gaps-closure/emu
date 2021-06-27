@@ -16,6 +16,8 @@ def execute(scenario, layout, settings, args):
     install_apps(scenario, settings)
     install_env_variables(scenario, settings)
     install_start_hal(scenario, settings)
+    if os.environ.get('CORE_NO_GUI') is not None:
+        run_programs(scenario, settings)
 
 def clean_snapshots(settings):
     subprocess.run(['rm', '-rf', settings.snapdir])
@@ -247,3 +249,21 @@ def install_start_hal(scenario, settings):
             if 'SUCCESS' not in res:
                 raise Exception (f'Unable to install/start HAL on {x.hostname}: {res}')
             print('DONE!', flush=True)
+
+
+def run_programs(scenario, settings):
+    started_procs = []
+    for enc in scenario.enclave:
+        for x in enc.xdhost:
+            to_start = "apps/" + scenario.qname
+            print(f'Starting program {to_start}  at {x.hostname}...', end="", flush=True)
+            core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
+            res = subprocess.Popen(['vcmd', '-c', core_path, '--', to_start], text=True)
+            started_procs.append(res)
+    for p in started_procs:
+        sout, serr = p.communicate(timeout=60)
+        print("COMMAND:", p.args, "RETURN CODE:", p.returncode, flush=True)
+        if p.returncode is None or p.returncode < 0:
+            raise Exception(f'Unable to run app: {p.args}')
+        print("STDOUT:", sout, flush=True)
+        print("STDERR:", serr, flush=True)
