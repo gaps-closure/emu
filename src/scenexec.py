@@ -259,12 +259,19 @@ def run_programs(scenario, settings):
             print(f'Starting program {to_start}  at {x.hostname}...', flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
             res = subprocess.Popen(['vcmd', '-c', core_path, '--', "ssh", "-i", "/root/.ssh/id_closure_rsa",
-                                    "closure@" + settings.mgmt_ip, "LD_LIBRARY_PATH=apps", to_start], text=True)
+                                    "closure@" + settings.mgmt_ip, "LD_LIBRARY_PATH=apps", to_start],
+                                   text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             started_procs.append(res)
     for p in started_procs:
-        sout, serr = p.communicate(timeout=60)
+        try:
+            sout, serr = p.communicate(timeout=30)
+        except TimeoutExpired:
+            print("COMMAND:", p.args, "TIMED OUT", flush=True)
         print("COMMAND:", p.args, "RETURN CODE:", p.returncode, flush=True)
-        if p.returncode is None or p.returncode != 0:
-            raise Exception(f'Unable to run app: {p.args} ({serr})')
-        print("STDOUT:", sout, flush=True)
+        if sout is not None:
+            for l in sout.splitlines():
+                print(scenario.qname + " STDOUT:", l, flush=True)
         print("STDERR:", serr, flush=True)
+        if p.returncode is not None and p.returncode != 0:
+            print(f'Unable to run app: {p.args} ({serr})', flush=True)
+            exit(1)
