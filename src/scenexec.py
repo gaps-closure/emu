@@ -265,7 +265,7 @@ def run_programs(scenario, settings):
     for p in started_procs:
         try:
             sout, serr = p.communicate(timeout=30)
-        except TimeoutExpired:
+        except subprocess.TimeoutExpired:
             print("COMMAND:", p.args, "TIMED OUT", flush=True)
         print("COMMAND:", p.args, "RETURN CODE:", p.returncode, flush=True)
         if sout is not None:
