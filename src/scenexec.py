@@ -263,6 +263,8 @@ def run_programs(scenario, settings):
                                    text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             started_procs.append(res)
     for p in started_procs:
+        sout = None
+        serr = None
         try:
             sout, serr = p.communicate(timeout=30)
         except subprocess.TimeoutExpired:
