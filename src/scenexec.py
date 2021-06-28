@@ -258,9 +258,8 @@ def run_programs(scenario, settings):
             to_start = "apps/" + scenario.qname
             print(f'Starting program {to_start}  at {x.hostname}...', flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
-            #res_tar = subprocess.check_output(['vcmd', '-c', core_path, '--', 'tar', '--directory=apps', '-xf',
-            #                                   'apps/*.tar'], text=True)
-            res = subprocess.Popen(['vcmd', '-c', core_path, '--', to_start], text=True)
+            res = subprocess.Popen(['vcmd', '-c', core_path, '--', "ssh", "-i", "/root/.ssh/id_closure_rsa",
+                                    "closure@" + settings.mgmt_ip, "LD_LIBRARY_PATH=apps", to_start], text=True)
             started_procs.append(res)
     for p in started_procs:
         sout, serr = p.communicate(timeout=60)
