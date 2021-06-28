@@ -258,12 +258,14 @@ def run_programs(scenario, settings):
             to_start = "apps/" + scenario.qname
             print(f'Starting program {to_start}  at {x.hostname}...', end="", flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
+            res_tar = subprocess.check_output(['vcmd', '-c', core_path, '--', 'tar', '--directory=apps', '-xf',
+                                               'apps/*.tar'], text=True)
             res = subprocess.Popen(['vcmd', '-c', core_path, '--', to_start], text=True)
             started_procs.append(res)
     for p in started_procs:
         sout, serr = p.communicate(timeout=60)
         print("COMMAND:", p.args, "RETURN CODE:", p.returncode, flush=True)
-        if p.returncode is None or p.returncode < 0:
-            raise Exception(f'Unable to run app: {p.args}')
+        if p.returncode is None or p.returncode != 0:
+            raise Exception(f'Unable to run app: {p.args} ({serr})')
         print("STDOUT:", sout, flush=True)
         print("STDERR:", serr, flush=True)
