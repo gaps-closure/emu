@@ -18,7 +18,7 @@ sleep 2
 nc -4 ${IP_RIGHT} ${PORT_RIGHT} < fifo-right | cat > fifo-left &
 sleep 2
 
-N= `ps -ef | grep "nc -4 | grep -v grep | wc -l`
+N= `ps -ef | grep "nc -4" | grep -v grep | wc -l`
 if [ $N -ne 2 ]
 then
     echo "ERROR: 2 netcat processes should be started, only $N found"
