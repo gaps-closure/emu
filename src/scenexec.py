@@ -8,6 +8,7 @@ DBG=True
 
 def execute(scenario, layout, settings, args):
     create_qemu_snapshots(scenario, settings, clean=False)
+    customize_pkgs(scenario,settings)
     start_core_scenario(scenario, settings, args.imnAbsPath)
     #cmdup commands executed per node (see IMN file)
     check_vm_status(scenario, settings)
@@ -230,6 +231,32 @@ def install_apps(scenario, settings):
             if 'SUCCESS' not in res:
                 raise Exception (f'Unable to install apps on {x.hostname}: {res}')
             print('DONE!', flush=True)
+
+def customize_pkgs(scenario, settings):
+    DEBS = f'{settings.emuroot}/config/{scenario.qname}/debs.list'
+    PIPS = f'{settings.emuroot}/config/{scenario.qname}/pips.list'
+    if os.path.exists(DEBS) or os.path.exists(PIPS):
+        QSCRIPTSDIR = settings.emuroot + '/scripts/qemu'
+        IMGDIR = settings.imgdir
+        SNAPDIR = settings.snapdir
+        for enc in scenario.enclave:
+            for x in enc.xdhost:
+                print(f'Installing custom deb/pips on {x.hostname}...', end="", flush=True)
+                KRNL = f'{IMGDIR}/linux-kernel-{x.hwconf.arch}-{x.swconf.kernel}'
+                QARCH = x.hwconf.arch
+                OFIL = f'{x.swconf.os}-{x.hwconf.arch}-{x.hostname}.qcow2'
+                ARGS = [f'{QSCRIPTSDIR}/qemu-emulator-packages.sh',
+                        '-k', KRNL,
+                        '-a', QARCH,
+                        '-o', OFIL,
+                        '-b', SNAPDIR,
+                        '-d', DEBS,
+                        '-p', PIPS] 
+                res = subprocess.run(ARGS)
+                if res.returncode != 0:
+                    raise Exception (f'ERROR: custom packages failed for {x.hostname}')
+    else:
+        print('INFO: Skipping custom package pre-emu step (no deb.list or pip3.list found)')
 
 def install_start_hal(scenario, settings):
     for enc in scenario.enclave:
