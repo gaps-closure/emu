@@ -109,9 +109,10 @@ elif '$QARCH' == "arm64":
 
 if os.path.exists('$DEBS'):
   print('\nInstall debian packages...')
-  do_cmd(p, 'sudo dpkg --configure -a')
+  #do_cmd(p, 'sudo dpkg --configure -a')
   debs = open('$DEBS', 'r').readlines()
   debs = (''.join(debs)).replace('\n', ' ')
+  do_cmd(p, 'sudo apt update -y')
   do_cmd(p, 'sudo apt install -y %s' % (debs))
   do_cmd(p, 'echo RC=\$?')
 
@@ -120,9 +121,11 @@ if os.path.exists('$DEBS'):
 
 if os.path.exists('$PIPS'):
   print('\nInstall pip3 packages...')
+  do_cmd(p, 'sudo apt install -y python3-pip')
+  do_cmd(p, 'sudo -H pip3 install -U pip')
   pips = open('$PIPS', 'r').readlines()
   pips = (''.join(pips)).replace('\n', ' ')
-  do_cmd(p, 'sudo -H pip3 install %s' % (pips))
+  do_cmd(p, 'sudo -H pip3 --no-cache-dir install %s' % (pips))
   do_cmd(p, 'echo RC=\$?')
 
   if "RC=0" not in str(p.before):
