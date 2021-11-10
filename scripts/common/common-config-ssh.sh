@@ -17,4 +17,4 @@ echo "    HostKeyAlias vm.local" >> /root/.ssh/config
 chmod 400 /root/.ssh/config
 
 cp ${KEYDIR}/id_closure* /root/.ssh
-
+chmod 700 /root/.ssh/id_closure*
