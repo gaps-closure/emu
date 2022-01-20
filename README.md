@@ -143,3 +143,4 @@ The GAPS Emulator is under active development. Features planned for upcoming rel
 * SDH filter rules based on vendor code and/or specifications
 * Multiple character devices per QEMU instance for peering with multiple enclaves
 * Integration with vendor code for high-fidelity SDH models
+
