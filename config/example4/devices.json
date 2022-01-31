@@ -1,0 +1,15 @@
+{
+  "devices": [
+    {
+      "model":    "sdh_ha_v1",
+      "comms":    "zmq",
+      "mode_in":  "sub",
+      "mode_out": "pub"
+    },
+    {
+      "model":    "sdh_socat_v1",
+      "path":     "/dev/vcom",
+      "comms":    "tty"
+    }
+  ]
+}
