@@ -30,10 +30,15 @@ try:
     scp.expect(pexpect.EOF)
   p.sendline('cd apps && tar -xvf *.tar && rm *.tar')
   p.expect(prompt)
-  p.sendline('cd /home/closure/apps/.dependencies/linux/deb && sudo dpkg -E -i *')
-  p.expect(prompt,timeout=300 ) 
+  DEPDIR='/home/closure/apps/.dependencies'
+  p.sendline('mkdir -p %s/debs' % (DEPDIR))
+  p.expect(prompt,timeout=300)
+  p.sendline('mkdir -p %s/pips' % (DEPDIR))
+  p.expect(prompt,timeout=300)
+  p.sendline('cd %s/debs && sudo dpkg -E -i * &> %s/install.log' % (DEPDIR, DEPDIR))
+  p.expect(prompt,timeout=300)
   spl_print(p.before+p.after)
-  p.sendline('cd /home/closure/apps/.dependencies/linux/python3 && sudo -H pip3 install --no-index --find-links . *')
+  p.sendline('cd %s/pips && sudo -H pip3 install --no-index --find-links . * &>> %s/install.log' % (DEPDIR, DEPDIR))
   p.expect(prompt,timeout=300)
   spl_print(p.before+p.after)
 except Exception as e:
