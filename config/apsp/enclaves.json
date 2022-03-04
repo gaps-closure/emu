@@ -8,7 +8,7 @@
       [
 	{
           "hostname": "orange-enclave-gw-G",
-	  "halconf": "deploy_hal_orange.cfg",
+	  "halconf": "apsp_hal_orange.cfg",
 	  "hwconf":{"arch": "amd64"},
 	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]
@@ -58,7 +58,7 @@
       [
 	{
 	  "hostname": "green-enclave-gw-O",
-	  "halconf": "deploy_hal_green.cfg",
+	  "halconf": "apsp_hal_green.cfg",
 	  "hwconf":{"arch": "amd64"},
 	  "swconf":{"os": "ubuntu", "distro": "focal", "kernel": "focal",
 		    "service": [{"s": "UserDefined"}]}, 
