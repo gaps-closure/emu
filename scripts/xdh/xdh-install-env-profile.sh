@@ -6,12 +6,12 @@ TM=$3
 
 # set environment variables in the CORE container
 if [[ x$DISPLAY == "x" ]]; then
-    echo "export DISPLAY=$DISP" >> ~/.bashrc
+    echo "export DISPLAY=$DISP" > /root/bashrc
 fi
 if [[ x$TERM == "xdumb" ]]; then
-    echo "export TERM=$TM" >> ~/.bashrc
+    echo "export TERM=$TM" >> /root/bashrc
 fi
-echo "ssh -X vm" >> ~/.bashrc
+echo "ssh -X vm" >> /root/bashrc
 
 # set environment variables in the QEMU Instance
 python3 <<END
