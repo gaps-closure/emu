@@ -261,6 +261,9 @@ def customize_pkgs(scenario, settings):
 def install_start_hal(scenario, settings):
     for enc in scenario.enclave:
         for x in enc.xdhost:
+            if not hasattr(x, 'halconf'):
+                print(f'...No HAL config specified for {x.hostname}')
+                continue
             print(f'Install/Start HAL on {x.hostname}...', end="", flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
             cfg = f'{settings.emuroot}/config/{scenario.qname}/{x.halconf}'
