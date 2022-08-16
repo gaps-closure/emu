@@ -1,4 +1,7 @@
 # GAPS Emulator (EMU)
+
+**DEPRECATED**. Please refer to [CLOSURE C Toolchain Documentation](https://github.com/gaps-closure/gaps-closure.github.io/)
+
 This repository hosts the open source components of the EMU for Multi-ISA cross-domain systems test and evaluation. The `master` branch contains the most recent public release software while `develop` contains bleeding-edge updates and work-in-progress features for use by beta testers and early adopters.
 
 This repository is maintained by Peraton Labs.
