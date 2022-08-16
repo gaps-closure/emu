@@ -1,7 +1,10 @@
 # GAPS Emulator (EMU)
+
+**DEPRECATED**. Please refer to [CLOSURE C Toolchain Documentation](https://github.com/gaps-closure/gaps-closure.github.io/)
+
 This repository hosts the open source components of the EMU for Multi-ISA cross-domain systems test and evaluation. The `master` branch contains the most recent public release software while `develop` contains bleeding-edge updates and work-in-progress features for use by beta testers and early adopters.
 
-This repository is maintained by Perspecta Labs.
+This repository is maintained by Peraton Labs.
 
 ## Contents
 - [Installing External Dependencies](#installing-external-dependencies)
@@ -143,3 +146,4 @@ The GAPS Emulator is under active development. Features planned for upcoming rel
 * SDH filter rules based on vendor code and/or specifications
 * Multiple character devices per QEMU instance for peering with multiple enclaves
 * Integration with vendor code for high-fidelity SDH models
+

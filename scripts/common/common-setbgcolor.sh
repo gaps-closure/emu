@@ -3,7 +3,7 @@ SUPPORTED_COLORS="orange lightgreen magenta cyan"
 COLOR=$(hostname | cut -d '-' -f1)
 
 # only change color for enclave nodes and if not already set
-if [[ `hostname` == *"-xd-gw" ]] || [[ -e ~/.bgset ]]; then
+if [[ `hostname` == *"-xd-gw" ]]; then
     exit
 fi
 
@@ -21,8 +21,7 @@ DONE=0
 for c in $SUPPORTED_COLORS; do
 	if [[ $c == $COLOR ]]; then
 		CMD="printf '\e]11;%s\a' \"$COLOR\""
-		echo "$CMD" >> ~/.bashrc
-		touch ~/.bgset
+		echo "$CMD" > /root/bashrc
 		DONE=1
 		break
 	fi

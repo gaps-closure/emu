@@ -132,7 +132,7 @@ do_cmd(p, 'sudo apt install -y python3-pip')
 do_cmd(p, 'sudo -H pip3 install -U pip')
 
 print('\nInstalling libpython3')
-do_cmd(p, 'sudo apt install -y libpython3.7')
+do_cmd(p, 'sudo apt install -y libpython3.8')
 
 #hal libraries
 if("$QARCH" == "amd64"):

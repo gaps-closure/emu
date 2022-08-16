@@ -4,10 +4,11 @@ import os.path
 import subprocess
 import time
 
-DBG=False
+DBG=True
 
 def execute(scenario, layout, settings, args):
     create_qemu_snapshots(scenario, settings, clean=False)
+    customize_pkgs(scenario,settings)
     start_core_scenario(scenario, settings, args.imnAbsPath)
     #cmdup commands executed per node (see IMN file)
     check_vm_status(scenario, settings)
@@ -16,6 +17,8 @@ def execute(scenario, layout, settings, args):
     install_apps(scenario, settings)
     install_env_variables(scenario, settings)
     install_start_hal(scenario, settings)
+    if os.environ.get('CORE_NO_GUI') is not None:
+        run_programs(scenario, settings)
 
 def clean_snapshots(settings):
     subprocess.run(['rm', '-rf', settings.snapdir])
@@ -72,8 +75,13 @@ def make_netplan(xdhost, outfile):
 def start_core_scenario(scenario, settings, filename):
     if not os.path.exists(filename):
         raise Exception ("CORE scenario file not found: " + filename)
-    print(f'Starting CORE session (filename={filename})...', end="", flush=True)
-    subprocess.Popen(["core-gui", "-s", filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if os.environ.get('CORE_NO_GUI') is not None:
+        opt_inter = "-b"
+        print(f'Starting CORE session with no GUI (filename={filename})...', end="", flush=True)
+    else:
+        opt_inter = "-s"
+        print(f'Starting CORE session (filename={filename})...', end="", flush=True)
+    subprocess.Popen(["core-gui", opt_inter, filename], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(5) # give CORE a chance to start
     p = subprocess.run([settings.emuroot + '/scripts/core/core-get-session-id.sh'], stdout=subprocess.PIPE)
     id = 0
@@ -224,9 +232,38 @@ def install_apps(scenario, settings):
                 raise Exception (f'Unable to install apps on {x.hostname}: {res}')
             print('DONE!', flush=True)
 
+def customize_pkgs(scenario, settings):
+    DEBS = f'{settings.emuroot}/config/{scenario.qname}/debs.list'
+    PIPS = f'{settings.emuroot}/config/{scenario.qname}/pips.list'
+    if os.path.exists(DEBS) or os.path.exists(PIPS):
+        QSCRIPTSDIR = settings.emuroot + '/scripts/qemu'
+        IMGDIR = settings.imgdir
+        SNAPDIR = settings.snapdir
+        for enc in scenario.enclave:
+            for x in enc.xdhost:
+                print(f'Installing custom deb/pips on {x.hostname}...', end="", flush=True)
+                KRNL = f'{IMGDIR}/linux-kernel-{x.hwconf.arch}-{x.swconf.kernel}'
+                QARCH = x.hwconf.arch
+                OFIL = f'{x.swconf.os}-{x.hwconf.arch}-{x.hostname}.qcow2'
+                ARGS = [f'{QSCRIPTSDIR}/qemu-emulator-packages.sh',
+                        '-k', KRNL,
+                        '-a', QARCH,
+                        '-o', OFIL,
+                        '-b', SNAPDIR,
+                        '-d', DEBS,
+                        '-p', PIPS] 
+                res = subprocess.run(ARGS)
+                if res.returncode != 0:
+                    raise Exception (f'ERROR: custom packages failed for {x.hostname}')
+    else:
+        print('INFO: Skipping custom package pre-emu step (no deb.list or pip3.list found)')
+
 def install_start_hal(scenario, settings):
     for enc in scenario.enclave:
         for x in enc.xdhost:
+            if not hasattr(x, 'halconf'):
+                print(f'...No HAL config specified for {x.hostname}')
+                continue
             print(f'Install/Start HAL on {x.hostname}...', end="", flush=True)
             core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
             cfg = f'{settings.emuroot}/config/{scenario.qname}/{x.halconf}'
@@ -242,3 +279,31 @@ def install_start_hal(scenario, settings):
             if 'SUCCESS' not in res:
                 raise Exception (f'Unable to install/start HAL on {x.hostname}: {res}')
             print('DONE!', flush=True)
+
+
+def run_programs(scenario, settings):
+    started_procs = []
+    for enc in scenario.enclave:
+        for x in enc.xdhost:
+            to_start = "apps/" + scenario.qname
+            print(f'Starting program {to_start}  at {x.hostname}...', flush=True)
+            core_path = f'/tmp/pycore.{scenario.core_session_id}/{x.hostname}'
+            res = subprocess.Popen(['vcmd', '-c', core_path, '--', "ssh", "-i", "/root/.ssh/id_closure_rsa",
+                                    "closure@" + settings.mgmt_ip, "LD_LIBRARY_PATH=apps", to_start],
+                                   text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            started_procs.append(res)
+    for p in started_procs:
+        sout = None
+        serr = None
+        try:
+            sout, serr = p.communicate(timeout=30)
+        except subprocess.TimeoutExpired:
+            print("COMMAND:", p.args, "TIMED OUT", flush=True)
+        print("COMMAND:", p.args, "RETURN CODE:", p.returncode, flush=True)
+        if sout is not None:
+            for l in sout.splitlines():
+                print(scenario.qname + " STDOUT:", l, flush=True)
+        print("STDERR:", serr, flush=True)
+        if p.returncode is not None and p.returncode != 0:
+            print(f'Unable to run app: {p.args} ({serr})', flush=True)
+            exit(1)
